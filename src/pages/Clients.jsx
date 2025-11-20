@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Client } from "@/entities/Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, List, LayoutGrid, ChevronLeft, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
 import CreateClientModal from "../components/clients/CreateClientModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
@@ -171,17 +171,24 @@ export default function Clients() {
         </div>
     );
 
-    // קיבוץ לקוחות לפי סטטוס עבור תצוגת לוח
+    // קיבוץ לקוחות לפי סטטוס עבור תצוגת לוח - מציג את כל הלקוחות המסוננים בלי פגינציה
     const boardColumns = {
         'לידים': 'ליד',
         'פולואפ': 'פולואפ',
-        'מסמכים לקליטה': 'מסמכים לקליטה',
         'לקוחות': 'לקוח',
+        'אחר': null // עמודה לכל השאר
     };
     
     const groupedClientsForBoard = Object.keys(boardColumns).reduce((acc, columnTitle) => {
         const status = boardColumns[columnTitle];
-        acc[columnTitle] = filteredClients.filter(c => c.status === status);
+        if (status === null) {
+            // עמודת "אחר" - כל מה שלא נכלל בקטגוריות הקודמות
+            acc[columnTitle] = filteredClients.filter(c => 
+                !['ליד', 'פולואפ', 'לקוח'].includes(c.status)
+            );
+        } else {
+            acc[columnTitle] = filteredClients.filter(c => c.status === status);
+        }
         return acc;
     }, {});
 
@@ -307,7 +314,8 @@ export default function Clients() {
 
                     {/* Main Content */}
                     <div className="flex-1">
-                      {/* Pagination Controls */}
+                      {/* Pagination Controls - מוסתר בתצוגת לוח */}
+                        {currentView !== 'לוח' && (
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
@@ -338,11 +346,12 @@ export default function Clients() {
                                 עמוד {currentPage} מתוך {totalPages || 1}
                             </div>
                         </div>
+                        )}
 
                         {currentView === 'לוח' ? (
                             <div className="grid grid-cols-4 gap-4">
                                 {Object.entries(groupedClientsForBoard).map(([columnTitle, clientsInColumn]) => (
-                                    <div key={columnTitle} className="bg-gray-50/50 rounded-lg p-3">
+                                    <div key={columnTitle} className="bg-gray-50/50 rounded-lg p-3 min-h-[200px]">
                                         <h3 
                                             className="text-[18px] font-medium text-right mb-4"
                                             style={{ 
@@ -352,10 +361,13 @@ export default function Clients() {
                                         >
                                             {columnTitle} ({clientsInColumn.length})
                                         </h3>
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
                                             {clientsInColumn.map((client) => (
                                                 <ClientCard key={client.id} client={client} />
                                             ))}
+                                            {clientsInColumn.length === 0 && (
+                                                <p className="text-sm text-gray-400 text-center py-4">אין לקוחות</p>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
