@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import LandingPage from "@/pages/LandingPage";
+import BottomNavigation from "@/components/mobile/BottomNavigation";
+import MobileHeader from "@/components/mobile/MobileHeader";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 
 export default function Layout({ children, currentPageName }) {
     const location = useLocation();
@@ -102,6 +105,16 @@ export default function Layout({ children, currentPageName }) {
         );
     }
 
+    const handleLogout = async () => {
+        try {
+            const { User } = await import("@/entities/User");
+            await User.logout();
+            setCurrentUser(null);
+        } catch (error) {
+            console.error("שגיאה ביציאה:", error);
+        }
+    };
+
     return (
         <div className="min-h-screen" style={{ 
             fontFamily: 'Heebo, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -123,6 +136,20 @@ export default function Layout({ children, currentPageName }) {
                 body {
                     font-family: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif !important;
                     direction: rtl !important;
+                }
+
+                /* Mobile optimizations */
+                @media (max-width: 768px) {
+                    body {
+                        padding-bottom: env(safe-area-inset-bottom);
+                    }
+                }
+
+                /* PWA display mode */
+                @media all and (display-mode: standalone) {
+                    body {
+                        padding-top: env(safe-area-inset-top);
+                    }
                 }
                 
                 .dashboard-card {
@@ -181,10 +208,15 @@ export default function Layout({ children, currentPageName }) {
                 }
             `}
             </style>
-            
-            {/* Header - Conditionally render header only for logged-in users */}
+
+            {/* Mobile Header */}
             {currentUser && (
-                <header className="w-full h-[93px] bg-white border-b border-gray-200 relative z-50">
+                <MobileHeader currentUser={currentUser} onLogout={handleLogout} />
+            )}
+
+            {/* Desktop Header - Conditionally render header only for logged-in users */}
+            {currentUser && (
+                <header className="hidden md:block w-full h-[93px] bg-white border-b border-gray-200 relative z-50">
                     <div className="max-w-[1315px] mx-auto h-full flex items-center justify-between px-4">
                         {/* Right side of header */}
                         <div className="flex items-center gap-8">
@@ -251,11 +283,15 @@ export default function Layout({ children, currentPageName }) {
             )}
             
             {/* Main Content */}
-            <main className="w-full">
+            <main className="w-full pt-14 md:pt-0">
                 {currentUser ? (
-                    <SubscriptionGuard>
-                        {children}
-                    </SubscriptionGuard>
+                    <>
+                        <SubscriptionGuard>
+                            {children}
+                        </SubscriptionGuard>
+                        <BottomNavigation />
+                        <PWAInstallPrompt />
+                    </>
                 ) : (
                     <LandingPage />
                 )}
