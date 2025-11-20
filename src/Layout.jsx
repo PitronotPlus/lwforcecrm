@@ -27,11 +27,16 @@ export default function Layout({ children, currentPageName }) {
 
     const loadUserData = async () => {
         try {
-            const { User } = await import("@/entities/User");
-            const user = await User.me();
-            setCurrentUser(user);
+            const { base44 } = await import("@/api/base44Client");
+            const isAuth = await base44.auth.isAuthenticated();
+            if (isAuth) {
+                const user = await base44.auth.me();
+                setCurrentUser(user);
+            } else {
+                setCurrentUser(null);
+            }
         } catch (error) {
-            // משתמש לא מחובר
+            console.error("Error loading user:", error);
             setCurrentUser(null);
         }
         setLoading(false);
@@ -76,8 +81,9 @@ export default function Layout({ children, currentPageName }) {
 
     const handleLogin = async () => {
         try {
-            const { User } = await import("@/entities/User");
-            await User.login();
+            const { base44 } = await import("@/api/base44Client");
+            const callbackUrl = createPageUrl('Dashboard');
+            base44.auth.redirectToLogin(callbackUrl);
         } catch (error) {
             console.error("שגיאה בהתחברות:", error);
         }
@@ -86,9 +92,9 @@ export default function Layout({ children, currentPageName }) {
     const handleMenuClick = async (item) => {
         if (item.action === "logout") {
             try {
-                const { User } = await import("@/entities/User");
-                await User.logout();
-                setCurrentUser(null); // עדכון מצב מקומי אחרי יציאה
+                const { base44 } = await import("@/api/base44Client");
+                await base44.auth.logout();
+                setCurrentUser(null);
             } catch (error) {
                 console.error("שגיאה ביציאה:", error);
             }
@@ -112,8 +118,8 @@ export default function Layout({ children, currentPageName }) {
 
     const handleLogout = async () => {
         try {
-            const { User } = await import("@/entities/User");
-            await User.logout();
+            const { base44 } = await import("@/api/base44Client");
+            await base44.auth.logout();
             setCurrentUser(null);
         } catch (error) {
             console.error("שגיאה ביציאה:", error);
