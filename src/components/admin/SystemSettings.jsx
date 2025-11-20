@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Save, Database, Shield, Globe } from 'lucide-react';
+import { Save, Database, Mail, Shield, Globe } from 'lucide-react';
 
 export default function SystemSettings() {
     const [settings, setSettings] = useState({
