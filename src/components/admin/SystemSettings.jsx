@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Save, Database, Mail, Shield, Globe } from 'lucide-react';
+import { Save, Database, Mail, Shield, Globe, Webhook } from 'lucide-react';
+import IntegrationManager from './IntegrationManager';
 
 export default function SystemSettings() {
     const [settings, setSettings] = useState({
@@ -187,9 +188,9 @@ export default function SystemSettings() {
             </div>
 
             {/* Integrations */}
-            <div className="bg-white rounded-[20px] p-6">
+            <div className="lg:col-span-2 bg-white rounded-[20px] p-6">
                 <div className="flex items-center gap-3 mb-6">
-                    <Shield className="w-6 h-6 text-[#3568AE]" />
+                    <Webhook className="w-6 h-6 text-[#3568AE]" />
                     <h3 
                         className="text-[20px] font-medium"
                         style={{ 
@@ -201,39 +202,7 @@ export default function SystemSettings() {
                     </h3>
                 </div>
 
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <Switch
-                            checked={settings.google_drive_integration}
-                            onCheckedChange={(checked) => updateSetting('google_drive_integration', checked)}
-                        />
-                        <label 
-                            className="text-[14px] font-medium text-right"
-                            style={{ 
-                                color: '#484848',
-                                fontFamily: 'Heebo'
-                            }}
-                        >
-                            אינטגרציה Google Drive
-                        </label>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <Switch
-                            checked={settings.facebook_leads_integration}
-                            onCheckedChange={(checked) => updateSetting('facebook_leads_integration', checked)}
-                        />
-                        <label 
-                            className="text-[14px] font-medium text-right"
-                            style={{ 
-                                color: '#484848',
-                                fontFamily: 'Heebo'
-                            }}
-                        >
-                            לידים מפייסבוק
-                        </label>
-                    </div>
-                </div>
+                <IntegrationManager />
             </div>
 
             {/* Save Button */}
