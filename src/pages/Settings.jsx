@@ -126,22 +126,18 @@ export default function Settings() {
                 </div>
 
                 <Tabs defaultValue="profile" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white rounded-[20px] p-1">
-                        <TabsTrigger value="profile" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                            <UserIcon className="w-3 md:w-4 h-3 md:h-4" />
-                            <span className="hidden sm:inline">פרופיל</span>
+                    <TabsList className="grid w-full grid-cols-3 bg-white rounded-[20px] p-1">
+                        <TabsTrigger value="profile" className="flex items-center gap-2 text-sm">
+                            <UserIcon className="w-4 h-4" />
+                            <span>פרופיל</span>
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                            <Bell className="w-3 md:w-4 h-3 md:h-4" />
-                            <span className="hidden sm:inline">התראות</span>
+                        <TabsTrigger value="notifications" className="flex items-center gap-2 text-sm">
+                            <Bell className="w-4 h-4" />
+                            <span>התראות</span>
                         </TabsTrigger>
-                        <TabsTrigger value="integrations" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                            <Database className="w-3 md:w-4 h-3 md:h-4" />
-                            <span className="hidden sm:inline">אינטגרציות</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="appearance" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
-                            <Palette className="w-3 md:w-4 h-3 md:h-4" />
-                            <span className="hidden sm:inline">תצוגה</span>
+                        <TabsTrigger value="appearance" className="flex items-center gap-2 text-sm">
+                            <Palette className="w-4 h-4" />
+                            <span>תצוגה</span>
                         </TabsTrigger>
                     </TabsList>
 
@@ -283,55 +279,6 @@ export default function Settings() {
                                         <Switch
                                             checked={userSettings.appointment_reminders}
                                             onCheckedChange={(checked) => updateSetting('appointment_reminders', checked)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end">
-                                    <Button onClick={handleSettingsSave} className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
-                                        <Save className="w-4 h-4 mr-2" />
-                                        שמור הגדרות
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* אינטגרציות */}
-                    <TabsContent value="integrations" className="mt-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle style={{ fontFamily: 'Heebo' }}>אינטגרציות חיצוניות</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                                        <div>
-                                            <label className="text-sm font-medium block" style={{ fontFamily: 'Heebo' }}>
-                                                אינטגרציה Google Drive
-                                            </label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                סנכרון אוטומטי של מסמכים לגוגל דרייב
-                                            </p>
-                                        </div>
-                                        <Switch
-                                            checked={userSettings.google_drive_integration}
-                                            onCheckedChange={(checked) => updateSetting('google_drive_integration', checked)}
-                                        />
-                                    </div>
-
-                                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                                        <div>
-                                            <label className="text-sm font-medium block" style={{ fontFamily: 'Heebo' }}>
-                                                גיבוי אוטומטי
-                                            </label>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                גיבוי יומי של כל הנתונים
-                                            </p>
-                                        </div>
-                                        <Switch
-                                            checked={userSettings.auto_backup}
-                                            onCheckedChange={(checked) => updateSetting('auto_backup', checked)}
                                         />
                                     </div>
                                 </div>
