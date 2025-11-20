@@ -220,9 +220,8 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
                 </DialogHeader>
 
                 <Tabs defaultValue="details" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="details">פרטים</TabsTrigger>
-                        <TabsTrigger value="timer">טיימר</TabsTrigger>
                         <TabsTrigger value="reminders">תזכורות</TabsTrigger>
                         <TabsTrigger value="history">היסטוריה</TabsTrigger>
                     </TabsList>
@@ -307,40 +306,6 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
                                 />
                             ) : (
                                 <p className="text-gray-600">{task.description || 'אין תיאור'}</p>
-                            )}
-                        </div>
-                    </TabsContent>
-
-                    <TabsContent value="timer" className="space-y-4">
-                        <div className="text-center py-8">
-                            {!task.due_date ? (
-                                <div className="text-gray-500">
-                                    <Clock className="w-16 h-16 mx-auto mb-4" />
-                                    <p className="text-lg">לא הוגדר דדליין למשימה</p>
-                                    <p className="text-sm mt-2">הוסף תאריך יעד בכרטיסיה "פרטים"</p>
-                                </div>
-                            ) : (
-                                <div>
-                                    <Clock className={`w-16 h-16 mx-auto mb-4 ${isOverdue ? 'text-red-500' : 'text-[#3568AE]'}`} />
-                                    <div className={`text-5xl font-bold mb-4 ${isOverdue ? 'text-red-500' : ''}`}>
-                                        {formatTimeRemaining(timeRemaining)}
-                                    </div>
-                                    <div className="text-sm text-gray-500 mb-2">
-                                        ימים : שעות : דקות : שניות
-                                    </div>
-                                    {isOverdue ? (
-                                        <Badge className="bg-red-100 text-red-800 text-lg px-4 py-2">
-                                            באיחור ⏰
-                                        </Badge>
-                                    ) : (
-                                        <Badge className="bg-green-100 text-green-800 text-lg px-4 py-2">
-                                            זמן נותר
-                                        </Badge>
-                                    )}
-                                    <div className="mt-6 text-gray-600">
-                                        <p className="text-sm">דדליין: {new Date(task.due_date).toLocaleString('he-IL')}</p>
-                                    </div>
-                                </div>
                             )}
                         </div>
                     </TabsContent>

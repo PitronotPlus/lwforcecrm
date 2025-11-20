@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Eye, Edit, Trash2 } from 'lucide-react';
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
 import TaskDetailModal from "../components/tasks/TaskDetailModal";
+import TaskTimeRemaining from "../components/tasks/TaskTimeRemaining";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -111,16 +112,16 @@ export default function Tasks() {
                 </div>
             </div>
             
-            <div className="text-right" onClick={() => openTaskDetail(task)} className="cursor-pointer">
+            <div className="text-right cursor-pointer" onClick={() => openTaskDetail(task)}>
                 <div className="font-medium mb-2">{task.title}</div>
                 {task.description && (
                     <div className="text-sm text-gray-500 mb-2">{task.description}</div>
                 )}
-                <div className="text-sm text-gray-600">
-                    {task.due_date && (
-                        <span>דדליין: {new Date(task.due_date).toLocaleDateString('he-IL')}</span>
-                    )}
-                </div>
+                {task.due_date && (
+                    <div className="mt-2">
+                        <TaskTimeRemaining dueDate={task.due_date} compact />
+                    </div>
+                )}
                 {task.client_id && (
                     <div className="mt-2">
                         <Link 
@@ -273,12 +274,13 @@ export default function Tasks() {
                         <div className="space-y-2">
                             {/* Table Header */}
                             <div className="bg-white rounded-[15px] p-6 mb-2">
-                                <div className="grid grid-cols-8 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                <div className="grid grid-cols-9 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                     <div className="text-right">בוצע</div>
                                     <div className="text-right col-span-2">נושא</div>
                                     <div className="text-right">סטטוס</div>
                                     <div className="text-right">עדיפות</div>
                                     <div className="text-right">דדליין</div>
+                                    <div className="text-right">זמן נותר</div>
                                     <div className="text-right">שיוך ל</div>
                                     <div className="text-right">פעולות</div>
                                 </div>
@@ -290,7 +292,7 @@ export default function Tasks() {
                             {/* Task Rows */}
                             {paginatedTasks.map((task) => (
                                 <div key={task.id} className="bg-white rounded-[15px] p-6 hover:shadow-md transition-shadow">
-                                    <div className="grid grid-cols-8 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                    <div className="grid grid-cols-9 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                         {/* Checkbox */}
                                         <div className="text-right">
                                             <input 
@@ -329,6 +331,15 @@ export default function Tasks() {
                                         {/* Due Date */}
                                         <div className="text-right">
                                             {task.due_date ? new Date(task.due_date).toLocaleDateString('he-IL') : '-'}
+                                        </div>
+                                        
+                                        {/* Time Remaining */}
+                                        <div className="text-right">
+                                            {task.due_date ? (
+                                                <TaskTimeRemaining dueDate={task.due_date} compact />
+                                            ) : (
+                                                <span className="text-gray-400">-</span>
+                                            )}
                                         </div>
                                         
                                         {/* Assigned To */}
