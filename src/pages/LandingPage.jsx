@@ -1,7 +1,7 @@
-
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Check, Star, Users, Zap, Shield, Headphones, BookOpen, Settings } from 'lucide-react';
 // Removed: import SurveyModal from '../components/landing/SurveyModal';
 import LeadForm from '../components/landing/LeadForm';
 import PricingSection from '../components/landing/PricingSection';
@@ -32,9 +32,18 @@ export default function LandingPage() {
             <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm z-50">
                 <nav className="container mx-auto px-6 py-3 flex justify-between items-center">
                     {/* ימין: כפתורי כניסה */}
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" onClick={handleLogin}>התחבר</Button>
-                        <Button className="bg-[#3568AE] hover:bg-[#2A5494] text-white" onClick={handleSignup}>
+                    <div className="flex items-center gap-2 md:gap-4">
+                        <Button 
+                            variant="ghost" 
+                            onClick={handleLogin}
+                            className="text-sm md:text-base px-3 md:px-4 py-2 touch-manipulation"
+                        >
+                            התחבר
+                        </Button>
+                        <Button 
+                            className="bg-[#3568AE] hover:bg-[#2A5494] text-white text-sm md:text-base px-3 md:px-4 py-2 touch-manipulation" 
+                            onClick={handleSignup}
+                        >
                            הרשמה ללא עלות
                         </Button>
                     </div>
@@ -63,10 +72,10 @@ export default function LandingPage() {
                         {/* New button added below */}
                         <div className="mt-8 flex justify-center gap-4">
                             <Button 
-                                className="bg-[#3568AE] hover:bg-[#2A5494] text-white text-lg px-8 py-6"
+                                className="bg-[#3568AE] hover:bg-[#2A5494] text-white text-base md:text-lg px-6 md:px-8 py-4 md:py-6 touch-manipulation"
                                 onClick={handleSignup}
                             >
-                                <Star className="ml-2 h-5 w-5" />
+                                <Star className="ml-2 h-4 md:h-5 w-4 md:w-5" />
                                 אני רוצה חודש התנסות ללא עלות!
                             </Button>
                         </div>
@@ -167,10 +176,10 @@ export default function LandingPage() {
                     <h2 className="text-3xl font-bold mb-4">מחליטים לצאת מהכאוס?</h2>
                     <p className="text-lg text-gray-600 mb-8">זה הזמן שלך לקחת שליטה – לא רק על הלקוחות, אלא על כל העסק המשפטי שלך.</p>
                      <Button 
-                        className="bg-[#3568AE] hover:bg-[#2A5494] text-white text-lg px-8 py-6"
+                        className="bg-[#3568AE] hover:bg-[#2A5494] text-white text-base md:text-lg px-6 md:px-8 py-4 md:py-6 touch-manipulation"
                         onClick={handleSignup}
                     >
-                        <Star className="ml-2 h-5 w-5" />
+                        <Star className="ml-2 h-4 md:h-5 w-4 md:w-5" />
                         הרשמה לחודש התנסות ללא עלות
                     </Button>
                 </section>
