@@ -98,24 +98,25 @@ export default function Cases() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[20px] shadow-sm">
+                {/* Desktop Table View */}
+                <div className="hidden md:block bg-white rounded-[20px] shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-right min-w-[800px]">
+                        <table className="w-full text-right">
                             <thead>
                                 <tr className="border-b">
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">כותרת התיק</th>
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">לקוח</th>
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">סוג</th>
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">סטטוס</th>
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden md:table-cell">תאריך פתיחה</th>
-                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">פעולות</th>
+                                    <th className="p-4 font-medium">כותרת התיק</th>
+                                    <th className="p-4 font-medium">לקוח</th>
+                                    <th className="p-4 font-medium">סוג</th>
+                                    <th className="p-4 font-medium">סטטוס</th>
+                                    <th className="p-4 font-medium">תאריך פתיחה</th>
+                                    <th className="p-4 font-medium">פעולות</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredCases.map(caseItem => (
                                     <tr key={caseItem.id} className="border-b hover:bg-gray-50">
-                                        <td className="p-2 md:p-4 text-sm md:text-base">{caseItem.title}</td>
-                                        <td className="p-2 md:p-4 text-sm md:text-base">
+                                        <td className="p-4">{caseItem.title}</td>
+                                        <td className="p-4">
                                             <Link 
                                                 to={`${createPageUrl('ClientDetails')}?id=${caseItem.client_id}`}
                                                 className="text-[#3B7CDF] hover:underline flex items-center gap-1"
@@ -124,19 +125,19 @@ export default function Cases() {
                                                 <ExternalLink className="w-3 h-3" />
                                             </Link>
                                         </td>
-                                        <td className="p-2 md:p-4 text-sm md:text-base">{caseItem.case_type}</td>
-                                        <td className="p-2 md:p-4">
+                                        <td className="p-4">{caseItem.case_type}</td>
+                                        <td className="p-4">
                                             <Badge className={getStatusColor(caseItem.status)}>
                                                 {caseItem.status}
                                             </Badge>
                                         </td>
-                                        <td className="p-2 md:p-4 text-sm md:text-base hidden md:table-cell">
+                                        <td className="p-4">
                                             {new Date(caseItem.opening_date).toLocaleDateString('he-IL')}
                                         </td>
-                                        <td className="p-2 md:p-4">
-                                            <div className="flex gap-1 md:gap-2">
+                                        <td className="p-4">
+                                            <div className="flex gap-2">
                                                 <CaseModal caseToEdit={caseItem} onCaseSaved={handleCaseSaved}>
-                                                    <Button variant="ghost" size="sm" className="text-blue-500 p-1 md:p-2">
+                                                    <Button variant="ghost" size="sm" className="text-blue-500">
                                                         <Edit className="w-4 h-4" />
                                                     </Button>
                                                 </CaseModal>
@@ -144,7 +145,7 @@ export default function Cases() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleDeleteCase(caseItem.id)}
-                                                    className="text-red-500 p-1 md:p-2"
+                                                    className="text-red-500"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>
@@ -155,6 +156,61 @@ export default function Cases() {
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-3">
+                    {filteredCases.map(caseItem => (
+                        <div key={caseItem.id} className="bg-white rounded-[15px] p-4 shadow-sm">
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-base mb-1 break-words">
+                                        {caseItem.title}
+                                    </h3>
+                                    <Link 
+                                        to={`${createPageUrl('ClientDetails')}?id=${caseItem.client_id}`}
+                                        className="text-sm text-[#3B7CDF] flex items-center gap-1 mb-2"
+                                    >
+                                        {caseItem.client_name}
+                                        <ExternalLink className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                                <Badge className={getStatusColor(caseItem.status)}>
+                                    {caseItem.status}
+                                </Badge>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                <div className="text-sm text-gray-600">
+                                    <span className="font-medium">סוג: </span>
+                                    {caseItem.case_type}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    <span className="font-medium">נפתח: </span>
+                                    {new Date(caseItem.opening_date).toLocaleDateString('he-IL')}
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-2 pt-3 border-t">
+                                <CaseModal caseToEdit={caseItem} onCaseSaved={handleCaseSaved}>
+                                    <Button variant="outline" size="sm" className="flex-1">
+                                        <Edit className="w-4 h-4 ml-1" />
+                                        ערוך
+                                    </Button>
+                                </CaseModal>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDeleteCase(caseItem.id)}
+                                    className="text-red-500 flex-1"
+                                >
+                                    <Trash2 className="w-4 h-4 ml-1" />
+                                    מחק
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
                     {filteredCases.length === 0 && (
                         <div className="text-center py-12">
                             <p className="text-gray-500 mb-4">לא נמצאו תיקים.</p>
