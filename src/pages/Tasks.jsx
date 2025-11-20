@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Task } from "@/entities/Task";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, ExternalLink } from 'lucide-react';
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
