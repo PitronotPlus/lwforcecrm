@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Task } from "@/entities/Task";
 import { Case } from "@/entities/Case";
 import { Appointment } from "@/entities/Appointment";
@@ -43,8 +43,8 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-[1315px] mx-auto">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-[1315px] mx-auto">
                 <WelcomeHeader onTaskCreated={loadData} />
                 <StatsCards tasks={tasks} cases={cases} onTaskUpdate={loadData} />
                 <AppointmentsSection appointments={appointments} />

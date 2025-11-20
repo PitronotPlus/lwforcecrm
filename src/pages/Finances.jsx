@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Financial } from "@/entities/Financial";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,12 +87,12 @@ export default function Finances() {
     }
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
                     <h1 
-                        className="text-[32px] font-bold"
+                        className="text-2xl md:text-[32px] font-bold"
                         style={{ 
                             color: '#3568AE',
                             fontFamily: 'Heebo'
@@ -99,8 +100,8 @@ export default function Finances() {
                     >
                         ניהול כספים
                     </h1>
-                    <div className="flex items-center gap-4">
-                        <div className="relative max-w-sm">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
+                        <div className="relative w-full sm:max-w-sm">
                             <Input
                                 placeholder="חיפוש לפי תיאור, לקוח, קטגוריה"
                                 value={searchQuery}
@@ -114,7 +115,7 @@ export default function Finances() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">סך הכנסות</CardTitle>
@@ -165,7 +166,7 @@ export default function Finances() {
                 </div>
 
                 {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
                     <Card>
                         <CardHeader>
                             <CardTitle>הכנסות ויוצאות לפי קטגוריה</CardTitle>
@@ -220,34 +221,34 @@ export default function Finances() {
                     </CardHeader>
                     <CardContent>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-right">
+                            <table className="w-full text-right min-w-[800px]">
                                 <thead>
                                     <tr className="border-b">
-                                        <th className="p-4 font-medium">תאריך</th>
-                                        <th className="p-4 font-medium">תיאור</th>
-                                        <th className="p-4 font-medium">סוג</th>
-                                        <th className="p-4 font-medium">קטגוריה</th>
-                                        <th className="p-4 font-medium">סכום</th>
-                                        <th className="p-4 font-medium">לקוח</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base">תאריך</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base">תיאור</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base">סוג</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden md:table-cell">קטגוריה</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base">סכום</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden sm:table-cell">לקוח</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredRecords.map(record => (
                                         <tr key={record.id} className="border-b hover:bg-gray-50">
-                                            <td className="p-4">
+                                            <td className="p-2 md:p-4 text-xs md:text-sm">
                                                 {new Date(record.date).toLocaleDateString('he-IL')}
                                             </td>
-                                            <td className="p-4">{record.description}</td>
-                                            <td className="p-4">
+                                            <td className="p-2 md:p-4 text-sm md:text-base">{record.description}</td>
+                                            <td className="p-2 md:p-4">
                                                 <Badge className={getTypeColor(record.type)}>
                                                     {record.type}
                                                 </Badge>
                                             </td>
-                                            <td className="p-4">{record.category}</td>
-                                            <td className={`p-4 font-bold ${record.type === 'הכנסה' ? 'text-green-600' : 'text-red-600'}`}>
+                                            <td className="p-2 md:p-4 text-sm md:text-base hidden md:table-cell">{record.category}</td>
+                                            <td className={`p-2 md:p-4 font-bold text-sm md:text-base ${record.type === 'הכנסה' ? 'text-green-600' : 'text-red-600'}`}>
                                                 {record.type === 'הכנסה' ? '+' : '-'}₪{record.amount.toLocaleString()}
                                             </td>
-                                            <td className="p-4">{record.client_name || '-'}</td>
+                                            <td className="p-2 md:p-4 text-sm md:text-base hidden sm:table-cell">{record.client_name || '-'}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Case } from "@/entities/Case";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,17 +70,17 @@ export default function Cases() {
     }
     
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-[1315px] mx-auto">
-                <div className="flex items-center justify-between mb-8">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-[1315px] mx-auto">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
                     <h1 
-                        className="text-[32px] font-bold"
+                        className="text-2xl md:text-[32px] font-bold"
                         style={{ color: '#3568AE', fontFamily: 'Heebo' }}
                     >
                         ניהול תיקים
                     </h1>
-                    <div className="flex items-center gap-4">
-                        <div className="relative max-w-sm">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full md:w-auto">
+                        <div className="relative w-full sm:max-w-sm">
                             <Input
                                 placeholder="חיפוש לפי כותרת, לקוח, מספר תיק"
                                 value={searchQuery}
@@ -90,7 +90,7 @@ export default function Cases() {
                             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
                         <CaseModal onCaseSaved={handleCaseSaved}>
-                             <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                             <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white w-full sm:w-auto">
                                 <Plus className="w-4 h-4 ml-2" />
                                 תיק חדש
                             </Button>
@@ -100,22 +100,22 @@ export default function Cases() {
 
                 <div className="bg-white rounded-[20px] shadow-sm">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-right">
+                        <table className="w-full text-right min-w-[800px]">
                             <thead>
                                 <tr className="border-b">
-                                    <th className="p-4 font-medium">כותרת התיק</th>
-                                    <th className="p-4 font-medium">לקוח</th>
-                                    <th className="p-4 font-medium">סוג</th>
-                                    <th className="p-4 font-medium">סטטוס</th>
-                                    <th className="p-4 font-medium">תאריך פתיחה</th>
-                                    <th className="p-4 font-medium">פעולות</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">כותרת התיק</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">לקוח</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">סוג</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">סטטוס</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden md:table-cell">תאריך פתיחה</th>
+                                    <th className="p-2 md:p-4 font-medium text-sm md:text-base">פעולות</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredCases.map(caseItem => (
                                     <tr key={caseItem.id} className="border-b hover:bg-gray-50">
-                                        <td className="p-4">{caseItem.title}</td>
-                                        <td className="p-4">
+                                        <td className="p-2 md:p-4 text-sm md:text-base">{caseItem.title}</td>
+                                        <td className="p-2 md:p-4 text-sm md:text-base">
                                             <Link 
                                                 to={`${createPageUrl('ClientDetails')}?id=${caseItem.client_id}`}
                                                 className="text-[#3B7CDF] hover:underline flex items-center gap-1"
@@ -124,19 +124,19 @@ export default function Cases() {
                                                 <ExternalLink className="w-3 h-3" />
                                             </Link>
                                         </td>
-                                        <td className="p-4">{caseItem.case_type}</td>
-                                        <td className="p-4">
+                                        <td className="p-2 md:p-4 text-sm md:text-base">{caseItem.case_type}</td>
+                                        <td className="p-2 md:p-4">
                                             <Badge className={getStatusColor(caseItem.status)}>
                                                 {caseItem.status}
                                             </Badge>
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-2 md:p-4 text-sm md:text-base hidden md:table-cell">
                                             {new Date(caseItem.opening_date).toLocaleDateString('he-IL')}
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-2">
+                                        <td className="p-2 md:p-4">
+                                            <div className="flex gap-1 md:gap-2">
                                                 <CaseModal caseToEdit={caseItem} onCaseSaved={handleCaseSaved}>
-                                                    <Button variant="ghost" size="sm" className="text-blue-500">
+                                                    <Button variant="ghost" size="sm" className="text-blue-500 p-1 md:p-2">
                                                         <Edit className="w-4 h-4" />
                                                     </Button>
                                                 </CaseModal>
@@ -144,7 +144,7 @@ export default function Cases() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleDeleteCase(caseItem.id)}
-                                                    className="text-red-500"
+                                                    className="text-red-500 p-1 md:p-2"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>

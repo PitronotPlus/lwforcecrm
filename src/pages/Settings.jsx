@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -110,12 +110,12 @@ export default function Settings() {
     }
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-5xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
-                    <Shield className="w-8 h-8 text-[#3568AE]" />
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-5xl mx-auto">
+                <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
+                    <Shield className="w-6 md:w-8 h-6 md:h-8 text-[#3568AE]" />
                     <h1 
-                        className="text-[32px] font-bold"
+                        className="text-2xl md:text-[32px] font-bold"
                         style={{ 
                             color: '#3568AE',
                             fontFamily: 'Heebo'
@@ -126,22 +126,22 @@ export default function Settings() {
                 </div>
 
                 <Tabs defaultValue="profile" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 bg-white rounded-[20px] p-1">
-                        <TabsTrigger value="profile" className="flex items-center gap-2">
-                            <UserIcon className="w-4 h-4" />
-                            פרופיל
+                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-white rounded-[20px] p-1">
+                        <TabsTrigger value="profile" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                            <UserIcon className="w-3 md:w-4 h-3 md:h-4" />
+                            <span className="hidden sm:inline">פרופיל</span>
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="flex items-center gap-2">
-                            <Bell className="w-4 h-4" />
-                            התראות
+                        <TabsTrigger value="notifications" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                            <Bell className="w-3 md:w-4 h-3 md:h-4" />
+                            <span className="hidden sm:inline">התראות</span>
                         </TabsTrigger>
-                        <TabsTrigger value="integrations" className="flex items-center gap-2">
-                            <Database className="w-4 h-4" />
-                            אינטגרציות
+                        <TabsTrigger value="integrations" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                            <Database className="w-3 md:w-4 h-3 md:h-4" />
+                            <span className="hidden sm:inline">אינטגרציות</span>
                         </TabsTrigger>
-                        <TabsTrigger value="appearance" className="flex items-center gap-2">
-                            <Palette className="w-4 h-4" />
-                            תצוגה
+                        <TabsTrigger value="appearance" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                            <Palette className="w-3 md:w-4 h-3 md:h-4" />
+                            <span className="hidden sm:inline">תצוגה</span>
                         </TabsTrigger>
                     </TabsList>
 

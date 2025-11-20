@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Client } from "@/entities/Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -47,11 +47,11 @@ export default function Marketing() {
     if (loading) return <div className="p-8">טוען נתונים...</div>;
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-[1315px] mx-auto">
-                <div className="flex justify-between items-center mb-8">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-[1315px] mx-auto">
+                <div className="flex justify-between items-center mb-6 md:mb-8">
                      <h1 
-                        className="text-[32px] font-bold"
+                        className="text-2xl md:text-[32px] font-bold"
                         style={{ 
                             color: '#3568AE',
                             fontFamily: 'Heebo'
@@ -61,7 +61,7 @@ export default function Marketing() {
                     </h1>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
                      <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">סך הכל לידים</CardTitle>
@@ -100,7 +100,7 @@ export default function Marketing() {
                     </Card>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
                     <Card>
                         <CardHeader>
                             <CardTitle>מקורות הגעה</CardTitle>

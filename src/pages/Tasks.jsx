@@ -181,7 +181,7 @@ export default function Tasks() {
                     {/* Right side - View Options */}
                     <div className="flex items-center gap-4">
                         <Select value={filterStatus} onValueChange={setFilterStatus}>
-                            <SelectTrigger className="w-[150px]">
+                            <SelectTrigger className="w-full sm:w-[150px]">
                                 <SelectValue placeholder="סנן לפי סטטוס" />
                             </SelectTrigger>
                             <SelectContent>
@@ -193,7 +193,7 @@ export default function Tasks() {
                         </Select>
 
                         <Select value={sortBy} onValueChange={setSortBy}>
-                            <SelectTrigger className="w-[180px]">
+                            <SelectTrigger className="w-full sm:w-[180px]">
                                 <SelectValue placeholder="מיין לפי" />
                             </SelectTrigger>
                             <SelectContent>

@@ -126,8 +126,8 @@ export default function ClientDetails() {
     }
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 
                 {/* Communication Log on the left */}
                 <div className="lg:col-span-1">
@@ -137,11 +137,11 @@ export default function ClientDetails() {
                 {/* Main Content on the right */}
                 <div className="lg:col-span-2">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <User className="w-8 h-8 text-[#3568AE]" />
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <User className="w-6 md:w-8 h-6 md:h-8 text-[#3568AE]" />
                             <h1 
-                                className="text-[32px] font-bold"
+                                className="text-2xl md:text-[32px] font-bold"
                                 style={{ 
                                     color: '#3568AE',
                                     fontFamily: 'Heebo'
@@ -154,20 +154,20 @@ export default function ClientDetails() {
                             </Badge>
                         </div>
                         
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-2 md:gap-4 w-full md:w-auto">
                             <Button
                                 onClick={() => setIsEditing(!isEditing)}
                                 variant="outline"
-                                className="border-[#3568AE] text-[#3568AE] hover:bg-[#3568AE]/10"
+                                className="border-[#3568AE] text-[#3568AE] hover:bg-[#3568AE]/10 w-full sm:w-auto"
                             >
                                 <Edit className="ml-2 w-4 h-4" />
-                                {isEditing ? 'בטל עריכה' : 'ערוך פרטים'}
+                                <span className="text-sm md:text-base">{isEditing ? 'בטל עריכה' : 'ערוך פרטים'}</span>
                             </Button>
-                            
+
                             {isEditing && (
                                 <Button
                                     onClick={handleSave}
-                                    className="bg-[#67BF91] hover:bg-[#5AA880] text-white"
+                                    className="bg-[#67BF91] hover:bg-[#5AA880] text-white w-full sm:w-auto"
                                 >
                                     שמור שינויים
                                 </Button>
@@ -176,18 +176,18 @@ export default function ClientDetails() {
                     </div>
 
                     <Tabs defaultValue="details" className="w-full">
-                        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-11 gap-1">
-                            <TabsTrigger value="details">פרטי לקוח</TabsTrigger>
-                            <TabsTrigger value="tasks">משימות</TabsTrigger>
-                            <TabsTrigger value="interactions">תיעוד</TabsTrigger>
-                            <TabsTrigger value="appointments">פגישות</TabsTrigger>
-                            <TabsTrigger value="activity">לוג פעילות</TabsTrigger>
-                            <TabsTrigger value="finances">כספים</TabsTrigger>
-                            <TabsTrigger value="documents">מסמכים</TabsTrigger>
-                            <TabsTrigger value="cases">תיקים</TabsTrigger>
-                            <TabsTrigger value="marketing">שיווק</TabsTrigger>
-                            <TabsTrigger value="communication">תקשורת</TabsTrigger>
-                            <TabsTrigger value="automation">אוטומציות</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 lg:grid-cols-11 gap-1 h-auto">
+                            <TabsTrigger value="details" className="text-xs md:text-sm py-2">פרטי לקוח</TabsTrigger>
+                            <TabsTrigger value="tasks" className="text-xs md:text-sm py-2">משימות</TabsTrigger>
+                            <TabsTrigger value="interactions" className="text-xs md:text-sm py-2">תיעוד</TabsTrigger>
+                            <TabsTrigger value="appointments" className="text-xs md:text-sm py-2">פגישות</TabsTrigger>
+                            <TabsTrigger value="activity" className="text-xs md:text-sm py-2 hidden sm:block">לוג</TabsTrigger>
+                            <TabsTrigger value="finances" className="text-xs md:text-sm py-2">כספים</TabsTrigger>
+                            <TabsTrigger value="documents" className="text-xs md:text-sm py-2 hidden sm:block">מסמכים</TabsTrigger>
+                            <TabsTrigger value="cases" className="text-xs md:text-sm py-2">תיקים</TabsTrigger>
+                            <TabsTrigger value="marketing" className="text-xs md:text-sm py-2 hidden lg:block">שיווק</TabsTrigger>
+                            <TabsTrigger value="communication" className="text-xs md:text-sm py-2 hidden lg:block">תקשורת</TabsTrigger>
+                            <TabsTrigger value="automation" className="text-xs md:text-sm py-2 hidden lg:block">אוטומציות</TabsTrigger>
                         </TabsList>
 
                         {/* משימות */}
