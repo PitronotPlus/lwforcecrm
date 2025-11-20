@@ -8,8 +8,7 @@ export default function MobileHeader({ currentUser, onLogout }) {
     const [profileOpen, setProfileOpen] = useState(false);
 
     const profileMenuItems = [
-        { icon: User, label: 'פרופיל', path: createPageUrl('Settings') },
-        { icon: Settings, label: 'הגדרות', path: createPageUrl('Settings') }
+        { icon: User, label: 'פרופיל והגדרות', path: createPageUrl('Settings') }
     ];
 
     if (currentUser?.role === 'admin') {
