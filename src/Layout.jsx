@@ -35,10 +35,10 @@ export default function Layout({ children, currentPageName }) {
         
         const baseItems = [
             { title: "דשבורד", url: createPageUrl("Dashboard") },
-            { title: "משימות", url: createPageUrl("Tasks") },
-            { title: "פגישות", url: createPageUrl("Appointments") },
             { title: "לקוחות", url: createPageUrl("Clients") },
             { title: "תיקים", url: createPageUrl("Cases") },
+            { title: "משימות", url: createPageUrl("Tasks") },
+            { title: "פגישות", url: createPageUrl("Appointments") },
             { title: "שיווק", url: createPageUrl("Marketing") },
             { title: "כספים", url: createPageUrl("Finances") },
             { title: "קרדיטים", url: createPageUrl("Credits") },
