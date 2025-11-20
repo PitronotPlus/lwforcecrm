@@ -21,6 +21,7 @@ export default function Tasks() {
     const [selectedTask, setSelectedTask] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState('all');
+    const [sortBy, setSortBy] = useState('created');
 
     useEffect(() => {
         loadTasks();
@@ -83,6 +84,30 @@ export default function Tasks() {
     if (filterStatus !== 'all') {
         filteredTasks = filteredTasks.filter(task => task.status === filterStatus);
     }
+
+    // Sort tasks
+    filteredTasks = [...filteredTasks].sort((a, b) => {
+        switch (sortBy) {
+            case 'priority_high':
+                const priorityOrder = { 'גבוהה': 3, 'בינונית': 2, 'נמוכה': 1 };
+                return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+            case 'priority_low':
+                const priorityOrderLow = { 'גבוהה': 3, 'בינונית': 2, 'נמוכה': 1 };
+                return (priorityOrderLow[a.priority] || 0) - (priorityOrderLow[b.priority] || 0);
+            case 'time_urgent':
+                // Tasks without due date go to the end
+                if (!a.due_date) return 1;
+                if (!b.due_date) return -1;
+                return new Date(a.due_date) - new Date(b.due_date);
+            case 'time_later':
+                if (!a.due_date) return 1;
+                if (!b.due_date) return -1;
+                return new Date(b.due_date) - new Date(a.due_date);
+            case 'created':
+            default:
+                return new Date(b.created_date) - new Date(a.created_date);
+        }
+    });
 
     const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
     const paginatedTasks = filteredTasks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -164,6 +189,19 @@ export default function Tasks() {
                                 <SelectItem value="פתוח">פתוח</SelectItem>
                                 <SelectItem value="בטיפול">בטיפול</SelectItem>
                                 <SelectItem value="הושלם">הושלם</SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <Select value={sortBy} onValueChange={setSortBy}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="מיין לפי" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="created">תאריך יצירה</SelectItem>
+                                <SelectItem value="priority_high">עדיפות: גבוהה לנמוכה</SelectItem>
+                                <SelectItem value="priority_low">עדיפות: נמוכה לגבוהה</SelectItem>
+                                <SelectItem value="time_urgent">הכי דחוף (זמן נותר)</SelectItem>
+                                <SelectItem value="time_later">פחות דחוף (זמן נותר)</SelectItem>
                             </SelectContent>
                         </Select>
                         <div className="bg-white rounded-[15px] px-6 py-4 flex items-center gap-6">
