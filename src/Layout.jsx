@@ -20,6 +20,11 @@ export default function Layout({ children, currentPageName }) {
         loadUserData();
     }, []);
 
+    useEffect(() => {
+        // Reload user data when URL changes (after login redirect)
+        loadUserData();
+    }, [location.pathname]);
+
     const loadUserData = async () => {
         try {
             const { User } = await import("@/entities/User");
