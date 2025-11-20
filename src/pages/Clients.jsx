@@ -207,11 +207,11 @@ export default function Clients() {
     }
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-[1500px] mx-auto">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-[1500px] mx-auto">
                 
-                {/* Top Controls */}
-                <div className="flex items-center justify-between mb-8">
+                {/* Desktop Top Controls */}
+                <div className="hidden md:flex items-center justify-between mb-8">
                     {/* Left side - New Client Button */}
                     <div className="flex items-center gap-4">
                         <CreateClientModal onClientCreated={loadClients} />
@@ -266,10 +266,47 @@ export default function Clients() {
                     </div>
                 </div>
 
+                {/* Mobile Top Controls */}
+                <div className="md:hidden space-y-3 mb-4">
+                    <div className="flex items-center justify-between gap-2">
+                        <CreateClientModal onClientCreated={loadClients} />
+                        <Select value={currentView} onValueChange={setCurrentView}>
+                            <SelectTrigger className="flex-1">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="כרטיסיה">כרטיסיה</SelectItem>
+                                <SelectItem value="רשימה">רשימה</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    
+                    <div className="relative">
+                        <Input
+                            placeholder="חיפוש לקוח..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pr-10"
+                        />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    </div>
+                    
+                    <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {filterOptions.map(option => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
                 {/* Main Content Area */}
-                <div className="flex gap-8">
-                    {/* Right Sidebar - Filter Panel */}
-                    <div className="w-[275px] bg-white rounded-[30px] p-6" style={{ height: 'fit-content' }}>
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                    {/* Right Sidebar - Filter Panel - Desktop Only */}
+                    <div className="hidden md:block w-[275px] bg-white rounded-[30px] p-6" style={{ height: 'fit-content' }}>
                         <div className="mb-6">
                             <h3 
                                 className="text-[16px] font-bold leading-[24px] text-right mb-4"
@@ -313,10 +350,10 @@ export default function Clients() {
                     </div>
 
                     {/* Main Content */}
-                    <div className="flex-1">
-                      {/* Pagination Controls - מוסתר בתצוגת לוח */}
+                    <div className="flex-1 w-full">
+                      {/* Pagination Controls - Desktop only, מוסתר בתצוגת לוח */}
                         {currentView !== 'לוח' && (
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="hidden md:flex items-center justify-between mb-6">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
                                      <Button variant="ghost" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
@@ -349,7 +386,7 @@ export default function Clients() {
                         )}
 
                         {currentView === 'לוח' ? (
-                            <div className="grid grid-cols-4 gap-4">
+                            <div className="hidden md:grid grid-cols-4 gap-4">
                                 {Object.entries(groupedClientsForBoard).map(([columnTitle, clientsInColumn]) => (
                                     <div key={columnTitle} className="bg-gray-50/50 rounded-lg p-3 min-h-[200px]">
                                         <h3 
@@ -373,8 +410,8 @@ export default function Clients() {
                                 ))}
                             </div>
                         ) : currentView === 'כרטיסיה' ? (
-                            /* Card Grid View */
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            /* Card Grid View */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                 {paginatedClients.map((client) => (
                                     <ClientCard key={client.id} client={client} />
                                 ))}
@@ -382,8 +419,8 @@ export default function Clients() {
                         ) : (
                             /* Table View */
                             <div className="space-y-2">
-                                {/* Table Header */}
-                                <div className="bg-white rounded-[15px] p-6 mb-2">
+                                {/* Table Header - Desktop Only */}
+                                <div className="hidden md:block bg-white rounded-[15px] p-6 mb-2">
                                     <div className="grid grid-cols-6 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                         <div className="text-right">שם הלקוח</div>
                                         <div className="text-right">טלפון</div>
@@ -399,8 +436,9 @@ export default function Clients() {
 
                                 {/* Table Rows */}
                                 {paginatedClients.map((client) => (
-                                    <div key={client.id} className="bg-white rounded-[15px] p-6 hover:shadow-md transition-shadow">
-                                        <div className="grid grid-cols-6 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                    <div key={client.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
+                                        {/* Desktop Table Row */}
+                                        <div className="hidden md:grid grid-cols-6 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                             <div className="text-right">
                                                 <Link 
                                                     to={`${createPageUrl('ClientDetails')}?id=${client.id}`}
@@ -441,6 +479,42 @@ export default function Clients() {
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                 </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Mobile Card Layout */}
+                                        <div className="md:hidden">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`} className="flex-1">
+                                                    <div className="font-medium text-base mb-1">{client.full_name}</div>
+                                                    <a href={`tel:${client.phone}`} className="text-sm text-[#3B7CDF]" onClick={(e) => e.stopPropagation()}>
+                                                        {client.phone}
+                                                    </a>
+                                                </Link>
+                                                <Badge className={getStatusColor(client.status)}>
+                                                    {client.status}
+                                                </Badge>
+                                            </div>
+                                            {client.service_type && (
+                                                <div className="text-sm text-gray-600 mb-2">
+                                                    שירות: {client.service_type}
+                                                </div>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`} className="flex-1">
+                                                    <Button variant="outline" size="sm" className="w-full">
+                                                        <Edit className="w-4 h-4 ml-1" />
+                                                        ערוך
+                                                    </Button>
+                                                </Link>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteClient(client.id)}
+                                                    className="text-red-500"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>

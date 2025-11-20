@@ -173,11 +173,11 @@ export default function Tasks() {
     );
 
     return (
-        <div className="min-h-screen p-8" style={{ background: '#F5F5F5' }}>
-            <div className="max-w-[1344px] mx-auto">
+        <div className="min-h-screen p-4 md:p-8" style={{ background: '#F5F5F5' }}>
+            <div className="max-w-full md:max-w-[1344px] mx-auto">
                 
-                {/* Top Controls */}
-                <div className="flex items-center justify-between mb-8">
+                {/* Desktop Top Controls */}
+                <div className="hidden md:flex items-center justify-between mb-8">
                     {/* Right side - View Options */}
                     <div className="flex items-center gap-4">
                         <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -249,8 +249,62 @@ export default function Tasks() {
                     </div>
                 </div>
 
+                {/* Mobile Top Controls */}
+                <div className="md:hidden space-y-3 mb-4">
+                    <div className="flex items-center justify-between gap-2">
+                        <CreateTaskModal onTaskCreated={() => loadTasks()} />
+                        <div className="flex items-center gap-2 flex-1">
+                            <Select value={currentView} onValueChange={setCurrentView}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="רשימה">רשימה</SelectItem>
+                                    <SelectItem value="כרטיסיה">כרטיסיה</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    
+                    <div className="relative">
+                        <Input
+                            placeholder="חיפוש משימה..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pr-10"
+                        />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                        <Select value={filterStatus} onValueChange={setFilterStatus}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="סטטוס" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">הכל</SelectItem>
+                                <SelectItem value="פתוח">פתוח</SelectItem>
+                                <SelectItem value="בטיפול">בטיפול</SelectItem>
+                                <SelectItem value="הושלם">הושלם</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        
+                        <Select value={sortBy} onValueChange={setSortBy}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="מיין" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="created">תאריך</SelectItem>
+                                <SelectItem value="priority_high">עדיפות ↓</SelectItem>
+                                <SelectItem value="priority_low">עדיפות ↑</SelectItem>
+                                <SelectItem value="time_urgent">דחוף</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
                 {/* Pagination Controls */}
-                <div className="flex items-center justify-start mb-6">
+                <div className="hidden md:flex items-center justify-start mb-6">
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             <Button variant="ghost" size="icon" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
@@ -282,8 +336,8 @@ export default function Tasks() {
                 {/* Main Content */}
                 <div className="mt-6">
                     {currentView === 'לוח' ? (
-                        /* Board View */
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        /* Board View - Hidden on mobile */
+                        <div className="hidden md:grid grid-cols-3 gap-6">
                             {['פתוח', 'בטיפול', 'הושלם'].map(status => {
                                 const statusTasks = paginatedTasks.filter(task => task.status === status);
                                 return (
@@ -302,7 +356,7 @@ export default function Tasks() {
                         </div>
                     ) : currentView === 'כרטיסיה' ? (
                         /* Card View */
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                             {paginatedTasks.map(task => (
                                 <TaskCard key={task.id} task={task} />
                             ))}
@@ -310,8 +364,8 @@ export default function Tasks() {
                     ) : (
                         /* List View (Table) */
                         <div className="space-y-2">
-                            {/* Table Header */}
-                            <div className="bg-white rounded-[15px] p-6 mb-2">
+                            {/* Table Header - Desktop only */}
+                            <div className="hidden md:block bg-white rounded-[15px] p-6 mb-2">
                                 <div className="grid grid-cols-9 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                     <div className="text-right">בוצע</div>
                                     <div className="text-right col-span-2">נושא</div>
@@ -329,8 +383,9 @@ export default function Tasks() {
 
                             {/* Task Rows */}
                             {paginatedTasks.map((task) => (
-                                <div key={task.id} className="bg-white rounded-[15px] p-6 hover:shadow-md transition-shadow">
-                                    <div className="grid grid-cols-9 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                <div key={task.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
+                                    {/* Desktop Table Row */}
+                                    <div className="hidden md:grid grid-cols-9 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                         {/* Checkbox */}
                                         <div className="text-right">
                                             <input 
@@ -406,6 +461,50 @@ export default function Tasks() {
                                                 </Button>
                                             </div>
                                         </div>
+                                    </div>
+                                    
+                                    {/* Mobile Card Layout */}
+                                    <div className="md:hidden">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="w-5 h-5"
+                                                    checked={task.completed || task.status === 'הושלם'}
+                                                    onChange={(e) => handleTaskUpdate(task.id, { 
+                                                        completed: e.target.checked,
+                                                        status: e.target.checked ? 'הושלם' : 'פתוח'
+                                                    })}
+                                                />
+                                                <div onClick={() => openTaskDetail(task)} className="flex-1">
+                                                    <div className="font-medium text-base">{task.title}</div>
+                                                    {task.description && (
+                                                        <div className="text-sm text-gray-500 mt-1 line-clamp-2">{task.description}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                                            <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
+                                        </div>
+                                        
+                                        {task.due_date && (
+                                            <div className="mb-2">
+                                                <TaskTimeRemaining dueDate={task.due_date} compact />
+                                            </div>
+                                        )}
+                                        
+                                        {task.client_id && (
+                                            <Link 
+                                                to={`${createPageUrl('ClientDetails')}?id=${task.client_id}`}
+                                                className="text-sm text-[#3B7CDF] flex items-center gap-1"
+                                            >
+                                                {task.client_name}
+                                                <ExternalLink className="w-3 h-3" />
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             ))}
