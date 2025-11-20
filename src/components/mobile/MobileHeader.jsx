@@ -31,9 +31,12 @@ export default function MobileHeader({ currentUser, onLogout }) {
                     </h1>
                 </Link>
 
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                <button 
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center touch-manipulation active:bg-gray-300"
+                >
                     <User className="w-5 h-5 text-gray-600" />
-                </div>
+                </button>
             </div>
 
             {/* Mobile Menu Overlay */}
