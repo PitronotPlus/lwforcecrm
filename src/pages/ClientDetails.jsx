@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Client } from "@/entities/Client";
 import { ClientSettings } from "@/entities/ClientSettings";
+import { Task } from "@/entities/Task";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +15,13 @@ import {
     Phone, 
     Mail, 
     Calendar, 
+    MessageCircle, 
+    Send, 
+    Settings, 
     ExternalLink,
     Plus,
     Edit,
+    Folder,
     FileText
 } from "lucide-react";
 import CommunicationLogStream from "../components/clients/CommunicationLogStream";
