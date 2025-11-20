@@ -10,20 +10,16 @@ import { createPageUrl } from '@/utils';
 export default function LandingPage() {
     // Removed: const [isSurveyOpen, setIsSurveyOpen] = useState(false);
 
-    const handleLogin = () => {
-        // This function redirects to the platform's generic login page.
-        import("@/entities/User").then(async ({ User }) => {
-            const callbackUrl = window.location.origin + createPageUrl('Dashboard');
-            await User.loginWithRedirect(callbackUrl);
-        });
+    const handleLogin = async () => {
+        const { base44 } = await import("@/api/base44Client");
+        const callbackUrl = createPageUrl('Dashboard');
+        base44.auth.redirectToLogin(callbackUrl);
     };
 
-    const handleSignup = () => {
-        import("@/entities/User").then(async ({ User }) => {
-            const callbackUrl = window.location.origin + createPageUrl('Dashboard');
-            // The second argument { view: 'sign_up' } tells the auth page to show the sign-up form.
-            await User.loginWithRedirect(callbackUrl, { view: 'sign_up' });
-        });
+    const handleSignup = async () => {
+        const { base44 } = await import("@/api/base44Client");
+        const callbackUrl = createPageUrl('Dashboard');
+        base44.auth.redirectToLogin(callbackUrl);
     };
 
     return (
