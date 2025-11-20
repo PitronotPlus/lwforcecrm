@@ -3,8 +3,9 @@ import { Task } from "@/entities/Task";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, ExternalLink } from 'lucide-react';
+import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, ExternalLink, Eye, Edit, Trash2 } from 'lucide-react';
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
+import TaskDetailModal from "../components/tasks/TaskDetailModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +17,9 @@ export default function Tasks() {
     const [currentView, setCurrentView] = useState('רשימה');
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [filterStatus, setFilterStatus] = useState('all');
 
     useEffect(() => {
         loadTasks();
@@ -33,6 +37,22 @@ export default function Tasks() {
         } catch (error) {
             console.error('שגיאה בעדכון משימה:', error);
         }
+    };
+
+    const handleDeleteTask = async (taskId) => {
+        if (window.confirm('האם אתה בטוח שברצונך למחוק את המשימה?')) {
+            try {
+                await Task.delete(taskId);
+                loadTasks();
+            } catch (error) {
+                console.error('שגיאה במחיקת משימה:', error);
+            }
+        }
+    };
+
+    const openTaskDetail = (task) => {
+        setSelectedTask(task);
+        setShowDetailModal(true);
     };
 
     const getPriorityColor = (priority) => {
@@ -53,11 +73,15 @@ export default function Tasks() {
         return colors[status] || colors['פתוח'];
     };
 
-    const filteredTasks = tasks.filter(task => 
+    let filteredTasks = tasks.filter(task => 
         task.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.status?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    if (filterStatus !== 'all') {
+        filteredTasks = filteredTasks.filter(task => task.status === filterStatus);
+    }
 
     const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
     const paginatedTasks = filteredTasks.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -87,7 +111,7 @@ export default function Tasks() {
                 </div>
             </div>
             
-            <div className="text-right">
+            <div className="text-right" onClick={() => openTaskDetail(task)} className="cursor-pointer">
                 <div className="font-medium mb-2">{task.title}</div>
                 {task.description && (
                     <div className="text-sm text-gray-500 mb-2">{task.description}</div>
@@ -102,12 +126,22 @@ export default function Tasks() {
                         <Link 
                             to={`${createPageUrl('ClientDetails')}?id=${task.client_id}`}
                             className="text-[#3B7CDF] cursor-pointer hover:underline flex items-center gap-1 justify-end"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             {task.client_name}
                             <ExternalLink className="w-3 h-3" />
                         </Link>
                     </div>
                 )}
+            </div>
+            
+            <div className="flex gap-2 mt-3 pt-3 border-t">
+                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); openTaskDetail(task); }}>
+                    <Eye className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }} className="text-red-500">
+                    <Trash2 className="w-4 h-4" />
+                </Button>
             </div>
         </div>
     );
@@ -120,6 +154,17 @@ export default function Tasks() {
                 <div className="flex items-center justify-between mb-8">
                     {/* Right side - View Options */}
                     <div className="flex items-center gap-4">
+                        <Select value={filterStatus} onValueChange={setFilterStatus}>
+                            <SelectTrigger className="w-[150px]">
+                                <SelectValue placeholder="סנן לפי סטטוס" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">כל המשימות</SelectItem>
+                                <SelectItem value="פתוח">פתוח</SelectItem>
+                                <SelectItem value="בטיפול">בטיפול</SelectItem>
+                                <SelectItem value="הושלם">הושלם</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <div className="bg-white rounded-[15px] px-6 py-4 flex items-center gap-6">
                             <button 
                                 className={`text-[16px] cursor-pointer ${currentView === 'רשימה' ? 'font-bold text-[#3568AE]' : 'text-[#858C94]'}`}
@@ -228,13 +273,14 @@ export default function Tasks() {
                         <div className="space-y-2">
                             {/* Table Header */}
                             <div className="bg-white rounded-[15px] p-6 mb-2">
-                                <div className="grid grid-cols-7 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                <div className="grid grid-cols-8 gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                     <div className="text-right">בוצע</div>
                                     <div className="text-right col-span-2">נושא</div>
                                     <div className="text-right">סטטוס</div>
                                     <div className="text-right">עדיפות</div>
                                     <div className="text-right">דדליין</div>
                                     <div className="text-right">שיוך ל</div>
+                                    <div className="text-right">פעולות</div>
                                 </div>
                             </div>
 
@@ -243,8 +289,8 @@ export default function Tasks() {
 
                             {/* Task Rows */}
                             {paginatedTasks.map((task) => (
-                                <div key={task.id} className="bg-white rounded-[15px] p-6">
-                                    <div className="grid grid-cols-7 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
+                                <div key={task.id} className="bg-white rounded-[15px] p-6 hover:shadow-md transition-shadow">
+                                    <div className="grid grid-cols-8 gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo' }}>
                                         {/* Checkbox */}
                                         <div className="text-right">
                                             <input 
@@ -299,6 +345,18 @@ export default function Tasks() {
                                                 <span className="text-gray-500">משימה עצמאית</span>
                                             )}
                                         </div>
+
+                                        {/* Actions */}
+                                        <div className="text-right">
+                                            <div className="flex gap-2">
+                                                <Button size="sm" variant="ghost" onClick={() => openTaskDetail(task)}>
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                                <Button size="sm" variant="ghost" onClick={() => handleDeleteTask(task.id)} className="text-red-500">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -323,6 +381,17 @@ export default function Tasks() {
                         </div>
                     )}
                 </div>
+
+                <TaskDetailModal
+                    task={selectedTask}
+                    open={showDetailModal}
+                    onClose={() => {
+                        setShowDetailModal(false);
+                        setSelectedTask(null);
+                    }}
+                    onUpdate={loadTasks}
+                    onDelete={loadTasks}
+                />
             </div>
         </div>
     );
