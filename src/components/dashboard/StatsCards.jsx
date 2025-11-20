@@ -1,5 +1,5 @@
-
-import { ExternalLink } from 'lucide-react';
+import React from 'react';
+import { CheckSquare, Briefcase, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Task } from '@/entities/Task';
@@ -30,16 +30,16 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
     const COLORS = ['#3568AE', '#67BF91'];
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
             {/* Tasks and Cases Section */}
-            <div className="dashboard-card p-8">
-                <div className="grid grid-cols-2 gap-8 h-full relative">
+            <div className="dashboard-card p-4 md:p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 h-full relative">
                     {/* Open Tasks */}
                     <div>
-                        <div className="flex justify-center items-center gap-4 mb-6">
+                        <div className="flex justify-center items-center gap-3 md:gap-4 mb-4 md:mb-6">
                             <Link 
                                 to={createPageUrl('Tasks')}
-                                className="text-[22px] font-medium leading-[32px] text-center hover:text-[#3568AE] cursor-pointer transition-colors"
+                                className="text-lg md:text-[22px] font-medium leading-tight md:leading-[32px] text-center hover:text-[#3568AE] cursor-pointer transition-colors"
                                 style={{ 
                                     color: '#484848',
                                     fontFamily: 'Heebo'
@@ -47,22 +47,22 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                             >
                                 משימות פתוחות
                             </Link>
-                            <div className="bg-blue-100 text-blue-800 w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold">
+                            <div className="bg-blue-100 text-blue-800 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-base md:text-lg font-bold">
                                 {openTasks.length}
                             </div>
                         </div>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-3 md:space-y-4">
                             {openTasks.slice(0, 6).map((task) => (
-                                <div key={task.id} className="flex items-start gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <div key={task.id} className="flex items-start gap-2 md:gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors">
                                     <button
                                         onClick={(e) => handleTaskComplete(task.id, e)}
-                                        className="w-[18px] h-[18px] border border-[#B8B5B5] rounded bg-white mt-1 flex-shrink-0 hover:border-green-500 hover:bg-green-50 transition-colors"
+                                        className="w-5 h-5 md:w-[18px] md:h-[18px] border border-[#B8B5B5] rounded bg-white mt-0.5 md:mt-1 flex-shrink-0 hover:border-green-500 hover:bg-green-50 transition-colors touch-manipulation"
                                         title="סמן כהושלם"
                                     />
                                     <Link 
                                         to={createPageUrl('Tasks')}
-                                        className="text-[16px] leading-[24px] text-right hover:text-[#3568AE] cursor-pointer transition-colors flex-1"
+                                        className="text-sm md:text-[16px] leading-tight md:leading-[24px] text-right hover:text-[#3568AE] cursor-pointer transition-colors flex-1"
                                         style={{ 
                                             color: '#484848',
                                             fontFamily: 'Heebo'
@@ -70,12 +70,12 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                                     >
                                         {task.title}
                                         {task.client_name && (
-                                            <div className="text-sm text-gray-500 mt-1">
+                                            <div className="text-xs md:text-sm text-gray-500 mt-1">
                                                 לקוח: {task.client_name}
                                             </div>
                                         )}
                                     </Link>
-                                    <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
+                                    <ExternalLink className="w-3 h-3 text-gray-400 opacity-0 md:group-hover:opacity-100 transition-opacity mt-1 hidden md:block" />
                                 </div>
                             ))}
                             {openTasks.length === 0 && (
@@ -96,10 +96,10 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
 
                     {/* Active Cases */}
                     <div>
-                        <div className="flex justify-center items-center gap-4 mb-6">
+                        <div className="flex justify-center items-center gap-3 md:gap-4 mb-4 md:mb-6">
                             <Link 
                                 to={createPageUrl('Cases')}
-                                className="text-[22px] font-medium leading-[32px] text-center hover:text-[#3568AE] cursor-pointer transition-colors"
+                                className="text-lg md:text-[22px] font-medium leading-tight md:leading-[32px] text-center hover:text-[#3568AE] cursor-pointer transition-colors"
                                 style={{ 
                                     color: '#484848',
                                     fontFamily: 'Heebo'
@@ -107,17 +107,17 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                             >
                                 תיקים פעילים
                             </Link>
-                            <div className="bg-green-100 text-green-800 w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold">
+                            <div className="bg-green-100 text-green-800 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-base md:text-lg font-bold">
                                 {activeCases.length}
                             </div>
                         </div>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-3 md:space-y-4">
                             {activeCases.slice(0, 6).map((caseItem) => (
                                 <div key={caseItem.id} className="group hover:bg-gray-50 p-2 rounded-lg transition-colors">
                                     <Link 
                                         to={createPageUrl('Cases')}
-                                        className="block text-[16px] leading-[24px] text-right hover:text-[#3568AE] cursor-pointer transition-colors"
+                                        className="block text-sm md:text-[16px] leading-tight md:leading-[24px] text-right hover:text-[#3568AE] cursor-pointer transition-colors"
                                         style={{ 
                                             color: '#484848',
                                             fontFamily: 'Heebo'
@@ -125,7 +125,7 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                                     >
                                         {caseItem.title}
                                         {caseItem.client_name && (
-                                            <div className="text-sm text-gray-500 mt-1">
+                                            <div className="text-xs md:text-sm text-gray-500 mt-1">
                                                 לקוח: {caseItem.client_name}
                                             </div>
                                         )}
@@ -148,15 +148,20 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                         </div>
                     </div>
                     
-                    {/* Vertical Divider */}
-                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-[#D9D9D9] transform -translate-x-1/2"></div>
+                    {/* Vertical Divider - Desktop only */}
+                    <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-[#D9D9D9] transform -translate-x-1/2"></div>
+                    
+                    {/* Horizontal Divider - Mobile only */}
+                    <div className="md:hidden col-span-1 my-4">
+                        <hr className="border-t border-[#D9D9D9]" />
+                    </div>
                 </div>
             </div>
 
             {/* Stats Card */}
-            <div className="dashboard-card p-8 flex flex-col justify-center items-center">
+            <div className="dashboard-card p-4 md:p-8 flex flex-col justify-center items-center">
                 <h3 
-                    className="text-[22px] font-medium leading-[32px] text-center mb-4"
+                    className="text-lg md:text-[22px] font-medium leading-tight md:leading-[32px] text-center mb-3 md:mb-4"
                     style={{ 
                         color: '#484848',
                         fontFamily: 'Heebo'
@@ -164,7 +169,7 @@ export default function StatsCards({ tasks = [], cases = [], onTaskUpdate }) {
                 >
                     סטטיסטיקות
                 </h3>
-                 <ResponsiveContainer width="100%" height={250}>
+                 <ResponsiveContainer width="100%" height={200} className="md:!h-[250px]">
                     <PieChart>
                         <Pie
                             data={statsData}

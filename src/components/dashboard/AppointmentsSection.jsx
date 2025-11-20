@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { InvokeLLM } from "@/integrations/Core";
 import { AiPrompt } from '@/entities/AiPrompt';
 import { ChevronDown, Copy, Download } from 'lucide-react';
@@ -65,11 +64,11 @@ export default function AppointmentsSection({ appointments = [] }) {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
             {/* Appointments Card */}
-            <div className="dashboard-card p-8">
+            <div className="dashboard-card p-4 md:p-8">
                 <h2 
-                    className="text-[22px] font-medium leading-[32px] text-right mb-6"
+                    className="text-lg md:text-[22px] font-medium leading-tight md:leading-[32px] text-right mb-4 md:mb-6"
                     style={{ 
                         color: '#484848',
                         fontFamily: 'Heebo'
@@ -78,13 +77,13 @@ export default function AppointmentsSection({ appointments = [] }) {
                     תזכורות, מועדים ופגישות
                 </h2>
                 
-                <hr style={{ border: '1px solid #D9D9D9', marginBottom: '32px' }} />
+                <hr style={{ border: '1px solid #D9D9D9' }} className="mb-4 md:mb-8" />
                 
-                <div className="grid grid-cols-2 gap-x-16 gap-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-16 gap-y-3 md:gap-y-6">
                     {appointments.slice(0, 8).map((appointment, index) => (
-                        <div key={index} className="flex items-center justify-between">
+                        <div key={index} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-1 md:gap-0 py-2 md:py-0 border-b md:border-b-0 border-gray-100 last:border-b-0">
                             <span 
-                                className="text-[15px] leading-[22px]"
+                                className="text-xs md:text-[15px] leading-tight md:leading-[22px] order-2 md:order-1"
                                 style={{ 
                                     color: '#858C94',
                                     fontFamily: 'Heebo'
@@ -93,7 +92,7 @@ export default function AppointmentsSection({ appointments = [] }) {
                                 {new Date(appointment.date).toLocaleDateString('he-IL')}
                             </span>
                             <span 
-                                className="text-[16px] leading-[24px] text-right"
+                                className="text-sm md:text-[16px] leading-tight md:leading-[24px] text-right font-medium md:font-normal order-1 md:order-2"
                                 style={{ 
                                     color: '#000000',
                                     fontFamily: 'Heebo'
@@ -110,12 +109,12 @@ export default function AppointmentsSection({ appointments = [] }) {
             </div>
 
             {/* AI Text Generator Card */}
-            <div className="dashboard-card p-8" style={{ background: 'linear-gradient(135deg, #E6F3FF 0%, #F0F8FF 100%)' }}>
+            <div className="dashboard-card p-4 md:p-8" style={{ background: 'linear-gradient(135deg, #E6F3FF 0%, #F0F8FF 100%)' }}>
                 {/* AI Label */}
-                <div className="mb-4">
+                <div className="mb-3 md:mb-4">
                     <div className="text-left">
                         <span 
-                            className="text-[32px] font-bold"
+                            className="text-2xl md:text-[32px] font-bold"
                             style={{ 
                                 color: '#4A5568',
                                 fontFamily: 'Heebo'
@@ -128,7 +127,7 @@ export default function AppointmentsSection({ appointments = [] }) {
 
                 {/* Title */}
                 <h2 
-                    className="text-[18px] font-medium leading-[26px] text-right mb-6"
+                    className="text-base md:text-[18px] font-medium leading-tight md:leading-[26px] text-right mb-4 md:mb-6"
                     style={{ 
                         color: '#2D3748',
                         fontFamily: 'Heebo'
@@ -138,15 +137,14 @@ export default function AppointmentsSection({ appointments = [] }) {
                 </h2>
 
                 {/* Dropdown for document type */}
-                <div className="mb-4">
+                <div className="mb-3 md:mb-4">
                     <div className="relative">
                         <select 
                             value={selectedPromptId}
                             onChange={(e) => setSelectedPromptId(e.target.value)}
-                            className="w-full p-3 rounded-lg border border-gray-200 bg-white text-right appearance-none"
+                            className="w-full p-2.5 md:p-3 rounded-lg border border-gray-200 bg-white text-right appearance-none text-sm md:text-base"
                             style={{ 
                                 fontFamily: 'Heebo',
-                                fontSize: '14px',
                                 color: '#4A5568'
                             }}
                         >
@@ -161,26 +159,25 @@ export default function AppointmentsSection({ appointments = [] }) {
                 </div>
 
                 {/* Text input field */}
-                <div className="mb-6">
+                <div className="mb-4 md:mb-6">
                     <textarea
                         value={requestText}
                         onChange={(e) => setRequestText(e.target.value)}
                         placeholder="מה ברצונך לנסח? (לדוגמה: מכתב דרישה לביטול עסקה בגלל איחור באספקה)"
-                        className="w-full p-4 rounded-lg border border-gray-200 bg-white text-right h-20 resize-none"
+                        className="w-full p-3 md:p-4 rounded-lg border border-gray-200 bg-white text-right h-20 md:h-20 resize-none text-sm md:text-base"
                         style={{ 
-                            fontFamily: 'Heebo',
-                            fontSize: '14px'
+                            fontFamily: 'Heebo'
                         }}
                         required
                     />
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-4 mb-6">
+                <div className="flex justify-end gap-4 mb-4 md:mb-6">
                     <button 
                         onClick={handleGenerate}
                         disabled={!requestText.trim() || isLoading}
-                        className="px-8 py-3 rounded-lg text-[14px] font-medium text-white disabled:opacity-50"
+                        className="px-6 md:px-8 py-2.5 md:py-3 rounded-lg text-sm md:text-[14px] font-medium text-white disabled:opacity-50 touch-manipulation"
                         style={{ 
                             background: '#67BF91',
                             fontFamily: 'Heebo'
@@ -192,7 +189,7 @@ export default function AppointmentsSection({ appointments = [] }) {
 
                 {/* Generated text output */}
                 {generatedText && (
-                    <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+                    <div className="mt-4 md:mt-6 p-3 md:p-4 bg-white rounded-lg border border-gray-200">
                         <div className="flex justify-between items-center mb-3">
                             <div className="flex gap-2">
                                 <button
