@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Edit, Trash2, Save, X, Clock, Bell, History, Timer, Play, Pause, StopCircle } from "lucide-react";
+import { Edit, Trash2, Save, X, Clock, Bell, History } from "lucide-react";
 
 export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelete }) {
     const [editing, setEditing] = useState(false);
@@ -18,8 +18,8 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
     const [editForm, setEditForm] = useState({});
     const [history, setHistory] = useState([]);
     const [reminders, setReminders] = useState([]);
-    const [timerRunning, setTimerRunning] = useState(false);
-    const [timerSeconds, setTimerSeconds] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(null);
+    const [isOverdue, setIsOverdue] = useState(false);
     const [newReminder, setNewReminder] = useState({ date: '', time: '' });
 
     useEffect(() => {
@@ -28,18 +28,35 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
             loadHistory();
             loadReminders();
             loadUser();
+            calculateTimeRemaining();
         }
     }, [task]);
 
     useEffect(() => {
-        let interval;
-        if (timerRunning) {
-            interval = setInterval(() => {
-                setTimerSeconds(s => s + 1);
-            }, 1000);
-        }
+        const interval = setInterval(() => {
+            calculateTimeRemaining();
+        }, 1000);
         return () => clearInterval(interval);
-    }, [timerRunning]);
+    }, [task?.due_date]);
+
+    const calculateTimeRemaining = () => {
+        if (!task?.due_date) {
+            setTimeRemaining(null);
+            return;
+        }
+
+        const now = new Date();
+        const dueDate = new Date(task.due_date);
+        const diff = dueDate - now;
+
+        if (diff < 0) {
+            setIsOverdue(true);
+            setTimeRemaining(Math.abs(diff));
+        } else {
+            setIsOverdue(false);
+            setTimeRemaining(diff);
+        }
+    };
 
     const loadUser = async () => {
         try {
@@ -136,33 +153,16 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
         }
     };
 
-    const startTimer = () => {
-        setTimerRunning(true);
-    };
-
-    const pauseTimer = () => {
-        setTimerRunning(false);
-    };
-
-    const stopTimer = async () => {
-        setTimerRunning(false);
+    const formatTimeRemaining = (milliseconds) => {
+        if (!milliseconds) return '00:00:00:00';
         
-        await TaskHistory.create({
-            task_id: task.id,
-            action: 'עודכנה',
-            performed_by: currentUser?.full_name || currentUser?.email,
-            notes: `עבד על המשימה: ${formatTime(timerSeconds)}`
-        });
-        
-        setTimerSeconds(0);
-        loadHistory();
-    };
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
 
-    const formatTime = (seconds) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
     const getPriorityColor = (priority) => {
@@ -313,25 +313,35 @@ export default function TaskDetailModal({ task, open, onClose, onUpdate, onDelet
 
                     <TabsContent value="timer" className="space-y-4">
                         <div className="text-center py-8">
-                            <Timer className="w-16 h-16 mx-auto mb-4 text-[#3568AE]" />
-                            <div className="text-6xl font-bold mb-6">{formatTime(timerSeconds)}</div>
-                            <div className="flex gap-2 justify-center">
-                                {!timerRunning ? (
-                                    <Button onClick={startTimer} className="bg-[#67BF91]">
-                                        <Play className="w-4 h-4 ml-1" />
-                                        התחל
-                                    </Button>
-                                ) : (
-                                    <Button onClick={pauseTimer} variant="outline">
-                                        <Pause className="w-4 h-4 ml-1" />
-                                        השהה
-                                    </Button>
-                                )}
-                                <Button onClick={stopTimer} variant="outline" disabled={timerSeconds === 0}>
-                                    <StopCircle className="w-4 h-4 ml-1" />
-                                    עצור ושמור
-                                </Button>
-                            </div>
+                            {!task.due_date ? (
+                                <div className="text-gray-500">
+                                    <Clock className="w-16 h-16 mx-auto mb-4" />
+                                    <p className="text-lg">לא הוגדר דדליין למשימה</p>
+                                    <p className="text-sm mt-2">הוסף תאריך יעד בכרטיסיה "פרטים"</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    <Clock className={`w-16 h-16 mx-auto mb-4 ${isOverdue ? 'text-red-500' : 'text-[#3568AE]'}`} />
+                                    <div className={`text-5xl font-bold mb-4 ${isOverdue ? 'text-red-500' : ''}`}>
+                                        {formatTimeRemaining(timeRemaining)}
+                                    </div>
+                                    <div className="text-sm text-gray-500 mb-2">
+                                        ימים : שעות : דקות : שניות
+                                    </div>
+                                    {isOverdue ? (
+                                        <Badge className="bg-red-100 text-red-800 text-lg px-4 py-2">
+                                            באיחור ⏰
+                                        </Badge>
+                                    ) : (
+                                        <Badge className="bg-green-100 text-green-800 text-lg px-4 py-2">
+                                            זמן נותר
+                                        </Badge>
+                                    )}
+                                    <div className="mt-6 text-gray-600">
+                                        <p className="text-sm">דדליין: {new Date(task.due_date).toLocaleString('he-IL')}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </TabsContent>
 
