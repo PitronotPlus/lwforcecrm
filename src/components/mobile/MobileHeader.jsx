@@ -36,36 +36,42 @@ export default function MobileHeader({ currentUser, onLogout }) {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu Overlay */}
             {menuOpen && (
-                <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
-                    {menuItems.map((item, index) => {
-                        const Icon = item.icon;
-                        return (
-                            <Link
-                                key={index}
-                                to={item.path}
-                                onClick={() => setMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
-                                style={{ fontFamily: 'Heebo' }}
-                            >
-                                <Icon className="w-5 h-5 text-gray-600" />
-                                <span>{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                    <button
-                        onClick={() => {
-                            setMenuOpen(false);
-                            onLogout();
-                        }}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 w-full text-right text-red-600"
-                        style={{ fontFamily: 'Heebo' }}
-                    >
-                        <LogOut className="w-5 h-5" />
-                        <span>יציאה</span>
-                    </button>
-                </div>
+                <>
+                    <div 
+                        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                        onClick={() => setMenuOpen(false)}
+                    />
+                    <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-50">
+                        {menuItems.map((item, index) => {
+                            const Icon = item.icon;
+                            return (
+                                <Link
+                                    key={index}
+                                    to={item.path}
+                                    onClick={() => setMenuOpen(false)}
+                                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
+                                    style={{ fontFamily: 'Heebo' }}
+                                >
+                                    <Icon className="w-5 h-5 text-gray-600" />
+                                    <span>{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                        <button
+                            onClick={() => {
+                                setMenuOpen(false);
+                                onLogout();
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 w-full text-right text-red-600"
+                            style={{ fontFamily: 'Heebo' }}
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span>יציאה</span>
+                        </button>
+                    </div>
+                </>
             )}
         </header>
     );
