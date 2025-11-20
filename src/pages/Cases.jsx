@@ -211,17 +211,18 @@ export default function Cases() {
                         </div>
                     ))}
                 </div>
-                    {filteredCases.length === 0 && (
-                        <div className="text-center py-12">
-                            <p className="text-gray-500 mb-4">לא נמצאו תיקים.</p>
-                             <CaseModal onCaseSaved={handleCaseSaved}>
-                                <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
-                                    <Plus className="w-4 h-4 ml-2" />
-                                    צור תיק ראשון
-                                </Button>
-                            </CaseModal>
-                        </div>
-                    )}
+
+                {filteredCases.length === 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 mb-4">לא נמצאו תיקים.</p>
+                         <CaseModal onCaseSaved={handleCaseSaved}>
+                            <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                <Plus className="w-4 h-4 ml-2" />
+                                צור תיק ראשון
+                            </Button>
+                        </CaseModal>
+                    </div>
+                )}
                 </div>
             </div>
         </div>
