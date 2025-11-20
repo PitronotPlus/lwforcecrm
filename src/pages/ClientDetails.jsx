@@ -22,13 +22,21 @@ import {
     Plus,
     Edit,
     Folder,
-    FileText
+    FileText,
+    Activity,
+    DollarSign
 } from "lucide-react";
 import CommunicationLogStream from "../components/clients/CommunicationLogStream";
 import CommunicationPanel from "../components/clients/CommunicationPanel";
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
 import { Case } from "@/entities/Case";
 import CaseModal from "../components/cases/CaseModal";
+import ClientTasks from "../components/client-details/ClientTasks";
+import ClientInteractions from "../components/client-details/ClientInteractions";
+import ClientAppointments from "../components/client-details/ClientAppointments";
+import ClientActivityLogComponent from "../components/client-details/ClientActivityLog";
+import ClientFinances from "../components/client-details/ClientFinances";
+import ClientDocuments from "../components/client-details/ClientDocuments";
 
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
@@ -168,13 +176,49 @@ export default function ClientDetails() {
                     </div>
 
                     <Tabs defaultValue="details" className="w-full">
-                        <TabsList className="grid w-full grid-cols-5">
+                        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-11 gap-1">
                             <TabsTrigger value="details">פרטי לקוח</TabsTrigger>
+                            <TabsTrigger value="tasks">משימות</TabsTrigger>
+                            <TabsTrigger value="interactions">תיעוד</TabsTrigger>
+                            <TabsTrigger value="appointments">פגישות</TabsTrigger>
+                            <TabsTrigger value="activity">לוג פעילות</TabsTrigger>
+                            <TabsTrigger value="finances">כספים</TabsTrigger>
+                            <TabsTrigger value="documents">מסמכים</TabsTrigger>
                             <TabsTrigger value="cases">תיקים</TabsTrigger>
-                            <TabsTrigger value="marketing">פרטי שיווק</TabsTrigger>
+                            <TabsTrigger value="marketing">שיווק</TabsTrigger>
                             <TabsTrigger value="communication">תקשורת</TabsTrigger>
-                            <TabsTrigger value="automation">הודעות אוטומטיות</TabsTrigger>
+                            <TabsTrigger value="automation">אוטומציות</TabsTrigger>
                         </TabsList>
+
+                        {/* משימות */}
+                        <TabsContent value="tasks">
+                            <ClientTasks client={client} />
+                        </TabsContent>
+
+                        {/* תיעוד אינטרקציות */}
+                        <TabsContent value="interactions">
+                            <ClientInteractions client={client} />
+                        </TabsContent>
+
+                        {/* פגישות */}
+                        <TabsContent value="appointments">
+                            <ClientAppointments client={client} />
+                        </TabsContent>
+
+                        {/* לוג פעילות */}
+                        <TabsContent value="activity">
+                            <ClientActivityLogComponent client={client} />
+                        </TabsContent>
+
+                        {/* כספים */}
+                        <TabsContent value="finances">
+                            <ClientFinances client={client} />
+                        </TabsContent>
+
+                        {/* מסמכים */}
+                        <TabsContent value="documents">
+                            <ClientDocuments client={client} />
+                        </TabsContent>
 
                         {/* פרטי לקוח */}
                         <TabsContent value="details">

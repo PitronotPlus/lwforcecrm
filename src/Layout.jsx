@@ -1,8 +1,9 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { User } from "lucide-react";
+import { Search, User, ChevronDown, LogIn } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import SubscriptionGuard from "@/components/SubscriptionGuard";
 import LandingPage from "@/pages/LandingPage";
 
@@ -35,6 +36,7 @@ export default function Layout({ children, currentPageName }) {
         const baseItems = [
             { title: "דשבורד", url: createPageUrl("Dashboard") },
             { title: "משימות", url: createPageUrl("Tasks") },
+            { title: "פגישות", url: createPageUrl("Appointments") },
             { title: "לקוחות", url: createPageUrl("Clients") },
             { title: "תיקים", url: createPageUrl("Cases") },
             { title: "שיווק", url: createPageUrl("Marketing") },
