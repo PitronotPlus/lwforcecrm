@@ -12,6 +12,7 @@ import LandingPage from './pages/LandingPage';
 import PricingPage from './pages/PricingPage';
 import PostSignupSurvey from './pages/PostSignupSurvey';
 import Support from './pages/Support';
+import Appointments from './pages/Appointments';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "PricingPage": PricingPage,
     "PostSignupSurvey": PostSignupSurvey,
     "Support": Support,
+    "Appointments": Appointments,
 }
 
 export const pagesConfig = {
