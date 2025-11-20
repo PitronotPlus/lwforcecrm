@@ -223,7 +223,6 @@ export default function Cases() {
                         </CaseModal>
                     </div>
                 )}
-                </div>
             </div>
         </div>
     );
