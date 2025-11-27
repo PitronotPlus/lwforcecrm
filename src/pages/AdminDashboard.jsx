@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2, Lock } from "lucide-react";
 import AdminStatsCards from "../components/admin/AdminStatsCards";
 import UserManagementTable from "../components/admin/UserManagementTable";
 import SystemSettings from "../components/admin/SystemSettings";
@@ -12,6 +12,7 @@ import FinancialOverviewChart from "../components/admin/FinancialOverviewChart";
 import UserCharts from "../components/admin/UserCharts";
 import SupportTicketManagement from "../components/admin/SupportTicketManagement";
 import SubAccountManager from "../components/admin/SubAccountManager";
+import PermissionsManager from "../components/admin/PermissionsManager";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -85,6 +86,8 @@ export default function AdminDashboard() {
                 return <ClientSettingsManager />;
             case 'aiPrompts':
                 return <AiPromptManager />;
+            case 'permissions':
+                return <PermissionsManager />;
             case 'support':
                 return <SupportTicketManagement />;
             case 'settings':
@@ -200,6 +203,19 @@ export default function AdminDashboard() {
                         >
                             <Bot className="w-5 h-5" />
                             הגדרות AI
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('permissions')}
+                            className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
+                                activeTab === 'permissions' 
+                                    ? 'bg-[#3568AE] text-white' 
+                                    : 'text-[#484848] hover:bg-gray-100'
+                            }`}
+                            style={{ fontFamily: 'Heebo' }}
+                        >
+                            <Lock className="w-5 h-5" />
+                            הרשאות
                         </button>
 
                         <button
