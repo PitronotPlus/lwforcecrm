@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Client } from "@/entities/Client";
 import { ClientSettings } from "@/entities/ClientSettings";
 import { Task } from "@/entities/Task";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +38,7 @@ import ClientAppointments from "../components/client-details/ClientAppointments"
 import ClientActivityLogComponent from "../components/client-details/ClientActivityLog";
 import ClientFinances from "../components/client-details/ClientFinances";
 import ClientDocuments from "../components/client-details/ClientDocuments";
+import { logClientChanges, logClientActivity } from "../components/client-details/activityLogger";
 
 export default function ClientDetails() {
     const [searchParams] = useSearchParams();
@@ -48,6 +50,21 @@ export default function ClientDetails() {
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({});
     const [refreshLogKey, setRefreshLogKey] = useState(0);
+    const [refreshActivityKey, setRefreshActivityKey] = useState(0);
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        loadCurrentUser();
+    }, []);
+
+    const loadCurrentUser = async () => {
+        try {
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+        } catch (error) {
+            console.error("שגיאה בטעינת משתמש:", error);
+        }
+    };
 
     useEffect(() => {
         if (clientId) {
@@ -86,6 +103,7 @@ export default function ClientDetails() {
     };
 
     const handleSave = async () => {
+        const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
         try {
             // Check for status change automation
             if (editForm.status !== client.status && editForm.automation_settings?.auto_send_on_status_change) {
@@ -94,9 +112,14 @@ export default function ClientDetails() {
                     console.log(`Sending template "${template.title}" to ${client.full_name} due to status change from ${client.status} to ${editForm.status}.`);
                 }
             }
+
+            // תיעוד שינויים בלוג פעילות
+            await logClientChanges(clientId, client, editForm, performedBy);
+
             await Client.update(clientId, editForm);
             setClient(editForm);
             setIsEditing(false);
+            setRefreshActivityKey(k => k + 1); // רענון לוג פעילות
         } catch (error) {
             console.error('שגיאה בשמירת לקוח:', error);
         }
@@ -207,7 +230,7 @@ export default function ClientDetails() {
 
                         {/* לוג פעילות */}
                         <TabsContent value="activity">
-                            <ClientActivityLogComponent client={client} />
+                            <ClientActivityLogComponent client={client} key={refreshActivityKey} />
                         </TabsContent>
 
                         {/* כספים */}
