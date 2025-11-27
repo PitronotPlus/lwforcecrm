@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, DollarSign, BarChart3, Edit, Trash2 } from 'lucide-react';
 import CreateFinancialRecordModal from "../components/finances/CreateFinancialRecordModal";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -230,6 +230,7 @@ export default function Finances() {
                                         <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden md:table-cell">קטגוריה</th>
                                         <th className="p-2 md:p-4 font-medium text-sm md:text-base">סכום</th>
                                         <th className="p-2 md:p-4 font-medium text-sm md:text-base hidden sm:table-cell">לקוח</th>
+                                        <th className="p-2 md:p-4 font-medium text-sm md:text-base">פעולות</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -249,6 +250,32 @@ export default function Finances() {
                                                 {record.type === 'הכנסה' ? '+' : '-'}₪{record.amount.toLocaleString()}
                                             </td>
                                             <td className="p-2 md:p-4 text-sm md:text-base hidden sm:table-cell">{record.client_name || '-'}</td>
+                                            <td className="p-2 md:p-4">
+                                                <div className="flex gap-1">
+                                                    <CreateFinancialRecordModal 
+                                                        onRecordCreated={loadRecords} 
+                                                        recordToEdit={record}
+                                                        trigger={
+                                                            <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
+                                                                <Edit className="w-4 h-4" />
+                                                            </Button>
+                                                        }
+                                                    />
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="text-red-500 hover:text-red-700"
+                                                        onClick={async () => {
+                                                            if (window.confirm('האם אתה בטוח שברצונך למחוק רישום זה?')) {
+                                                                await Financial.delete(record.id);
+                                                                loadRecords();
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

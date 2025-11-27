@@ -48,9 +48,9 @@ export default function TaskTimeRemaining({ dueDate, compact = false }) {
             <div className={`flex items-center gap-1 text-xs ${isOverdue ? 'text-red-600' : 'text-gray-600'}`}>
                 <Clock className="w-3 h-3" />
                 {isOverdue ? (
-                    <span>באיחור {time.days > 0 ? `${time.days}ד ` : ''}{time.hours}ש {time.minutes}ד</span>
+                    <span>באיחור {time.days > 0 ? `${time.days}י ` : ''}{time.hours}ש {time.minutes}ד</span>
                 ) : (
-                    <span>נשאר {time.days > 0 ? `${time.days}ד ` : ''}{time.hours}ש {time.minutes}ד</span>
+                    <span>נשאר {time.days > 0 ? `${time.days}י ` : ''}{time.hours}ש {time.minutes}ד</span>
                 )}
             </div>
         );
