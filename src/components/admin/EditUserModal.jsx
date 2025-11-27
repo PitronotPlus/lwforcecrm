@@ -1,19 +1,36 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { SubAccount } from '@/entities/SubAccount';
 
 export default function EditUserModal({ user, isOpen, onClose, onSave }) {
     const [formData, setFormData] = useState({});
+    const [subAccounts, setSubAccounts] = useState([]);
+
+    useEffect(() => {
+        loadSubAccounts();
+    }, []);
+
+    const loadSubAccounts = async () => {
+        try {
+            const accounts = await SubAccount.list();
+            setSubAccounts(accounts);
+        } catch (error) {
+            console.error('שגיאה בטעינת חשבונות:', error);
+        }
+    };
 
     useEffect(() => {
         if (user) {
             setFormData({
                 full_name: user.full_name || '',
                 law_firm_name: user.law_firm_name || '',
+                sub_account_id: user.sub_account_id || '',
+                user_role: user.user_role || 'lawyer',
                 subscription_plan: user.subscription_plan || 'basic',
                 is_active: user.is_active === undefined ? true : user.is_active,
                 credit_profit_margin: user.credit_profit_margin || 0,
@@ -42,8 +59,40 @@ export default function EditUserModal({ user, isOpen, onClose, onSave }) {
                         <Input id="full_name" value={formData.full_name} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="law_firm_name">שם משרד</Label>
-                        <Input id="law_firm_name" value={formData.law_firm_name} onChange={handleChange} />
+                        <Label htmlFor="sub_account_id">משרד (חשבון)</Label>
+                        <Select 
+                            value={formData.sub_account_id || ''}
+                            onValueChange={(value) => setFormData(prev => ({...prev, sub_account_id: value}))}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="בחר משרד" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={null}>ללא משרד</SelectItem>
+                                {subAccounts.map(account => (
+                                    <SelectItem key={account.id} value={account.id}>
+                                        {account.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="user_role">תפקיד</Label>
+                        <Select 
+                            value={formData.user_role || 'lawyer'}
+                            onValueChange={(value) => setFormData(prev => ({...prev, user_role: value}))}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="בחר תפקיד" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="admin">מנהל מערכת (Admin)</SelectItem>
+                                <SelectItem value="owner">בעל משרד</SelectItem>
+                                <SelectItem value="department_head">ראש מחלקה</SelectItem>
+                                <SelectItem value="lawyer">עורך דין</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">

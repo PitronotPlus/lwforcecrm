@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, MoreVertical, Shield, ShieldOff } from 'lucide-react';
@@ -10,10 +9,51 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import EditUserModal from './EditUserModal';
+import { SubAccount } from '@/entities/SubAccount';
 
 export default function UserManagementTable({ users, onUserAction, searchQuery }) {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
+    const [subAccounts, setSubAccounts] = useState([]);
+
+    useEffect(() => {
+        loadSubAccounts();
+    }, []);
+
+    const loadSubAccounts = async () => {
+        try {
+            const accounts = await SubAccount.list();
+            setSubAccounts(accounts);
+        } catch (error) {
+            console.error('שגיאה בטעינת חשבונות:', error);
+        }
+    };
+
+    const getSubAccountName = (subAccountId) => {
+        if (!subAccountId) return 'עצמאי';
+        const account = subAccounts.find(a => a.id === subAccountId);
+        return account?.name || 'לא מוגדר';
+    };
+
+    const getUserRoleLabel = (role) => {
+        const labels = {
+            'admin': 'מנהל מערכת',
+            'owner': 'בעל משרד',
+            'department_head': 'ראש מחלקה',
+            'lawyer': 'עורך דין'
+        };
+        return labels[role] || 'עורך דין';
+    };
+
+    const getUserRoleColor = (role) => {
+        const colors = {
+            'admin': 'bg-purple-100 text-purple-800',
+            'owner': 'bg-blue-100 text-blue-800',
+            'department_head': 'bg-orange-100 text-orange-800',
+            'lawyer': 'bg-gray-100 text-gray-800'
+        };
+        return colors[role] || 'bg-gray-100 text-gray-800';
+    };
 
     const filteredUsers = users.filter(user => 
         user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -105,6 +145,15 @@ export default function UserManagementTable({ users, onUserAction, searchQuery }
                                     fontFamily: 'Heebo'
                                 }}
                             >
+                                תפקיד
+                            </th>
+                            <th 
+                                className="text-right py-4 px-4 text-[16px] font-medium"
+                                style={{ 
+                                    color: '#484848',
+                                    fontFamily: 'Heebo'
+                                }}
+                            >
                                 תוכנית
                             </th>
                             <th 
@@ -170,7 +219,12 @@ export default function UserManagementTable({ users, onUserAction, searchQuery }
                                         fontFamily: 'Heebo'
                                     }}
                                 >
-                                    {user.law_firm_name || 'עצמאי'}
+                                    {getSubAccountName(user.sub_account_id)}
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                    <Badge className={getUserRoleColor(user.user_role)}>
+                                        {getUserRoleLabel(user.user_role)}
+                                    </Badge>
                                 </td>
                                 <td className="py-4 px-4 text-right">
                                     {getSubscriptionBadge(user.subscription_plan)}
