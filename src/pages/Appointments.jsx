@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Calendar, Clock, MapPin, User, Edit, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Calendar, Clock, MapPin, User, Edit, Trash2, Video, ExternalLink } from 'lucide-react';
 
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
@@ -17,7 +18,9 @@ export default function Appointments() {
         date: '',
         time: '',
         client_name: '',
+        location_type: 'משרד',
         location: '',
+        meeting_link: '',
         notes: '',
         type: 'פגישה'
     });
@@ -73,7 +76,9 @@ export default function Appointments() {
             date: '',
             time: '',
             client_name: '',
+            location_type: 'משרד',
             location: '',
+            meeting_link: '',
             notes: '',
             type: 'פגישה'
         });
@@ -144,7 +149,7 @@ export default function Appointments() {
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         type="date"
                                         value={formData.date}
@@ -156,11 +161,48 @@ export default function Appointments() {
                                         value={formData.time}
                                         onChange={(e) => setFormData({...formData, time: e.target.value})}
                                     />
-                                    <Input
-                                        placeholder="מיקום"
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({...formData, location: e.target.value})}
-                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">מקום פגישה</label>
+                                        <Select 
+                                            value={formData.location_type} 
+                                            onValueChange={(val) => setFormData({...formData, location_type: val, meeting_link: val === 'משרד' ? '' : formData.meeting_link})}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="בחר מקום" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="משרד">במשרד</SelectItem>
+                                                <SelectItem value="zoom">Zoom</SelectItem>
+                                                <SelectItem value="google_meet">Google Meet</SelectItem>
+                                                <SelectItem value="אחר">מיקום אחר</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {formData.location_type === 'אחר' && (
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">פרט מיקום</label>
+                                            <Input
+                                                placeholder="כתובת / מיקום"
+                                                value={formData.location}
+                                                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {(formData.location_type === 'zoom' || formData.location_type === 'google_meet') && (
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">קישור לפגישה</label>
+                                            <Input
+                                                placeholder={formData.location_type === 'zoom' ? 'https://zoom.us/j/...' : 'https://meet.google.com/...'}
+                                                value={formData.meeting_link}
+                                                onChange={(e) => setFormData({...formData, meeting_link: e.target.value})}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <Textarea
@@ -215,12 +257,31 @@ export default function Appointments() {
                                                     {apt.time}
                                                 </div>
                                             )}
-                                            {apt.location && (
-                                                <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2">
+                                                {apt.location_type === 'zoom' || apt.location_type === 'google_meet' ? (
+                                                    <Video className="w-4 h-4" />
+                                                ) : (
                                                     <MapPin className="w-4 h-4" />
-                                                    {apt.location}
-                                                </div>
-                                            )}
+                                                )}
+                                                <span>
+                                                    {apt.location_type === 'משרד' && 'במשרד'}
+                                                    {apt.location_type === 'zoom' && 'Zoom'}
+                                                    {apt.location_type === 'google_meet' && 'Google Meet'}
+                                                    {apt.location_type === 'אחר' && apt.location}
+                                                    {!apt.location_type && apt.location}
+                                                </span>
+                                                {apt.meeting_link && (
+                                                    <a 
+                                                        href={apt.meeting_link} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="text-[#3568AE] hover:underline flex items-center gap-1"
+                                                    >
+                                                        <ExternalLink className="w-3 h-3" />
+                                                        הצטרף
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {apt.notes && (
