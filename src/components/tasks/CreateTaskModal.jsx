@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Task } from "@/entities/Task";
 import { Client } from "@/entities/Client";
+import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Plus, Calendar as CalendarIcon } from "lucide-react";
 import { format } from 'date-fns';
+import { base44 } from '@/api/base44Client';
 
 export default function CreateTaskModal({ 
     client = null, 
@@ -19,12 +21,16 @@ export default function CreateTaskModal({
 }) {
     const [isOpen, setIsOpen] = useState(false);
     const [allClients, setAllClients] = useState([]);
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
     
     const getInitialFormData = () => ({
         title: '',
         description: '',
         client_id: client ? client.id : '',
         client_name: client ? client.full_name : '',
+        assigned_to: '',
+        assigned_to_name: '',
         status: 'פתוח',
         priority: 'בינונית',
         task_type: 'אחר',
@@ -35,10 +41,33 @@ export default function CreateTaskModal({
     const [formData, setFormData] = useState(getInitialFormData());
 
     useEffect(() => {
-        if (isOpen && !client) {
-            loadClients();
+        if (isOpen) {
+            loadData();
         }
-    }, [isOpen, client]);
+    }, [isOpen]);
+
+    const loadData = async () => {
+        try {
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+            
+            if (!client) {
+                const clientsData = await Client.list();
+                setAllClients(clientsData);
+            }
+            
+            // Load team members from same sub_account
+            if (user.sub_account_id) {
+                const allUsers = await User.list();
+                const sameAccountUsers = allUsers.filter(u => 
+                    u.sub_account_id === user.sub_account_id && u.id !== user.id
+                );
+                setTeamMembers(sameAccountUsers);
+            }
+        } catch (error) {
+            console.error('שגיאה בטעינת נתונים:', error);
+        }
+    };
 
     const loadClients = async () => {
         try {
@@ -58,10 +87,24 @@ export default function CreateTaskModal({
         }));
     };
 
+    const handleAssigneeChange = (selectedUserId) => {
+        const selectedUser = teamMembers.find(u => u.id === selectedUserId);
+        setFormData(prev => ({
+            ...prev,
+            assigned_to: selectedUserId,
+            assigned_to_name: selectedUser ? selectedUser.full_name : ''
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const newTask = await Task.create(formData);
+            const taskData = {
+                ...formData,
+                sub_account_id: currentUser?.sub_account_id,
+                assigned_by: currentUser?.id
+            };
+            const newTask = await Task.create(taskData);
             onTaskCreated && onTaskCreated(newTask);
             setIsOpen(false);
             setFormData(getInitialFormData()); // Reset form
@@ -132,6 +175,25 @@ export default function CreateTaskModal({
                                     {allClients.map((c) => (
                                         <SelectItem key={c.id} value={c.id}>
                                             {c.full_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
+                    {teamMembers.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">הקצה לעובד</label>
+                            <Select
+                                value={formData.assigned_to}
+                                onValueChange={handleAssigneeChange}
+                            >
+                                <SelectTrigger><SelectValue placeholder="בחר עובד אחראי (אופציונאלי)" /></SelectTrigger>
+                                <SelectContent>
+                                    {teamMembers.map((member) => (
+                                        <SelectItem key={member.id} value={member.id}>
+                                            {member.full_name} {member.user_role === 'department_head' ? '(ראש מחלקה)' : ''}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
