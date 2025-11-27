@@ -1,23 +1,44 @@
 import React, { useState } from 'react';
 import { Financial } from '@/entities/Financial';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Upload, FileText, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function CreateFinancialRecordModal({ onRecordCreated, recordToEdit, trigger }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const getInitialState = () => ({
         description: recordToEdit?.description || '',
         amount: recordToEdit?.amount || '',
         type: recordToEdit?.type || 'הכנסה',
         category: recordToEdit?.category || 'שכ"ט',
         date: recordToEdit?.date || format(new Date(), 'yyyy-MM-dd'),
-        client_name: recordToEdit?.client_name || ''
+        client_name: recordToEdit?.client_name || '',
+        payment_method: recordToEdit?.payment_method || '',
+        invoice_issued: recordToEdit?.invoice_issued || false,
+        invoice_file_url: recordToEdit?.invoice_file_url || ''
     });
     const [formData, setFormData] = useState(getInitialState());
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        try {
+            setUploading(true);
+            const { file_url } = await base44.integrations.Core.UploadFile({ file });
+            setFormData({ ...formData, invoice_file_url: file_url });
+        } catch (error) {
+            console.error("שגיאה בהעלאת קובץ:", error);
+        } finally {
+            setUploading(false);
+        }
+    };
 
     React.useEffect(() => {
         if (isOpen) {
@@ -125,6 +146,69 @@ export default function CreateFinancialRecordModal({ onRecordCreated, recordToEd
                             onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                         />
                     </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שיטת תשלום</label>
+                        <Select value={formData.payment_method} onValueChange={(val) => setFormData({ ...formData, payment_method: val })}>
+                            <SelectTrigger><SelectValue placeholder="בחר שיטת תשלום" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="מזומן">מזומן</SelectItem>
+                                <SelectItem value="העברה בנקאית">העברה בנקאית</SelectItem>
+                                <SelectItem value="אשראי">אשראי</SelectItem>
+                                <SelectItem value="צ'ק">צ'ק</SelectItem>
+                                <SelectItem value="אחר">אחר</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="invoice_issued"
+                                checked={formData.invoice_issued}
+                                onCheckedChange={(checked) => setFormData({ ...formData, invoice_issued: checked })}
+                            />
+                            <label htmlFor="invoice_issued" className="text-sm font-medium cursor-pointer">
+                                הונפקה חשבונית
+                            </label>
+                        </div>
+                        
+                        {formData.invoice_issued && (
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium">העלאת קובץ חשבונית</label>
+                                <div className="flex items-center gap-2">
+                                    <label className="flex-1">
+                                        <div className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#3568AE] transition-colors">
+                                            {uploading ? (
+                                                <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+                                            ) : (
+                                                <Upload className="w-5 h-5 text-gray-500" />
+                                            )}
+                                            <span className="text-sm text-gray-600">
+                                                {uploading ? 'מעלה...' : 'לחץ להעלאת קובץ'}
+                                            </span>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            disabled={uploading}
+                                        />
+                                    </label>
+                                </div>
+                                {formData.invoice_file_url && (
+                                    <div className="flex items-center gap-2 text-sm text-green-600">
+                                        <FileText className="w-4 h-4" />
+                                        <a href={formData.invoice_file_url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                            צפה בחשבונית
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex justify-end gap-4 pt-4">
                         <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>ביטול</Button>
                         <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880]">
