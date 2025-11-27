@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ClientInteraction } from "@/entities/ClientInteraction";
-import { User } from "@/entities/User";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, MessageCircle, Phone, Mail, User as UserIcon } from "lucide-react";
+import { logClientActivity } from './activityLogger';
 
 export default function ClientInteractions({ client }) {
     const [interactions, setInteractions] = useState([]);
@@ -25,7 +26,7 @@ export default function ClientInteractions({ client }) {
 
     const loadUser = async () => {
         try {
-            const user = await User.me();
+            const user = await base44.auth.me();
             setCurrentUser(user);
         } catch (error) {
             console.error("שגיאה בטעינת משתמש:", error);
@@ -43,14 +44,24 @@ export default function ClientInteractions({ client }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
         try {
             await ClientInteraction.create({
                 client_id: client.id,
                 client_name: client.full_name,
                 ...newInteraction,
-                recorded_by: currentUser?.full_name || currentUser?.email,
+                recorded_by: performedBy,
                 interaction_date: new Date().toISOString()
             });
+
+            // תיעוד בלוג פעילות
+            await logClientActivity(
+                client.id,
+                'אינטרקציה',
+                `תועדה אינטרקציה מסוג ${newInteraction.interaction_type}: ${newInteraction.summary}`,
+                performedBy
+            );
+
             setNewInteraction({ interaction_type: 'שיחה', summary: '', notes: '' });
             setShowForm(false);
             loadInteractions();

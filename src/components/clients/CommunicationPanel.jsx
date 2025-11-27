@@ -1,15 +1,30 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, Mail, MessageSquare } from 'lucide-react';
-import { SendEmail } from "@/integrations/Core";
+import { base44 } from "@/api/base44Client";
 import { CommunicationLog } from '@/entities/CommunicationLog';
+import { logClientActivity } from '../client-details/activityLogger';
 
 export default function CommunicationPanel({ client, clientSettings, onMessageSent }) {
     const [messageType, setMessageType] = useState('whatsapp');
     const [messageBody, setMessageBody] = useState('');
     const [selectedTemplate, setSelectedTemplate] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        loadCurrentUser();
+    }, []);
+
+    const loadCurrentUser = async () => {
+        try {
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+        } catch (error) {
+            console.error("שגיאה בטעינת משתמש:", error);
+        }
+    };
 
     const handleTemplateChange = (templateId) => {
         const template = clientSettings?.message_templates?.find(t => t.id === templateId);
@@ -29,10 +44,11 @@ export default function CommunicationPanel({ client, clientSettings, onMessageSe
         if (!messageBody.trim()) return;
 
         const finalMessage = interpolateMessage(messageBody);
+        const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
 
         try {
             if (messageType === 'email') {
-                await SendEmail({
+                await base44.integrations.Core.SendEmail({
                     to: client.email,
                     subject: `הודעה ממשרד עו"ד`,
                     body: finalMessage,
@@ -48,6 +64,16 @@ export default function CommunicationPanel({ client, clientSettings, onMessageSe
                 content: finalMessage,
                 status: 'sent',
             });
+
+            // תיעוד בלוג פעילות
+            const messageTypeHebrew = messageType === 'email' ? 'אימייל' : 'וואטסאפ';
+            await logClientActivity(
+                client.id,
+                'הודעה נשלחה',
+                `נשלחה הודעת ${messageTypeHebrew} ללקוח`,
+                performedBy,
+                { metadata: { message_type: messageType, message_preview: finalMessage.substring(0, 100) } }
+            );
             
             setMessageBody('');
             setSelectedTemplate('');

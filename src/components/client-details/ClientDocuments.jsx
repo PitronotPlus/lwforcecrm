@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ClientDocument } from "@/entities/ClientDocument";
-import { User } from "@/entities/User";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, FileText, Download, Trash2, Upload } from "lucide-react";
+import { logClientActivity } from './activityLogger';
 
 export default function ClientDocuments({ client }) {
     const [documents, setDocuments] = useState([]);
@@ -28,7 +28,7 @@ export default function ClientDocuments({ client }) {
 
     const loadUser = async () => {
         try {
-            const user = await User.me();
+            const user = await base44.auth.me();
             setCurrentUser(user);
         } catch (error) {
             console.error("שגיאה בטעינת משתמש:", error);
@@ -62,6 +62,8 @@ export default function ClientDocuments({ client }) {
             return;
         }
 
+        const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
+
         try {
             setUploading(true);
             
@@ -78,9 +80,17 @@ export default function ClientDocuments({ client }) {
                 document_type: newDocument.document_type,
                 file_url: file_url,
                 file_size: newDocument.file.size,
-                uploaded_by: currentUser?.full_name || currentUser?.email,
+                uploaded_by: performedBy,
                 notes: newDocument.notes
             });
+
+            // תיעוד בלוג פעילות
+            await logClientActivity(
+                client.id,
+                'מסמך הועלה',
+                `הועלה מסמך: ${newDocument.document_name} (${newDocument.document_type})`,
+                performedBy
+            );
 
             setNewDocument({ document_name: '', document_type: 'אחר', notes: '', file: null });
             setShowForm(false);
@@ -93,10 +103,20 @@ export default function ClientDocuments({ client }) {
         }
     };
 
-    const handleDelete = async (docId) => {
+    const handleDelete = async (doc) => {
         if (window.confirm('האם אתה בטוח שברצונך למחוק את המסמך?')) {
+            const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
             try {
-                await ClientDocument.delete(docId);
+                await ClientDocument.delete(doc.id);
+
+                // תיעוד בלוג פעילות
+                await logClientActivity(
+                    client.id,
+                    'מסמך נמחק',
+                    `נמחק מסמך: ${doc.document_name}`,
+                    performedBy
+                );
+
                 loadDocuments();
             } catch (error) {
                 console.error("שגיאה במחיקת מסמך:", error);
@@ -211,7 +231,7 @@ export default function ClientDocuments({ client }) {
                                     <Button 
                                         variant="ghost" 
                                         size="sm"
-                                        onClick={() => handleDelete(doc.id)}
+                                        onClick={() => handleDelete(doc)}
                                         className="text-red-500 hover:text-red-700"
                                     >
                                         <Trash2 className="w-4 h-4" />
