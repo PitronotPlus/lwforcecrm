@@ -227,6 +227,9 @@ export default function CreateTaskModal({
                                     <SelectItem value="פולואפ">פולואפ</SelectItem>
                                     <SelectItem value="פגישה">פגישה</SelectItem>
                                     <SelectItem value="מסמכים">מסמכים</SelectItem>
+                                    <SelectItem value="מתן הערות">מתן הערות</SelectItem>
+                                    <SelectItem value="כתיבת מסמך">כתיבת מסמך</SelectItem>
+                                    <SelectItem value="חיפוש משפטי">חיפוש משפטי</SelectItem>
                                     <SelectItem value="אחר">אחר</SelectItem>
                                 </SelectContent>
                             </Select>
