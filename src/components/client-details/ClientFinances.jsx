@@ -16,10 +16,7 @@ export default function ClientFinances({ client }) {
 
     const loadFinances = async () => {
         try {
-            const allFinances = await Financial.list('-date');
-            const clientFinances = allFinances.filter(f => 
-                f.client_name === client.full_name
-            );
+            const clientFinances = await Financial.filter({ client_id: client.id }, '-date');
             setFinances(clientFinances);
         } catch (error) {
             console.error("שגיאה בטעינת נתונים כספיים:", error);
@@ -43,14 +40,16 @@ export default function ClientFinances({ client }) {
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle style={{ fontFamily: 'Heebo' }}>מידע כספי</CardTitle>
                 <CreateFinancialRecordModal 
-                    clientName={client.full_name}
+                    preselectedClientId={client.id}
+                    preselectedClientName={client.full_name}
                     onRecordCreated={loadFinances}
-                >
-                    <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
-                        <Plus className="ml-2 w-4 h-4" />
-                        הוסף רשומה
-                    </Button>
-                </CreateFinancialRecordModal>
+                    trigger={
+                        <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            <Plus className="ml-2 w-4 h-4" />
+                            הוסף רשומה
+                        </Button>
+                    }
+                />
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* סיכום כספי */}

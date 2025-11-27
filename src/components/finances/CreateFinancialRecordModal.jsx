@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Financial } from '@/entities/Financial';
+import { Client } from '@/entities/Client';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,21 +10,58 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Upload, FileText, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function CreateFinancialRecordModal({ onRecordCreated, recordToEdit, trigger }) {
+export default function CreateFinancialRecordModal({ onRecordCreated, recordToEdit, trigger, preselectedClientId, preselectedClientName }) {
     const [isOpen, setIsOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [clients, setClients] = useState([]);
+    const [loadingClients, setLoadingClients] = useState(false);
+
     const getInitialState = () => ({
         description: recordToEdit?.description || '',
         amount: recordToEdit?.amount || '',
         type: recordToEdit?.type || 'הכנסה',
         category: recordToEdit?.category || 'שכ"ט',
         date: recordToEdit?.date || format(new Date(), 'yyyy-MM-dd'),
-        client_name: recordToEdit?.client_name || '',
+        client_id: recordToEdit?.client_id || preselectedClientId || '',
+        client_name: recordToEdit?.client_name || preselectedClientName || '',
         payment_method: recordToEdit?.payment_method || '',
         invoice_issued: recordToEdit?.invoice_issued || false,
         invoice_file_url: recordToEdit?.invoice_file_url || ''
     });
     const [formData, setFormData] = useState(getInitialState());
+
+    useEffect(() => {
+        if (isOpen && !preselectedClientId) {
+            loadClients();
+        }
+    }, [isOpen]);
+
+    const loadClients = async () => {
+        try {
+            setLoadingClients(true);
+            const data = await Client.list('full_name');
+            setClients(data);
+        } catch (error) {
+            console.error("שגיאה בטעינת לקוחות:", error);
+        } finally {
+            setLoadingClients(false);
+        }
+    };
+
+    const handleClientChange = (clientId) => {
+        if (clientId === 'none') {
+            setFormData({ ...formData, client_id: '', client_name: '' });
+        } else {
+            const selectedClient = clients.find(c => c.id === clientId);
+            if (selectedClient) {
+                setFormData({ 
+                    ...formData, 
+                    client_id: clientId, 
+                    client_name: selectedClient.full_name 
+                });
+            }
+        }
+    };
 
     const handleFileUpload = async (e) => {
         const file = e.target.files?.[0];
@@ -140,11 +178,31 @@ export default function CreateFinancialRecordModal({ onRecordCreated, recordToEd
                         </div>
                     </div>
                      <div>
-                        <label className="block text-sm font-medium mb-1">שם לקוח (אופציונלי)</label>
-                        <Input
-                            value={formData.client_name}
-                            onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                        />
+                        <label className="block text-sm font-medium mb-1">שיוך ללקוח (אופציונלי)</label>
+                        {preselectedClientId ? (
+                            <Input
+                                value={formData.client_name}
+                                disabled
+                                className="bg-gray-100"
+                            />
+                        ) : (
+                            <Select 
+                                value={formData.client_id || 'none'} 
+                                onValueChange={handleClientChange}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={loadingClients ? "טוען לקוחות..." : "בחר לקוח"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">ללא שיוך ללקוח</SelectItem>
+                                    {clients.map(client => (
+                                        <SelectItem key={client.id} value={client.id}>
+                                            {client.full_name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
                     
                     <div>
