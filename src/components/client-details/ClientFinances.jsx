@@ -1,18 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { Financial } from "@/entities/Financial";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import CreateFinancialRecordModal from "../finances/CreateFinancialRecordModal";
+import { logClientActivity } from './activityLogger';
 
 export default function ClientFinances({ client }) {
     const [finances, setFinances] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
         loadFinances();
+        loadCurrentUser();
     }, [client.id]);
+
+    const loadCurrentUser = async () => {
+        try {
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+        } catch (error) {
+            console.error("שגיאה בטעינת משתמש:", error);
+        }
+    };
+
+    const handleRecordCreated = async () => {
+        const performedBy = currentUser?.full_name || currentUser?.email || 'לא ידוע';
+        await logClientActivity(
+            client.id,
+            'תשלום',
+            'נוספה רשומה כספית חדשה',
+            performedBy
+        );
+        loadFinances();
+    };
 
     const loadFinances = async () => {
         try {
@@ -42,7 +66,7 @@ export default function ClientFinances({ client }) {
                 <CreateFinancialRecordModal 
                     preselectedClientId={client.id}
                     preselectedClientName={client.full_name}
-                    onRecordCreated={loadFinances}
+                    onRecordCreated={handleRecordCreated}
                     trigger={
                         <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
                             <Plus className="ml-2 w-4 h-4" />
