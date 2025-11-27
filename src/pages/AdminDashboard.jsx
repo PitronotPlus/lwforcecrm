@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy } from "lucide-react";
 import AdminStatsCards from "../components/admin/AdminStatsCards";
 import UserManagementTable from "../components/admin/UserManagementTable";
 import SystemSettings from "../components/admin/SystemSettings";
