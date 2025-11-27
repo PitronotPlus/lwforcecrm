@@ -66,12 +66,11 @@ export default function Layout({ children, currentPageName }) {
         if (!currentUser) return [];
 
         const baseItems = [
-            { title: "עריכת פרופיל", url: createPageUrl("Settings") },
-            { title: "הגדרות", url: createPageUrl("Settings") }
+            { title: "פרופיל והגדרות", url: createPageUrl("Settings") }
         ];
 
-        // הוספת ניהול מערכת רק למנהלי מערכת
-        if (currentUser.role === 'admin') {
+        // הוספת ניהול מערכת רק למנהלי מערכת (admin)
+        if (currentUser.role === 'admin' || currentUser.user_role === 'admin') {
             baseItems.unshift({ title: "ניהול מערכת", url: createPageUrl("AdminDashboard") });
         }
 
