@@ -1,33 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Home, Users, Briefcase, CheckSquare, UserCog } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Home, Users, Briefcase, CheckSquare, Calendar } from 'lucide-react';
 
 export default function BottomNavigation() {
     const location = useLocation();
-    const [currentUser, setCurrentUser] = useState(null);
-
-    useEffect(() => {
-        loadUser();
-    }, []);
-
-    const loadUser = async () => {
-        try {
-            const user = await base44.auth.me();
-            setCurrentUser(user);
-        } catch (e) {}
-    };
-
-    const userRole = currentUser?.user_role || currentUser?.role || 'lawyer';
-    const isManager = userRole === 'owner' || userRole === 'department_head' || userRole === 'admin';
 
     const navItems = [
         { icon: Home, label: 'דשבורד', path: createPageUrl('Dashboard') },
         { icon: Users, label: 'לקוחות', path: createPageUrl('Clients') },
         { icon: Briefcase, label: 'תיקים', path: createPageUrl('Cases') },
         { icon: CheckSquare, label: 'משימות', path: createPageUrl('Tasks') },
-        ...(isManager ? [{ icon: UserCog, label: 'צוות', path: createPageUrl('TeamManagement') }] : [])
+        { icon: Calendar, label: 'פגישות', path: createPageUrl('Appointments') }
     ];
 
     const isActive = (path) => location.pathname === path;

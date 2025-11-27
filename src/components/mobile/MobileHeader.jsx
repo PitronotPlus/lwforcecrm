@@ -14,6 +14,11 @@ export default function MobileHeader({ currentUser, onLogout }) {
         { icon: User, label: 'פרופיל והגדרות', path: createPageUrl('Settings') }
     ];
 
+    // הוספת ניהול צוות לתפריט הפרופיל למנהלים
+    if (isManager) {
+        profileMenuItems.push({ icon: Settings, label: 'ניהול צוות', path: createPageUrl('TeamManagement') });
+    }
+
     if (currentUser?.role === 'admin' || currentUser?.user_role === 'admin') {
         profileMenuItems.unshift({ icon: Settings, label: 'ניהול מערכת', path: createPageUrl('AdminDashboard') });
     }
@@ -24,7 +29,6 @@ export default function MobileHeader({ currentUser, onLogout }) {
         { label: 'תיקים', path: createPageUrl('Cases') },
         { label: 'משימות', path: createPageUrl('Tasks') },
         { label: 'פגישות', path: createPageUrl('Appointments') },
-        ...(isManager ? [{ label: 'ניהול צוות', path: createPageUrl('TeamManagement') }] : []),
         { label: 'שיווק', path: createPageUrl('Marketing') },
         { label: 'כספים', path: createPageUrl('Finances') },
         { label: 'קרדיטים', path: createPageUrl('Credits') },

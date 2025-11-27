@@ -46,28 +46,17 @@ export default function Layout({ children, currentPageName }) {
     const getNavigationItems = () => {
         if (!currentUser) return []; // אם לא מחובר, אין תפריט ניווט
 
-        const userRole = currentUser.user_role || currentUser.role || 'lawyer';
-
         const baseItems = [
             { title: "דשבורד", url: createPageUrl("Dashboard") },
             { title: "לקוחות", url: createPageUrl("Clients") },
             { title: "תיקים", url: createPageUrl("Cases") },
             { title: "משימות", url: createPageUrl("Tasks") },
-            { title: "פגישות", url: createPageUrl("Appointments") }
-        ];
-
-        // הוספת ניהול צוות לבעלי משרד וראשי מחלקות
-        if (userRole === 'owner' || userRole === 'department_head' || userRole === 'admin') {
-            baseItems.push({ title: "ניהול צוות", url: createPageUrl("TeamManagement") });
-        }
-
-        // הוספת שאר הפריטים
-        baseItems.push(
+            { title: "פגישות", url: createPageUrl("Appointments") },
             { title: "שיווק", url: createPageUrl("Marketing") },
             { title: "כספים", url: createPageUrl("Finances") },
             { title: "קרדיטים", url: createPageUrl("Credits") },
             { title: "תמיכה", url: createPageUrl("Support") }
-        );
+        ];
 
         return baseItems;
     };
@@ -76,9 +65,17 @@ export default function Layout({ children, currentPageName }) {
     const getProfileMenuItems = () => {
         if (!currentUser) return [];
 
+        const userRole = currentUser.user_role || currentUser.role || 'lawyer';
+        const isManager = userRole === 'owner' || userRole === 'department_head' || userRole === 'admin';
+
         const baseItems = [
             { title: "פרופיל והגדרות", url: createPageUrl("Settings") }
         ];
+
+        // הוספת ניהול צוות לבעלי משרד וראשי מחלקות
+        if (isManager) {
+            baseItems.push({ title: "ניהול צוות", url: createPageUrl("TeamManagement") });
+        }
 
         // הוספת ניהול מערכת רק למנהלי מערכת (admin)
         if (currentUser.role === 'admin' || currentUser.user_role === 'admin') {
