@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Calendar, Clock, MapPin, User, Edit, Trash2, Video, ExternalLink } from 'lucide-react';
+import BookingLinkSection from "../components/appointments/BookingLinkSection";
 
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
@@ -124,6 +125,9 @@ export default function Appointments() {
                         </Button>
                     </div>
                 </div>
+
+                {/* Booking Link Section */}
+                <BookingLinkSection />
 
                 {/* Form */}
                 {showForm && (
