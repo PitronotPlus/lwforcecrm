@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2, Lock, Menu } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2, Lock, Menu, Database } from "lucide-react";
 import AdminStatsCards from "../components/admin/AdminStatsCards";
 import UserManagementTable from "../components/admin/UserManagementTable";
 import SystemSettings from "../components/admin/SystemSettings";
@@ -14,6 +14,7 @@ import SupportTicketManagement from "../components/admin/SupportTicketManagement
 import SubAccountManager from "../components/admin/SubAccountManager";
 import PermissionsManager from "../components/admin/PermissionsManager";
 import MenuEditor from "../components/admin/MenuEditor";
+import ObjectStudio from "../components/admin/ObjectStudio";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -93,6 +94,8 @@ export default function AdminDashboard() {
                 return <SupportTicketManagement />;
             case 'menuEditor':
                 return <MenuEditor />;
+            case 'objectStudio':
+                return <ObjectStudio />;
             case 'settings':
                 return <SystemSettings />;
             default:
@@ -245,6 +248,19 @@ export default function AdminDashboard() {
                         >
                             <Menu className="w-5 h-5" />
                             עריכת תפריט
+                        </button>
+                        
+                        <button
+                            onClick={() => setActiveTab('objectStudio')}
+                            className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
+                                activeTab === 'objectStudio' 
+                                    ? 'bg-[#3568AE] text-white' 
+                                    : 'text-[#484848] hover:bg-gray-100'
+                            }`}
+                            style={{ fontFamily: 'Heebo' }}
+                        >
+                            <Database className="w-5 h-5" />
+                            הגדרת רשומות
                         </button>
                         
                         <button
