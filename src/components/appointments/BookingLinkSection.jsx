@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 export default function BookingLinkSection() {
     const [bookingUrl, setBookingUrl] = useState("");
     const [embedCode, setEmbedCode] = useState("");
-    const [iframeCo de, setIframeCode] = useState("");
+    const [iframeCode, setIframeCode] = useState("");
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
