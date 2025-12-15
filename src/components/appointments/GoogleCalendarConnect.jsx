@@ -52,13 +52,22 @@ export default function GoogleCalendarConnect() {
             // קריאה לפונקציה שמתחילה OAuth flow למשתמש הנוכחי
             const result = await base44.functions.invoke('googleCalendarConnect', {});
             
+            if (result.data.error === 'missing_credentials') {
+                alert('חיבור Google Calendar טרם הוגדר במערכת.\n\nיש לפנות למנהל המערכת להגדרת חיבור Google Calendar (פעם אחת בלבד).');
+                return;
+            }
+            
             if (result.data.authUrl) {
                 // הפניית המשתמש לדף האישור של Google
                 window.location.href = result.data.authUrl;
             }
         } catch (error) {
             console.error('שגיאה בחיבור:', error);
-            alert('אירעה שגיאה בחיבור. אנא נסה שוב.');
+            if (error.message?.includes('GOOGLE_CLIENT_ID')) {
+                alert('חיבור Google Calendar טרם הוגדר במערכת.\n\nיש לפנות למנהל המערכת.');
+            } else {
+                alert('אירעה שגיאה בחיבור. אנא נסה שוב.');
+            }
         }
     };
 
@@ -154,6 +163,16 @@ export default function GoogleCalendarConnect() {
                     </>
                 ) : (
                     <>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <p className="text-sm font-semibold text-gray-800 mb-2">💡 למנהל המערכת:</p>
+                            <p className="text-xs text-gray-600">
+                                כדי להפעיל חיבור Google Calendar, יש להגדיר פעם אחת (לכל האפליקציה):<br/>
+                                1. צור OAuth Client ב-<a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">Google Cloud Console</a><br/>
+                                2. הגדר את GOOGLE_CLIENT_ID ו-GOOGLE_CLIENT_SECRET בהגדרות הסודות של האפליקציה<br/>
+                                3. אחרי זה - כל משתמש יוכל להתחבר ליומן שלו בקליק
+                            </p>
+                        </div>
+                        
                         <p className="text-sm text-gray-600">
                             חבר את יומן Google שלך כדי:
                         </p>

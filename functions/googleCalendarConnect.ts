@@ -48,6 +48,15 @@ Deno.serve(async (req) => {
 
         // אם אין code - החזר את ה-OAuth URL
         const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+        const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+        
+        if (!clientId || !clientSecret) {
+            return Response.json({ 
+                error: 'missing_credentials',
+                message: 'Google Calendar integration not configured. Contact system administrator.'
+            });
+        }
+        
         const redirectUri = `${new URL(req.url).origin}/Appointments?tab=google`;
         const scope = 'https://www.googleapis.com/auth/calendar.events';
 
