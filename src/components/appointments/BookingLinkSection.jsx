@@ -178,11 +178,15 @@ export default function BookingLinkSection() {
                         </div>
                         <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg">
                             <p className="text-sm font-medium mb-2">תצוגה מקדימה:</p>
-                            <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300">
-                                <div className="text-center text-gray-500 py-8">
-                                    <Code className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                                    <p className="text-sm">הטופס יוטמע כאן באתר שלך</p>
-                                </div>
+                            <div className="bg-white p-2 rounded-lg border-2 border-gray-200 overflow-hidden">
+                                <iframe 
+                                    src={bookingUrl} 
+                                    width="100%" 
+                                    height="600" 
+                                    frameBorder="0"
+                                    style={{ border: 'none', borderRadius: '8px' }}
+                                    title="תצוגה מקדימה של טופס הזמנת פגישות"
+                                />
                             </div>
                         </div>
                         <div className="bg-green-50 p-4 rounded-lg">
