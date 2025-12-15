@@ -1,223 +1,141 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, ArrowUpDown, Eye, LayoutGrid, Plus } from "lucide-react";
-import ObjectEditorModal from "./ObjectEditorModal";
+import { Database, FileText, AlertCircle } from "lucide-react";
 
 export default function ObjectStudio() {
-    const [objects, setObjects] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [sortField, setSortField] = useState("record_number");
-    const [sortDirection, setSortDirection] = useState("asc");
-    const [selectedObject, setSelectedObject] = useState(null);
-    const [showEditor, setShowEditor] = useState(false);
+    const [entities, setEntities] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadObjects();
+        loadEntities();
     }, []);
 
-    const loadObjects = async () => {
+    const loadEntities = async () => {
         try {
-            setLoading(true);
-            const data = await base44.entities.SystemObject.list();
-            setObjects(data);
+            // נקבל רשימת כל ה-entities שקיימות במערכת
+            const entityNames = [
+                'Client', 'Case', 'Task', 'Appointment', 'Financial',
+                'Integration', 'Lead', 'ClientInteraction', 'ClientDocument',
+                'ClientActivityLog', 'Permission', 'SubAccount', 'User'
+            ];
+            
+            const entityList = entityNames.map(name => ({
+                name,
+                type: 'מובנה',
+                canEdit: !['User'].includes(name)
+            }));
+            
+            setEntities(entityList);
         } catch (error) {
-            console.error("שגיאה בטעינת אובייקטים:", error);
+            console.error("שגיאה בטעינת entities:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSort = (field) => {
-        if (sortField === field) {
-            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-        } else {
-            setSortField(field);
-            setSortDirection("asc");
-        }
-    };
-
-    const getSortedObjects = () => {
-        let filtered = objects.filter(obj =>
-            obj.display_name_singular?.includes(searchQuery) ||
-            obj.display_name_plural?.includes(searchQuery) ||
-            obj.system_key?.includes(searchQuery)
-        );
-
-        filtered.sort((a, b) => {
-            const aVal = a[sortField] || "";
-            const bVal = b[sortField] || "";
-            
-            if (sortDirection === "asc") {
-                return aVal > bVal ? 1 : -1;
-            } else {
-                return aVal < bVal ? 1 : -1;
-            }
-        });
-
-        return filtered;
-    };
-
-    const handleEditObject = (obj) => {
-        setSelectedObject(obj);
-        setShowEditor(true);
-    };
-
-    const handleCreateNew = () => {
-        setSelectedObject(null);
-        setShowEditor(true);
-    };
-
-    const sortedObjects = getSortedObjects();
-
     if (loading) {
-        return <div className="p-8">טוען רשומות מערכת...</div>;
+        return <div className="p-8">טוען...</div>;
     }
 
     return (
-        <div className="p-6">
+        <div className="p-6 space-y-6">
             <Card>
-                <CardContent className="pt-6">
-                    {/* Header Controls */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <LayoutGrid className="w-5 h-5 text-[#3568AE]" />
-                                <h2 className="text-xl font-bold" style={{ fontFamily: 'Heebo' }}>
-                                    רשומות מערכת ({sortedObjects.length})
-                                </h2>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-3" style={{ fontFamily: 'Heebo' }}>
+                        <Database className="w-6 h-6 text-[#3568AE]" />
+                        הגדרת רשומות מערכת
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
+                            <div>
+                                <h3 className="font-bold mb-2" style={{ fontFamily: 'Heebo' }}>
+                                    תכונה מתקדמת בפיתוח
+                                </h3>
+                                <p className="text-sm text-gray-700 mb-2">
+                                    עריכת מבנה הרשומות (Entities) תהיה זמינה בגרסה הבאה.
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                    כרגע, ניתן לערוך את הגדרות הרשומות דרך קבצי ה-JSON שנמצאים בתיקיית entities/
+                                </p>
                             </div>
-                            
-                            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
-                                <button className="px-4 py-2 bg-white rounded-md font-medium text-sm">
-                                    רשימה
-                                </button>
-                                <button className="px-4 py-2 text-gray-500 text-sm">
-                                    לוח
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
-                                <Input
-                                    placeholder="חיפוש רשומות..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pr-10 w-[300px]"
-                                />
-                                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            </div>
-                            
-                            <Button
-                                onClick={handleCreateNew}
-                                className="bg-[#67BF91] hover:bg-[#5AA880]"
-                            >
-                                <Plus className="w-4 h-4 ml-2" />
-                                חדש
-                            </Button>
                         </div>
                     </div>
 
-                    {/* Table */}
                     <div className="border rounded-lg overflow-hidden">
                         <table className="w-full">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="text-right p-4 w-12">
-                                        <input type="checkbox" className="w-4 h-4" />
-                                    </th>
-                                    <th 
-                                        className="text-right p-4 cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleSort("display_name_singular")}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm">שם רשומה</span>
-                                            {sortField === "display_name_singular" && (
-                                                <ArrowUpDown className="w-3 h-3" />
-                                            )}
-                                        </div>
-                                    </th>
-                                    <th className="text-right p-4">
-                                        <span className="font-bold text-sm">סוג רשומה</span>
-                                    </th>
-                                    <th 
-                                        className="text-right p-4 cursor-pointer hover:bg-gray-100"
-                                        onClick={() => handleSort("record_number")}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-sm">מספר רשומה</span>
-                                            {sortField === "record_number" && (
-                                                <ArrowUpDown className="w-3 h-3" />
-                                            )}
-                                        </div>
-                                    </th>
+                                    <th className="text-right p-4 font-bold text-sm">שם רשומה</th>
+                                    <th className="text-right p-4 font-bold text-sm">סוג</th>
+                                    <th className="text-right p-4 font-bold text-sm">ניתן לעריכה</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {sortedObjects.map((obj) => (
-                                    <tr
-                                        key={obj.id}
-                                        className="border-t hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => handleEditObject(obj)}
-                                    >
+                                {entities.map((entity, index) => (
+                                    <tr key={index} className="border-t hover:bg-gray-50">
                                         <td className="p-4">
-                                            <input 
-                                                type="checkbox" 
-                                                className="w-4 h-4"
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
+                                            <div className="flex items-center gap-2">
+                                                <FileText className="w-4 h-4 text-gray-400" />
+                                                <span className="text-sm font-medium">{entity.name}</span>
+                                            </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className="text-sm">{obj.display_name_singular}</span>
+                                            <span className="text-sm text-gray-600">{entity.type}</span>
                                         </td>
                                         <td className="p-4">
-                                            <span className="text-sm text-gray-600">
-                                                {obj.is_system ? "רשומת מערכת קבועה" : "רשומת מערכת ניתנת לשינוי"}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className="text-sm">{obj.record_number}</span>
+                                            {entity.canEdit ? (
+                                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                                    כן
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                    לא
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-
-                    {sortedObjects.length === 0 && (
-                        <div className="text-center py-12">
-                            <p className="text-gray-500 mb-4">לא נמצאו רשומות מערכת</p>
-                            <Button
-                                onClick={handleCreateNew}
-                                className="bg-[#67BF91] hover:bg-[#5AA880]"
-                            >
-                                <Plus className="w-4 h-4 ml-2" />
-                                צור רשומה ראשונה
-                            </Button>
-                        </div>
-                    )}
                 </CardContent>
             </Card>
 
-            {showEditor && (
-                <ObjectEditorModal
-                    object={selectedObject}
-                    open={showEditor}
-                    onClose={() => {
-                        setShowEditor(false);
-                        setSelectedObject(null);
-                    }}
-                    onSave={() => {
-                        setShowEditor(false);
-                        setSelectedObject(null);
-                        loadObjects();
-                    }}
-                />
-            )}
+            <Card>
+                <CardHeader>
+                    <CardTitle style={{ fontFamily: 'Heebo' }}>
+                        📖 מדריך מהיר - עריכת Entities
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4 text-sm">
+                        <div>
+                            <h4 className="font-bold mb-2">איך מוסיפים שדה חדש לרשומה קיימת:</h4>
+                            <ol className="list-decimal list-inside space-y-1 text-gray-700 mr-4">
+                                <li>פתח את הקובץ המתאים בתיקיית entities/ (למשל: entities/Client.json)</li>
+                                <li>הוסף את השדה החדש בתוך ה-properties</li>
+                                <li>הגדר את הסוג (type), תיאור (description) ואם השדה חובה (required)</li>
+                                <li>שמור את הקובץ - השינוי ייכנס לתוקף מיד</li>
+                            </ol>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h4 className="font-bold mb-2">דוגמה:</h4>
+                            <pre className="text-xs bg-gray-800 text-green-400 p-3 rounded overflow-x-auto" style={{ direction: 'ltr', textAlign: 'left' }}>
+{`"new_field": {
+  "type": "string",
+  "description": "תיאור השדה החדש"
+}`}
+                            </pre>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }
