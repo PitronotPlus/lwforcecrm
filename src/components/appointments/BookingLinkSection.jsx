@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,19 @@ export default function BookingLinkSection() {
     const [iframeCode, setIframeCode] = useState("");
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
+    const embedPreviewRef = useRef(null);
 
     useEffect(() => {
         loadBookingLink();
     }, []);
+    
+    useEffect(() => {
+        if (currentUser && embedPreviewRef.current) {
+            const script = document.createElement('script');
+            script.src = `${window.location.origin}/functions/embedBooking`;
+            embedPreviewRef.current.appendChild(script);
+        }
+    }, [currentUser]);
 
     const loadBookingLink = async () => {
         try {
@@ -152,18 +161,18 @@ export default function BookingLinkSection() {
                     <TabsContent value="embed" className="space-y-4">
                         <div>
                             <label className="text-sm font-medium mb-2 block">
-                                קוד JavaScript להטמעה מלאה (ללא iframe)
+                                קוד JavaScript להטמעה (ללא iframe)
                             </label>
                             <Textarea
                                 value={`<div id="lawforce-booking" data-lawyer-id="${currentUser?.id}"></div>
-                            <script src="${window.location.origin}/functions/embedBooking"></script>`}
+                    <script src="${window.location.origin}/functions/embedBooking"></script>`}
                                 readOnly
                                 className="font-mono text-xs"
                                 rows={3}
                             />
                             <Button
                                 onClick={() => copyToClipboard(`<div id="lawforce-booking" data-lawyer-id="${currentUser?.id}"></div>
-                                <script src="${window.location.origin}/functions/embedBooking"></script>`, 'embedjs')}
+                    <script src="${window.location.origin}/functions/embedBooking"></script>`, 'embedjs')}
                                 variant="outline"
                                 className="mt-2"
                             >
@@ -182,24 +191,17 @@ export default function BookingLinkSection() {
                         </div>
                         <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg">
                             <p className="text-sm font-medium mb-2">תצוגה מקדימה:</p>
-                            <div className="bg-white p-4 rounded-lg">
-                                <iframe 
-                                    src={bookingUrl} 
-                                    width="100%" 
-                                    height="800" 
-                                    frameBorder="0"
-                                    style={{ border: 'none', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                    title="תצוגה מקדימה"
-                                />
+                            <div className="bg-white p-4 rounded-lg" ref={embedPreviewRef}>
+                                <div id="lawforce-booking" data-lawyer-id={currentUser?.id}></div>
                             </div>
                         </div>
                         <div className="bg-purple-50 p-4 rounded-lg">
                             <p className="text-sm text-gray-700 space-y-2">
-                                <strong className="block">🎨 הטמעה מלאה ורספונסיבית:</strong>
-                                <span className="block">• הטופס משתלב לחלוטין עם העיצוב של האתר שלך</span>
-                                <span className="block">• רספונסיבי למובייל, טאבלט ומחשב</span>
-                                <span className="block">• בונה את הטופס ישירות בעמוד (ללא iframe)</span>
-                                <span className="block">• מתאים ל-WordPress, Wix, Shopify וכל אתר אחר</span>
+                                <strong className="block">🎨 טופס מינימלי וקומפקטי:</strong>
+                                <span className="block">• יומן קטן + טופס פשוט בלבד</span>
+                                <span className="block">• רספונסיבי ומשתלב בכל אתר</span>
+                                <span className="block">• ללא כותרות גדולות או עיצוב מיותר</span>
+                                <span className="block">• מושלם להטמעה כמקטע קטן בצד תוכן אחר</span>
                             </p>
                         </div>
                     </TabsContent>
