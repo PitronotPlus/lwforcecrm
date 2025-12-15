@@ -13,32 +13,10 @@ export default function BookingLinkSection() {
     const [iframeCode, setIframeCode] = useState("");
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
-    const [activeTab, setActiveTab] = useState('link');
-    const embedPreviewRef = useRef(null);
 
     useEffect(() => {
         loadBookingLink();
     }, []);
-    
-    useEffect(() => {
-        if (currentUser && activeTab === 'embed' && embedPreviewRef.current) {
-            // נקה את התוכן הקודם
-            embedPreviewRef.current.innerHTML = `<div id="lawforce-booking" data-lawyer-id="${currentUser.id}"></div>`;
-            
-            // טען את הסקריפט
-            const script = document.createElement('script');
-            script.src = `${window.location.origin}/functions/embedBooking`;
-            script.async = true;
-            embedPreviewRef.current.appendChild(script);
-            
-            return () => {
-                // נקה בעת יציאה מהטאב
-                if (embedPreviewRef.current) {
-                    embedPreviewRef.current.innerHTML = '';
-                }
-            };
-        }
-    }, [currentUser, activeTab]);
 
     const loadBookingLink = async () => {
         try {
@@ -84,7 +62,7 @@ export default function BookingLinkSection() {
                 </p>
             </CardHeader>
             <CardContent>
-                <Tabs defaultValue="link" className="w-full" onValueChange={setActiveTab}>
+                <Tabs defaultValue="link" className="w-full">
                     <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="link">קישור ישיר</TabsTrigger>
                         <TabsTrigger value="button">כפתור</TabsTrigger>
@@ -202,10 +180,19 @@ export default function BookingLinkSection() {
                                 )}
                             </Button>
                         </div>
-                        <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg">
-                            <p className="text-sm font-medium mb-2">תצוגה מקדימה:</p>
-                            <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300" ref={embedPreviewRef}>
-                                {/* הטופס ייטען כאן דינמית */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200">
+                            <div className="text-center py-8">
+                                <Code className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                                <h3 className="font-semibold text-lg mb-2 text-gray-800">טופס מינימלי וקומפקטי</h3>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    הטופס המוטמע כולל יומן קטן + שדות טופס בלבד<br />
+                                    העתק את הקוד למעלה והדבק באתר שלך כדי לראות אותו פועל
+                                </p>
+                                <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
+                                    <span className="text-xs text-gray-500">✓ יומן מיני</span>
+                                    <span className="text-xs text-gray-500">✓ בחירת שעה</span>
+                                    <span className="text-xs text-gray-500">✓ טופס פרטים</span>
+                                </div>
                             </div>
                         </div>
                         <div className="bg-purple-50 p-4 rounded-lg">
