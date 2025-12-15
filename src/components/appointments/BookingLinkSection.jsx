@@ -156,14 +156,14 @@ export default function BookingLinkSection() {
                             </label>
                             <Textarea
                                 value={`<div id="lawforce-booking" data-lawyer-id="${currentUser?.id}"></div>
-                    <script src="${window.location.origin}/embed-booking.js"></script>`}
+                            <script src="${window.location.origin}/functions/embedBooking"></script>`}
                                 readOnly
                                 className="font-mono text-xs"
                                 rows={3}
                             />
                             <Button
                                 onClick={() => copyToClipboard(`<div id="lawforce-booking" data-lawyer-id="${currentUser?.id}"></div>
-                    <script src="${window.location.origin}/embed-booking.js"></script>`, 'embedjs')}
+                                <script src="${window.location.origin}/functions/embedBooking"></script>`, 'embedjs')}
                                 variant="outline"
                                 className="mt-2"
                             >
