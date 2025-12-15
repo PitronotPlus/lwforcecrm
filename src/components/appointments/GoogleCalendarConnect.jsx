@@ -29,19 +29,18 @@ export default function GoogleCalendarConnect() {
 
     const handleConnect = async () => {
         try {
-            // קבלת טוקן OAuth דרך BASE44
-            const token = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
+            // הפניה לדף OAuth של Google Calendar
+            // המשתמש יאשר ישירות עם Google ויחזור לכאן
+            const currentUrl = window.location.origin + window.location.pathname + '?tab=google&connected=true';
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                `client_id=YOUR_CLIENT_ID&` +
+                `redirect_uri=${encodeURIComponent(currentUrl)}&` +
+                `response_type=code&` +
+                `scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events')}&` +
+                `access_type=offline&` +
+                `prompt=consent`;
             
-            if (token) {
-                // שמירת מצב מחובר
-                await base44.auth.updateMe({ google_calendar_connected: true });
-                setConnected(true);
-                
-                // יצירת Webhook לעדכונים אוטומטיים
-                await base44.functions.invoke('googleCalendarSetupWatch', {});
-                
-                alert('חיבור ליומן Google הושלם בהצלחה!');
-            }
+            window.location.href = authUrl;
         } catch (error) {
             console.error('שגיאה בחיבור:', error);
             alert('אירעה שגיאה בחיבור. אנא נסה שוב.');
