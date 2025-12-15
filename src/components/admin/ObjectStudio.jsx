@@ -2,18 +2,30 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Database, Edit, Plus, Search, FileText, Check, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Database, Edit, Plus, Search, FileText, Check, X, Trash2 } from "lucide-react";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export default function ObjectStudio() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedEntity, setSelectedEntity] = useState(null);
     const [showEditor, setShowEditor] = useState(false);
+    const [editingField, setEditingField] = useState(null);
+    const [showFieldEditor, setShowFieldEditor] = useState(false);
+    const [entityFields, setEntityFields] = useState([]);
     const [entities, setEntities] = useState([
         { 
             name: 'Client', 
@@ -73,7 +85,79 @@ export default function ObjectStudio() {
 
     const handleEdit = (entity) => {
         setSelectedEntity(entity);
+        
+        // טעינת שדות לפי סוג ה-entity
+        let fields = [];
+        if (entity.name === 'Client') {
+            fields = [
+                { id: '1', name: 'full_name', displayName: 'שם מלא', type: 'string', required: true, description: 'שם מלא של הלקוח' },
+                { id: '2', name: 'phone', displayName: 'טלפון', type: 'string', required: true, description: 'מספר טלפון' },
+                { id: '3', name: 'email', displayName: 'אימייל', type: 'email', required: false, description: 'כתובת מייל' },
+                { id: '4', name: 'status', displayName: 'סטטוס', type: 'enum', required: false, options: ['ליד', 'פולואפ', 'לקוח'], description: 'סטטוס הלקוח' }
+            ];
+        } else if (entity.name === 'Task') {
+            fields = [
+                { id: '1', name: 'title', displayName: 'כותרת', type: 'string', required: true, description: 'כותרת המשימה' },
+                { id: '2', name: 'description', displayName: 'תיאור', type: 'textarea', required: false, description: 'תיאור המשימה' },
+                { id: '3', name: 'status', displayName: 'סטטוס', type: 'enum', required: false, options: ['פתוח', 'בטיפול', 'הושלם'], description: 'סטטוס המשימה' },
+                { id: '4', name: 'priority', displayName: 'עדיפות', type: 'enum', required: false, options: ['נמוכה', 'בינונית', 'גבוהה'], description: 'עדיפות המשימה' }
+            ];
+        } else {
+            fields = [
+                { id: '1', name: 'title', displayName: 'כותרת', type: 'string', required: true, description: 'כותרת' }
+            ];
+        }
+        
+        setEntityFields(fields);
         setShowEditor(true);
+    };
+
+    const handleAddField = () => {
+        setEditingField({
+            id: Date.now().toString(),
+            name: '',
+            displayName: '',
+            type: 'string',
+            required: false,
+            description: '',
+            options: []
+        });
+        setShowFieldEditor(true);
+    };
+
+    const handleEditField = (field) => {
+        setEditingField({ ...field });
+        setShowFieldEditor(true);
+    };
+
+    const handleSaveField = () => {
+        if (!editingField.name || !editingField.displayName) {
+            alert('יש למלא שם שדה ושם תצוגה');
+            return;
+        }
+
+        const existingIndex = entityFields.findIndex(f => f.id === editingField.id);
+        if (existingIndex >= 0) {
+            const updated = [...entityFields];
+            updated[existingIndex] = editingField;
+            setEntityFields(updated);
+        } else {
+            setEntityFields([...entityFields, editingField]);
+        }
+        
+        setShowFieldEditor(false);
+        setEditingField(null);
+    };
+
+    const handleDeleteField = (fieldId) => {
+        if (confirm('האם למחוק שדה זה?')) {
+            setEntityFields(entityFields.filter(f => f.id !== fieldId));
+        }
+    };
+
+    const handleSaveEntity = () => {
+        alert('הרשומה נשמרה בהצלחה! (בגרסת ייצור זה ישמר למערכת)');
+        setShowEditor(false);
     };
 
     return (
@@ -149,76 +233,178 @@ export default function ObjectStudio() {
 
             {/* Entity Editor Dialog */}
             <Dialog open={showEditor} onOpenChange={setShowEditor}>
-                <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle style={{ fontFamily: 'Heebo' }}>
-                            עריכת רשומה: {selectedEntity?.displayName}
-                        </DialogTitle>
+                        <div className="flex items-center justify-between">
+                            <DialogTitle style={{ fontFamily: 'Heebo' }}>
+                                עריכת רשומה: {selectedEntity?.displayName}
+                            </DialogTitle>
+                            <Button onClick={handleAddField} className="bg-[#67BF91] hover:bg-[#5AA880]">
+                                <Plus className="w-4 h-4 ml-2" />
+                                הוסף שדה
+                            </Button>
+                        </div>
                     </DialogHeader>
                     {selectedEntity && (
                         <div className="space-y-4">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <p className="text-sm text-gray-700">
-                                    <strong>שם טכני:</strong> {selectedEntity.name}
+                                <p className="text-sm text-gray-700 mb-2">
+                                    <strong>{selectedEntity.description}</strong>
                                 </p>
-                                <p className="text-sm text-gray-700 mt-1">
-                                    <strong>קובץ:</strong> entities/{selectedEntity.name}.json
+                                <p className="text-xs text-gray-600">
+                                    הגדר את השדות שיופיעו ברשומה זו. כל שדה יוצג בטפסים ובטבלאות של המערכת.
                                 </p>
                             </div>
 
                             <div>
-                                <h3 className="font-bold mb-3">שדות קיימים:</h3>
-                                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                                    {['id', 'created_date', 'updated_date', 'created_by'].map((field) => (
-                                        <div key={field} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-medium text-sm">{field}</p>
-                                                    <p className="text-xs text-gray-500">שדה מערכת מובנה</p>
-                                                </div>
-                                                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">
-                                                    מוגן
-                                                </span>
-                                            </div>
-                                        </div>
+                                <h3 className="font-bold mb-3 flex items-center justify-between">
+                                    <span>שדות מערכת (לא ניתנים לעריכה)</span>
+                                    <span className="text-xs text-gray-500 font-normal">4 שדות</span>
+                                </h3>
+                                <div className="space-y-2 mb-6">
+                                    <SystemField name="מזהה ייחודי" description="מספר זיהוי אוטומטי" />
+                                    <SystemField name="תאריך יצירה" description="מתי נוצרה הרשומה" />
+                                    <SystemField name="תאריך עדכון" description="מתי עודכנה לאחרונה" />
+                                    <SystemField name="נוצר על ידי" description="מי יצר את הרשומה" />
+                                </div>
+
+                                <h3 className="font-bold mb-3 flex items-center justify-between">
+                                    <span>שדות מותאמים אישית</span>
+                                    <span className="text-xs text-gray-500 font-normal">{entityFields.length} שדות</span>
+                                </h3>
+                                <div className="space-y-2 max-h-[350px] overflow-y-auto">
+                                    {entityFields.map((field) => (
+                                        <EditableFieldCard
+                                            key={field.id}
+                                            field={field}
+                                            onEdit={() => handleEditField(field)}
+                                            onDelete={() => handleDeleteField(field.id)}
+                                        />
                                     ))}
                                     
-                                    {selectedEntity.name === 'Client' && (
-                                        <>
-                                            <FieldCard name="full_name" type="string" required />
-                                            <FieldCard name="phone" type="string" required />
-                                            <FieldCard name="email" type="email" />
-                                            <FieldCard name="status" type="enum" />
-                                        </>
-                                    )}
-                                    {selectedEntity.name === 'Task' && (
-                                        <>
-                                            <FieldCard name="title" type="string" required />
-                                            <FieldCard name="description" type="string" />
-                                            <FieldCard name="status" type="enum" />
-                                            <FieldCard name="priority" type="enum" />
-                                        </>
+                                    {entityFields.length === 0 && (
+                                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                                            <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                            <p className="text-sm text-gray-500">אין שדות מותאמים</p>
+                                            <Button
+                                                variant="link"
+                                                onClick={handleAddField}
+                                                className="text-[#3568AE] mt-2"
+                                            >
+                                                הוסף שדה ראשון
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                <p className="text-sm text-gray-700">
-                                    💡 <strong>טיפ:</strong> לעריכה מלאה של השדות, ערוך את הקובץ 
-                                    <code className="mx-1 bg-white px-2 py-1 rounded text-xs">
-                                        entities/{selectedEntity.name}.json
-                                    </code>
-                                    ישירות בעורך הקוד.
-                                </p>
-                            </div>
-
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2 pt-4 border-t">
                                 <Button variant="outline" onClick={() => setShowEditor(false)}>
-                                    סגור
+                                    ביטול
                                 </Button>
-                                <Button className="bg-[#67BF91] hover:bg-[#5AA880]">
+                                <Button onClick={handleSaveEntity} className="bg-[#67BF91] hover:bg-[#5AA880]">
                                     <Check className="w-4 h-4 ml-2" />
                                     שמור שינויים
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Field Editor Dialog */}
+            <Dialog open={showFieldEditor} onOpenChange={setShowFieldEditor}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle style={{ fontFamily: 'Heebo' }}>
+                            {editingField?.id && entityFields.find(f => f.id === editingField.id) ? 'עריכת שדה' : 'הוספת שדה חדש'}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {editingField && (
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">שם השדה בעברית</label>
+                                <Input
+                                    placeholder="למשל: כתובת, מספר תיק, תאריך לידה"
+                                    value={editingField.displayName}
+                                    onChange={(e) => setEditingField({ ...editingField, displayName: e.target.value })}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">מפתח טכני (באנגלית)</label>
+                                <Input
+                                    placeholder="למשל: address, case_number, birth_date"
+                                    value={editingField.name}
+                                    onChange={(e) => setEditingField({ ...editingField, name: e.target.value.toLowerCase().replace(/\s/g, '_') })}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">אותיות אנגליות קטנות ו-underscore בלבד</p>
+                            </div>
+
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">סוג השדה</label>
+                                <Select
+                                    value={editingField.type}
+                                    onValueChange={(value) => setEditingField({ ...editingField, type: value })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="string">טקסט קצר</SelectItem>
+                                        <SelectItem value="textarea">טקסט ארוך</SelectItem>
+                                        <SelectItem value="number">מספר</SelectItem>
+                                        <SelectItem value="email">אימייל</SelectItem>
+                                        <SelectItem value="phone">טלפון</SelectItem>
+                                        <SelectItem value="date">תאריך</SelectItem>
+                                        <SelectItem value="boolean">כן/לא</SelectItem>
+                                        <SelectItem value="enum">רשימה נפתחת (אפשרויות)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {editingField.type === 'enum' && (
+                                <div>
+                                    <label className="text-sm font-medium mb-2 block">אפשרויות (מופרדות בפסיק)</label>
+                                    <Input
+                                        placeholder="למשל: פעיל, לא פעיל, בהמתנה"
+                                        value={editingField.options?.join(', ') || ''}
+                                        onChange={(e) => setEditingField({
+                                            ...editingField,
+                                            options: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                                        })}
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">תיאור (אופציונלי)</label>
+                                <Textarea
+                                    placeholder="הסבר קצר על מה השדה הזה"
+                                    value={editingField.description}
+                                    onChange={(e) => setEditingField({ ...editingField, description: e.target.value })}
+                                    rows={2}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p className="font-medium text-sm">שדה חובה</p>
+                                    <p className="text-xs text-gray-500">האם חובה למלא את השדה הזה</p>
+                                </div>
+                                <Switch
+                                    checked={editingField.required}
+                                    onCheckedChange={(checked) => setEditingField({ ...editingField, required: checked })}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-4 border-t">
+                                <Button variant="outline" onClick={() => setShowFieldEditor(false)}>
+                                    ביטול
+                                </Button>
+                                <Button onClick={handleSaveField} className="bg-[#67BF91] hover:bg-[#5AA880]">
+                                    <Check className="w-4 h-4 ml-2" />
+                                    שמור שדה
                                 </Button>
                             </div>
                         </div>
@@ -229,24 +415,71 @@ export default function ObjectStudio() {
     );
 }
 
-function FieldCard({ name, type, required = false }) {
+function SystemField({ name, description }) {
     return (
-        <div className="bg-white p-3 rounded-lg border border-gray-200">
+        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
             <div className="flex items-center justify-between">
-                <div>
-                    <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                    </div>
+                    <div>
                         <p className="font-medium text-sm">{name}</p>
-                        {required && (
+                        <p className="text-xs text-gray-500">{description}</p>
+                    </div>
+                </div>
+                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">
+                    מוגן
+                </span>
+            </div>
+        </div>
+    );
+}
+
+function EditableFieldCard({ field, onEdit, onDelete }) {
+    const typeLabels = {
+        string: 'טקסט',
+        textarea: 'טקסט ארוך',
+        number: 'מספר',
+        email: 'אימייל',
+        phone: 'טלפון',
+        date: 'תאריך',
+        boolean: 'כן/לא',
+        enum: 'רשימה'
+    };
+
+    return (
+        <div className="bg-white p-3 rounded-lg border border-gray-200 hover:border-[#3568AE] transition-colors">
+            <div className="flex items-center justify-between">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium text-sm">{field.displayName}</p>
+                        {field.required && (
                             <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
                                 חובה
                             </span>
                         )}
+                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                            {typeLabels[field.type] || field.type}
+                        </span>
                     </div>
-                    <p className="text-xs text-gray-500">{type}</p>
+                    {field.description && (
+                        <p className="text-xs text-gray-500">{field.description}</p>
+                    )}
+                    {field.type === 'enum' && field.options && (
+                        <p className="text-xs text-gray-400 mt-1">
+                            אפשרויות: {field.options.join(', ')}
+                        </p>
+                    )}
                 </div>
-                <Button variant="ghost" size="sm">
-                    <Edit className="w-3 h-3" />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={onEdit}>
+                        <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={onDelete} className="text-red-500 hover:text-red-700">
+                        <Trash2 className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
         </div>
     );
