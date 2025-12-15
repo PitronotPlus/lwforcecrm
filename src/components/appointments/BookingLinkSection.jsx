@@ -25,7 +25,7 @@ export default function BookingLinkSection() {
             
             // יצירת קישור הזמנה ייחודי למשתמש
             const baseUrl = window.location.origin;
-            const userBookingUrl = `${baseUrl}/booking/${user.id}`;
+            const userBookingUrl = `${baseUrl}/Booking?id=${user.id}`;
             setBookingUrl(userBookingUrl);
             
             // קוד הטמעה כפתור
