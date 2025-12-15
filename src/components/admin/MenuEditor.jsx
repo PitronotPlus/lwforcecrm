@@ -3,9 +3,10 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Menu, GripVertical, Eye, EyeOff, Plus, X, Save } from "lucide-react";
+import { Menu, GripVertical, Eye, EyeOff, Plus, X, Save, Users } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function MenuEditor() {
     const availablePages = [
@@ -23,29 +24,40 @@ export default function MenuEditor() {
         { name: 'ניהול מערכת', path: '/AdminDashboard' }
     ];
 
+    const userRoles = [
+        { value: 'admin', label: 'מנהל מערכת' },
+        { value: 'owner', label: 'בעל משרד' },
+        { value: 'department_head', label: 'ראש מחלקה' },
+        { value: 'lawyer', label: 'עורך דין' }
+    ];
+
+    const [selectedRole, setSelectedRole] = useState('admin');
     const [menuItems, setMenuItems] = useState([]);
-    const [newItem, setNewItem] = useState({ title: '', url: '' });
+    const [newItem, setNewItem] = useState({ title: '', url: '', roles: ['admin', 'owner', 'department_head', 'lawyer'] });
     const [showAddForm, setShowAddForm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         loadMenuItems();
-    }, []);
+    }, [selectedRole]);
 
     const loadMenuItems = async () => {
+        setLoading(true);
         try {
             const configs = await base44.entities.MenuConfiguration.list('order_index');
             if (configs.length === 0) {
                 await initializeDefaultMenu();
             } else {
-                setMenuItems(configs.map(c => ({
+                const items = configs.map(c => ({
                     id: c.id,
                     title: c.display_name,
                     url: c.custom_route || '',
                     visible: c.is_visible,
-                    order: c.order_index
-                })));
+                    order: c.order_index,
+                    roles: c.allowed_roles || ['admin', 'owner', 'department_head', 'lawyer']
+                }));
+                setMenuItems(items);
             }
         } catch (error) {
             console.error('שגיאה בטעינת תפריט:', error);
@@ -55,15 +67,17 @@ export default function MenuEditor() {
 
     const initializeDefaultMenu = async () => {
         const defaultItems = [
-            { display_name: 'דשבורד', custom_route: '/Dashboard', is_visible: true, order_index: 1 },
-            { display_name: 'לקוחות', custom_route: '/Clients', is_visible: true, order_index: 2 },
-            { display_name: 'תיקים', custom_route: '/Cases', is_visible: true, order_index: 3 },
-            { display_name: 'משימות', custom_route: '/Tasks', is_visible: true, order_index: 4 },
-            { display_name: 'פגישות', custom_route: '/Appointments', is_visible: true, order_index: 5 },
-            { display_name: 'שיווק', custom_route: '/Marketing', is_visible: true, order_index: 6 },
-            { display_name: 'כספים', custom_route: '/Finances', is_visible: true, order_index: 7 },
-            { display_name: 'קרדיטים', custom_route: '/Credits', is_visible: true, order_index: 8 },
-            { display_name: 'תמיכה', custom_route: '/Support', is_visible: true, order_index: 9 }
+            { display_name: 'דשבורד', custom_route: '/Dashboard', is_visible: true, order_index: 1, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'לקוחות', custom_route: '/Clients', is_visible: true, order_index: 2, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'תיקים', custom_route: '/Cases', is_visible: true, order_index: 3, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'משימות', custom_route: '/Tasks', is_visible: true, order_index: 4, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'פגישות', custom_route: '/Appointments', is_visible: true, order_index: 5, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'שיווק', custom_route: '/Marketing', is_visible: true, order_index: 6, allowed_roles: ['admin', 'owner', 'department_head'] },
+            { display_name: 'כספים', custom_route: '/Finances', is_visible: true, order_index: 7, allowed_roles: ['admin', 'owner', 'department_head'] },
+            { display_name: 'קרדיטים', custom_route: '/Credits', is_visible: true, order_index: 8, allowed_roles: ['admin', 'owner'] },
+            { display_name: 'תמיכה', custom_route: '/Support', is_visible: true, order_index: 9, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+            { display_name: 'ניהול צוות', custom_route: '/TeamManagement', is_visible: true, order_index: 10, allowed_roles: ['admin', 'owner', 'department_head'] },
+            { display_name: 'ניהול מערכת', custom_route: '/AdminDashboard', is_visible: true, order_index: 11, allowed_roles: ['admin'] }
         ];
 
         for (const item of defaultItems) {
@@ -94,6 +108,19 @@ export default function MenuEditor() {
         ));
     };
 
+    const toggleRole = (id, role) => {
+        setMenuItems(menuItems.map(item => {
+            if (item.id === id) {
+                const roles = item.roles || [];
+                const newRoles = roles.includes(role)
+                    ? roles.filter(r => r !== role)
+                    : [...roles, role];
+                return { ...item, roles: newRoles };
+            }
+            return item;
+        }));
+    };
+
     const deleteItem = async (id) => {
         if (confirm('האם למחוק פריט זה מהתפריט?')) {
             try {
@@ -114,7 +141,8 @@ export default function MenuEditor() {
                 display_name: newItem.title,
                 custom_route: newItem.url,
                 is_visible: true,
-                order_index: menuItems.length + 1
+                order_index: menuItems.length + 1,
+                allowed_roles: newItem.roles
             });
             
             setMenuItems([
@@ -124,10 +152,11 @@ export default function MenuEditor() {
                     title: created.display_name,
                     url: created.custom_route,
                     visible: created.is_visible,
-                    order: created.order_index
+                    order: created.order_index,
+                    roles: created.allowed_roles
                 }
             ]);
-            setNewItem({ title: '', url: '' });
+            setNewItem({ title: '', url: '', roles: ['admin', 'owner', 'department_head', 'lawyer'] });
             setShowAddForm(false);
         } catch (error) {
             console.error('שגיאה בהוספת פריט:', error);
@@ -144,7 +173,8 @@ export default function MenuEditor() {
                     display_name: item.title,
                     custom_route: item.url,
                     is_visible: item.visible,
-                    order_index: i + 1
+                    order_index: i + 1,
+                    allowed_roles: item.roles
                 });
             }
             alert('התפריט נשמר בהצלחה!');
@@ -155,6 +185,10 @@ export default function MenuEditor() {
         setSaving(false);
     };
 
+    const filteredMenuItems = menuItems.filter(item => 
+        item.roles && item.roles.includes(selectedRole)
+    );
+
     return (
         <div className="p-6">
             <Card>
@@ -164,26 +198,43 @@ export default function MenuEditor() {
                             <Menu className="w-6 h-6 text-[#3568AE]" />
                             עריכת תפריט ראשי
                         </CardTitle>
-                        <Button 
-                            onClick={saveMenu} 
-                            className="bg-[#67BF91] hover:bg-[#5AA880]"
-                            disabled={saving}
-                        >
-                            {saving ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
-                                    שומר...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4 ml-2" />
-                                    שמור שינויים
-                                </>
-                            )}
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <Users className="w-5 h-5 text-gray-500" />
+                                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {userRoles.map(role => (
+                                            <SelectItem key={role.value} value={role.value}>
+                                                {role.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button 
+                                onClick={saveMenu} 
+                                className="bg-[#67BF91] hover:bg-[#5AA880]"
+                                disabled={saving}
+                            >
+                                {saving ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
+                                        שומר...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="w-4 h-4 ml-2" />
+                                        שמור שינויים
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
                     <p className="text-sm text-gray-500 mt-2">
-                        גרור כדי לשנות סדר, הסתר/הצג פריטים, או הוסף חדשים
+                        גרור כדי לשנות סדר, הסתר/הצג פריטים, ובחר לאילו תפקידים הם גלויים
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -194,6 +245,14 @@ export default function MenuEditor() {
                         </div>
                     ) : (
                         <>
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                                <p className="text-sm text-gray-700">
+                                    <strong>📌 תצוגת תפריט עבור: {userRoles.find(r => r.value === selectedRole)?.label}</strong>
+                                    <br />
+                                    מוצגים {filteredMenuItems.length} פריטים מתוך {menuItems.length} סך הכל
+                                </p>
+                            </div>
+
                             <DragDropContext onDragEnd={handleDragEnd}>
                                 <Droppable droppableId="menu">
                                     {(provided) => (
@@ -209,37 +268,51 @@ export default function MenuEditor() {
                                                             ref={provided.innerRef}
                                                             {...provided.draggableProps}
                                                             {...provided.dragHandleProps}
-                                                            className={`bg-white border rounded-lg p-4 flex items-center justify-between ${
+                                                            className={`bg-white border rounded-lg p-4 ${
                                                                 item.visible ? 'border-gray-200' : 'border-gray-300 opacity-60'
-                                                            }`}
+                                                            } ${!item.roles?.includes(selectedRole) ? 'bg-gray-50' : ''}`}
                                                         >
-                                                            <div className="flex items-center gap-3">
-                                                                <GripVertical className="w-5 h-5 text-gray-400" />
-                                                                <div>
-                                                                    <p className="font-medium">{item.title}</p>
-                                                                    <p className="text-xs text-gray-500">{item.url}</p>
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex items-start gap-3 flex-1">
+                                                                    <GripVertical className="w-5 h-5 text-gray-400 mt-1" />
+                                                                    <div className="flex-1">
+                                                                        <p className="font-medium">{item.title}</p>
+                                                                        <p className="text-xs text-gray-500 mb-3">{item.url}</p>
+                                                                        
+                                                                        <div className="flex gap-2 flex-wrap">
+                                                                            {userRoles.map(role => (
+                                                                                <label key={role.value} className="flex items-center gap-2 cursor-pointer">
+                                                                                    <Checkbox
+                                                                                        checked={item.roles?.includes(role.value)}
+                                                                                        onCheckedChange={() => toggleRole(item.id, role.value)}
+                                                                                    />
+                                                                                    <span className="text-sm">{role.label}</span>
+                                                                                </label>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => toggleVisibility(item.id)}
-                                                                >
-                                                                    {item.visible ? (
-                                                                        <Eye className="w-4 h-4" />
-                                                                    ) : (
-                                                                        <EyeOff className="w-4 h-4 text-gray-400" />
-                                                                    )}
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => deleteItem(item.id)}
-                                                                    className="text-red-500 hover:text-red-700"
-                                                                >
-                                                                    <X className="w-4 h-4" />
-                                                                </Button>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => toggleVisibility(item.id)}
+                                                                    >
+                                                                        {item.visible ? (
+                                                                            <Eye className="w-4 h-4" />
+                                                                        ) : (
+                                                                            <EyeOff className="w-4 h-4 text-gray-400" />
+                                                                        )}
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => deleteItem(item.id)}
+                                                                        className="text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -259,7 +332,7 @@ export default function MenuEditor() {
                                             value={newItem.url}
                                             onValueChange={(value) => {
                                                 const page = availablePages.find(p => p.path === value);
-                                                setNewItem({ title: page?.name || '', url: value });
+                                                setNewItem({ ...newItem, title: page?.name || '', url: value });
                                             }}
                                         >
                                             <SelectTrigger>
@@ -281,6 +354,26 @@ export default function MenuEditor() {
                                             value={newItem.title}
                                             onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">גלוי לתפקידים</label>
+                                        <div className="flex gap-4 flex-wrap">
+                                            {userRoles.map(role => (
+                                                <label key={role.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <Checkbox
+                                                        checked={newItem.roles.includes(role.value)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setNewItem({ ...newItem, roles: [...newItem.roles, role.value] });
+                                                            } else {
+                                                                setNewItem({ ...newItem, roles: newItem.roles.filter(r => r !== role.value) });
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="text-sm">{role.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="flex gap-2">
                                         <Button onClick={addNewItem} className="bg-[#67BF91] hover:bg-[#5AA880]">

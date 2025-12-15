@@ -56,32 +56,32 @@ export default function Layout({ children, currentPageName }) {
             const { base44 } = await import("@/api/base44Client");
             const configs = await base44.entities.MenuConfiguration.list('order_index');
             
-            console.log('טען תפריט:', configs.length, 'פריטים');
+            const userRole = currentUser?.user_role || currentUser?.role || 'lawyer';
             
             if (configs.length === 0) {
                 // אין הגדרות תפריט, השתמש בברירת מחדל
-                console.log('אין הגדרות תפריט, משתמש בברירת מחדל');
-                setMenuItems([
-                    { title: "דשבורד", url: createPageUrl("Dashboard") },
-                    { title: "לקוחות", url: createPageUrl("Clients") },
-                    { title: "תיקים", url: createPageUrl("Cases") },
-                    { title: "משימות", url: createPageUrl("Tasks") },
-                    { title: "פגישות", url: createPageUrl("Appointments") },
-                    { title: "שיווק", url: createPageUrl("Marketing") },
-                    { title: "כספים", url: createPageUrl("Finances") },
-                    { title: "קרדיטים", url: createPageUrl("Credits") },
-                    { title: "תמיכה", url: createPageUrl("Support") }
-                ]);
+                const defaultMenu = [
+                    { title: "דשבורד", url: createPageUrl("Dashboard"), roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+                    { title: "לקוחות", url: createPageUrl("Clients"), roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+                    { title: "תיקים", url: createPageUrl("Cases"), roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+                    { title: "משימות", url: createPageUrl("Tasks"), roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+                    { title: "פגישות", url: createPageUrl("Appointments"), roles: ['admin', 'owner', 'department_head', 'lawyer'] },
+                    { title: "שיווק", url: createPageUrl("Marketing"), roles: ['admin', 'owner', 'department_head'] },
+                    { title: "כספים", url: createPageUrl("Finances"), roles: ['admin', 'owner', 'department_head'] },
+                    { title: "קרדיטים", url: createPageUrl("Credits"), roles: ['admin', 'owner'] },
+                    { title: "תמיכה", url: createPageUrl("Support"), roles: ['admin', 'owner', 'department_head', 'lawyer'] }
+                ];
+                
+                setMenuItems(defaultMenu.filter(item => item.roles.includes(userRole)));
             } else {
-                // סנן רק פריטים גלויים והמר לפורמט הנכון
+                // סנן לפי תפקיד משתמש
                 const items = configs
-                    .filter(c => c.is_visible)
+                    .filter(c => c.is_visible && c.allowed_roles && c.allowed_roles.includes(userRole))
                     .map(c => ({
                         title: c.display_name,
                         url: c.custom_route
                     }));
                 
-                console.log('פריטי תפריט גלויים:', items);
                 setMenuItems(items);
             }
         } catch (error) {

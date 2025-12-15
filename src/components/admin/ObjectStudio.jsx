@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Database, Edit, Plus, Search, FileText, Check, X, Trash2 } from "lucide-react";
+import { Database, Edit, Plus, Search, FileText, Check, X, Trash2, Users } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -18,9 +18,18 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ObjectStudio() {
+    const userRoles = [
+        { value: 'admin', label: 'מנהל מערכת' },
+        { value: 'owner', label: 'בעל משרד' },
+        { value: 'department_head', label: 'ראש מחלקה' },
+        { value: 'lawyer', label: 'עורך דין' }
+    ];
+
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedRole, setSelectedRole] = useState('admin');
     const [selectedEntity, setSelectedEntity] = useState(null);
     const [showEditor, setShowEditor] = useState(false);
     const [editingField, setEditingField] = useState(null);
@@ -169,14 +178,31 @@ export default function ObjectStudio() {
                             <Database className="w-6 h-6 text-[#3568AE]" />
                             הגדרת רשומות מערכת
                         </CardTitle>
-                        <div className="relative">
-                            <Input
-                                placeholder="חיפוש רשומות..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-[300px] pr-10"
-                            />
-                            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <Users className="w-5 h-5 text-gray-500" />
+                                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {userRoles.map(role => (
+                                            <SelectItem key={role.value} value={role.value}>
+                                                {role.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    placeholder="חיפוש רשומות..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-[300px] pr-10"
+                                />
+                                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            </div>
                         </div>
                     </div>
                     <p className="text-sm text-gray-500 mt-2">
