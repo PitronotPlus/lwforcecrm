@@ -42,23 +42,42 @@ export default function Layout({ children, currentPageName }) {
         setLoading(false);
     };
 
-    // תפריט ניווט לפי סוג משתמש
+    // תפריט ניווט לפי הגדרות מהמערכת
+    const [menuItems, setMenuItems] = useState([]);
+
+    useEffect(() => {
+        if (currentUser) {
+            loadMenuItems();
+        }
+    }, [currentUser]);
+
+    const loadMenuItems = async () => {
+        try {
+            const { base44 } = await import("@/api/base44Client");
+            const configs = await base44.entities.MenuConfiguration.list('order_index');
+            
+            // סנן רק פריטים גלויים והמר לפורמט הנכון
+            const items = configs
+                .filter(c => c.is_visible)
+                .map(c => ({
+                    title: c.display_name,
+                    url: c.custom_route
+                }));
+            
+            setMenuItems(items);
+        } catch (error) {
+            console.error('שגיאה בטעינת תפריט:', error);
+            // ברירת מחדל במקרה של שגיאה
+            setMenuItems([
+                { title: "דשבורד", url: createPageUrl("Dashboard") },
+                { title: "לקוחות", url: createPageUrl("Clients") },
+                { title: "משימות", url: createPageUrl("Tasks") }
+            ]);
+        }
+    };
+
     const getNavigationItems = () => {
-        if (!currentUser) return []; // אם לא מחובר, אין תפריט ניווט
-
-        const baseItems = [
-            { title: "דשבורד", url: createPageUrl("Dashboard") },
-            { title: "לקוחות", url: createPageUrl("Clients") },
-            { title: "תיקים", url: createPageUrl("Cases") },
-            { title: "משימות", url: createPageUrl("Tasks") },
-            { title: "פגישות", url: createPageUrl("Appointments") },
-            { title: "שיווק", url: createPageUrl("Marketing") },
-            { title: "כספים", url: createPageUrl("Finances") },
-            { title: "קרדיטים", url: createPageUrl("Credits") },
-            { title: "תמיכה", url: createPageUrl("Support") }
-        ];
-
-        return baseItems;
+        return menuItems;
     };
 
     // תפריט פרופיל לפי סוג משתמש

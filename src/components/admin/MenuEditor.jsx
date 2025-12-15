@@ -58,8 +58,16 @@ export default function MenuEditor() {
         ));
     };
 
-    const deleteItem = (id) => {
-        setMenuItems(menuItems.filter(item => item.id !== id));
+    const deleteItem = async (id) => {
+        if (confirm('האם למחוק פריט זה מהתפריט?')) {
+            try {
+                await base44.entities.MenuConfiguration.delete(id);
+                setMenuItems(menuItems.filter(item => item.id !== id));
+            } catch (error) {
+                console.error('שגיאה במחיקת פריט:', error);
+                alert('אירעה שגיאה במחיקת הפריט');
+            }
+        }
     };
 
     const addNewItem = () => {
