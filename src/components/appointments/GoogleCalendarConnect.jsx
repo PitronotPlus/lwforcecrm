@@ -12,7 +12,27 @@ export default function GoogleCalendarConnect() {
 
     useEffect(() => {
         checkConnection();
+        
+        // בדיקה אם חזרנו מ-OAuth
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+            handleOAuthCallback(code);
+        }
     }, []);
+
+    const handleOAuthCallback = async (code) => {
+        try {
+            await base44.functions.invoke('googleCalendarConnect', { code });
+            setConnected(true);
+            // ניקוי ה-URL
+            window.history.replaceState({}, '', '/Appointments?tab=google');
+            alert('חיבור ליומן Google הושלם בהצלחה!');
+        } catch (error) {
+            console.error('שגיאה בהשלמת החיבור:', error);
+        }
+    };
 
     const checkConnection = async () => {
         try {
@@ -29,18 +49,13 @@ export default function GoogleCalendarConnect() {
 
     const handleConnect = async () => {
         try {
-            // הפניה לדף OAuth של Google Calendar
-            // המשתמש יאשר ישירות עם Google ויחזור לכאן
-            const currentUrl = window.location.origin + window.location.pathname + '?tab=google&connected=true';
-            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-                `client_id=YOUR_CLIENT_ID&` +
-                `redirect_uri=${encodeURIComponent(currentUrl)}&` +
-                `response_type=code&` +
-                `scope=${encodeURIComponent('https://www.googleapis.com/auth/calendar.events')}&` +
-                `access_type=offline&` +
-                `prompt=consent`;
+            // קריאה לפונקציה שמתחילה OAuth flow למשתמש הנוכחי
+            const result = await base44.functions.invoke('googleCalendarConnect', {});
             
-            window.location.href = authUrl;
+            if (result.data.authUrl) {
+                // הפניית המשתמש לדף האישור של Google
+                window.location.href = result.data.authUrl;
+            }
         } catch (error) {
             console.error('שגיאה בחיבור:', error);
             alert('אירעה שגיאה בחיבור. אנא נסה שוב.');

@@ -9,7 +9,33 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
+        // קבלת access token של המשתמש
+        let accessToken = user.google_access_token;
+        
+        // בדיקה אם הטוקן פג תוקף
+        if (new Date(user.google_token_expiry) < new Date()) {
+            const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+            const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+
+            const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    refresh_token: user.google_refresh_token,
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    grant_type: 'refresh_token',
+                }),
+            });
+
+            const tokens = await refreshResponse.json();
+            accessToken = tokens.access_token;
+
+            await base44.auth.updateMe({
+                google_access_token: tokens.access_token,
+                google_token_expiry: new Date(Date.now() + tokens.expires_in * 1000).toISOString()
+            });
+        }
         
         if (!accessToken) {
             return Response.json({ error: 'Google Calendar not connected' }, { status: 400 });
