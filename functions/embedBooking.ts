@@ -4,16 +4,10 @@ Deno.serve((req) => {
     'use strict';
     
     const container = document.getElementById('lawforce-booking');
-    if (!container) {
-        console.error('LawForce: Container not found');
-        return;
-    }
+    if (!container) return;
     
     const lawyerId = container.getAttribute('data-lawyer-id');
-    if (!lawyerId) {
-        console.error('LawForce: Lawyer ID is required');
-        return;
-    }
+    if (!lawyerId) return;
     
     const API_URL = '${new URL(req.url).origin}';
     
@@ -25,7 +19,8 @@ Deno.serve((req) => {
     let currentYear = new Date().getFullYear();
     let formData = { full_name: '', phone: '', email: '', service_type: '', notes: '' };
     
-    const styles = \`<style>
+    const styles = document.createElement('style');
+    styles.textContent = \`
 .lf-container { max-width: 900px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl; }
 .lf-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 40px 20px; text-align: center; color: white; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(102,126,234,0.3); }
 .lf-header h1 { margin: 0 0 10px 0; font-size: 32px; font-weight: 700; }
@@ -60,7 +55,8 @@ Deno.serve((req) => {
     .lf-card { padding: 20px; }
     .lf-grid { grid-template-columns: 1fr; }
 }
-</style>\`;
+\`;
+    document.head.appendChild(styles);
     
     async function api(action, data = {}) {
         const res = await fetch(\`\${API_URL}/functions/publicBooking\`, {
@@ -106,12 +102,12 @@ Deno.serve((req) => {
     }
     
     function render(state) {
-        let html = styles;
+        container.innerHTML = '';
         
         if (state === 'loading') {
-            html += '<div class="lf-container"><div class="lf-spinner"></div></div>';
+            container.innerHTML = '<div class="lf-container"><div class="lf-spinner"></div></div>';
         } else if (state === 'success') {
-            html += \`<div class="lf-container"><div class="lf-card lf-success">
+            container.innerHTML = \`<div class="lf-container"><div class="lf-card lf-success">
                 <div class="lf-success-icon">✓</div>
                 <h2 style="color:#10b981">הפגישה נקבעה בהצלחה!</h2>
                 <p>קיבלת אישור למייל. נתראה ב-\${fmtHe(selectedDate)} בשעה \${selectedTime}</p>
@@ -119,7 +115,7 @@ Deno.serve((req) => {
         } else {
             const monthName = new Date(currentYear, currentMonth).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
             
-            html += \`<div class="lf-container">
+            container.innerHTML = \`<div class="lf-container">
                 <div class="lf-header">
                     <h1>קביעת פגישה</h1>
                     <p>עם \${lawyer.full_name}</p>
@@ -127,12 +123,12 @@ Deno.serve((req) => {
                 <div class="lf-card">
                     <div class="lf-title">הפרטים שלך</div>
                     <div class="lf-grid">
-                        <div><label class="lf-label">שם מלא *</label><input class="lf-input" id="lf-name" required /></div>
-                        <div><label class="lf-label">טלפון *</label><input class="lf-input" id="lf-phone" required /></div>
-                        <div><label class="lf-label">אימייל *</label><input class="lf-input" type="email" id="lf-email" required /></div>
-                        <div><label class="lf-label">נושא</label><input class="lf-input" id="lf-service" /></div>
+                        <div><label class="lf-label">שם מלא *</label><input class="lf-input" id="lf-name" value="\${formData.full_name}" required /></div>
+                        <div><label class="lf-label">טלפון *</label><input class="lf-input" id="lf-phone" value="\${formData.phone}" required /></div>
+                        <div><label class="lf-label">אימייל *</label><input class="lf-input" type="email" id="lf-email" value="\${formData.email}" required /></div>
+                        <div><label class="lf-label">נושא</label><input class="lf-input" id="lf-service" value="\${formData.service_type}" /></div>
                     </div>
-                    <div><label class="lf-label">הערות</label><textarea class="lf-textarea" id="lf-notes" rows="3"></textarea></div>
+                    <div><label class="lf-label">הערות</label><textarea class="lf-textarea" id="lf-notes" rows="3">\${formData.notes}</textarea></div>
                 </div>
                 <div class="lf-card">
                     <div class="lf-title">בחר תאריך ושעה</div>
@@ -154,16 +150,14 @@ Deno.serve((req) => {
                                         : '<p style="text-align:center;color:#999">אין שעות פנויות</p>'
                                     }
                                 </div>
-                            \` : '<p style="text-align:center;color:#999;padding:40px">בחר תאריך</p>'}
+                            \` : '<p style="text-align:center;color:#999;padding:40px">בחר תאריך מהלוח</p>'}
                         </div>
                     </div>
                     <button class="lf-btn" id="lf-submit" \${!selectedDate || !selectedTime ? 'disabled' : ''}>אשר פגישה</button>
                 </div>
             </div>\`;
+            attach();
         }
-        
-        container.innerHTML = html;
-        if (state === 'form') attach();
     }
     
     async function loadSlots(date) {
