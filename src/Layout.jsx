@@ -74,12 +74,19 @@ export default function Layout({ children, currentPageName }) {
                 
                 setMenuItems(defaultMenu.filter(item => item.roles.includes(userRole)));
             } else {
-                // סנן לפי תפקיד משתמש
+                // טען מההגדרות וסנן לפי תפקיד משתמש
                 const items = configs
-                    .filter(c => c.is_visible && c.allowed_roles && c.allowed_roles.includes(userRole))
+                    .filter(c => {
+                        // הצג רק פריטים גלויים
+                        if (!c.is_visible) return false;
+                        
+                        // בדוק אם למשתמש יש הרשאה לראות את הפריט
+                        const allowedRoles = c.allowed_roles || ['admin', 'owner', 'department_head', 'lawyer'];
+                        return allowedRoles.includes(userRole);
+                    })
                     .map(c => ({
                         title: c.display_name,
-                        url: c.custom_route
+                        url: c.custom_route || createPageUrl(c.object_id || c.display_name)
                     }));
                 
                 setMenuItems(items);
@@ -87,13 +94,14 @@ export default function Layout({ children, currentPageName }) {
         } catch (error) {
             console.error('שגיאה בטעינת תפריט:', error);
             // ברירת מחדל במקרה של שגיאה
-            setMenuItems([
+            const defaultMenu = [
                 { title: "דשבורד", url: createPageUrl("Dashboard") },
                 { title: "לקוחות", url: createPageUrl("Clients") },
                 { title: "תיקים", url: createPageUrl("Cases") },
                 { title: "משימות", url: createPageUrl("Tasks") },
                 { title: "פגישות", url: createPageUrl("Appointments") }
-            ]);
+            ];
+            setMenuItems(defaultMenu);
         }
     };
 
