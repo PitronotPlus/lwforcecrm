@@ -163,25 +163,108 @@ export default function GoogleCalendarConnect() {
                     </>
                 ) : (
                     <>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <p className="text-sm font-semibold text-gray-800 mb-2">💡 למנהל המערכת:</p>
-                            <p className="text-xs text-gray-600">
-                                כדי להפעיל חיבור Google Calendar, יש להגדיר פעם אחת (לכל האפליקציה):<br/>
-                                1. צור OAuth Client ב-<a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">Google Cloud Console</a><br/>
-                                2. הגדר את GOOGLE_CLIENT_ID ו-GOOGLE_CLIENT_SECRET בהגדרות הסודות של האפליקציה<br/>
-                                3. אחרי זה - כל משתמש יוכל להתחבר ליומן שלו בקליק
-                            </p>
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6 mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                🔧 מדריך הגדרה חד-פעמית למנהל המערכת
+                            </h3>
+                            
+                            <div className="bg-white rounded-lg p-4 mb-4 border-l-4 border-green-500">
+                                <p className="text-sm font-semibold text-green-800 mb-2">✅ חשוב להבין:</p>
+                                <p className="text-xs text-gray-700 leading-relaxed">
+                                    <strong>ההגדרה הזו היא פעם אחת בלבד לכל המערכת.</strong><br/>
+                                    אחרי ההגדרה - כל עורך דין במשרד יוכל להתחבר ליומן Google <strong>שלו</strong> בקליק אחד.<br/>
+                                    היומנים לא מתערבבים - כל אחד רואה רק את הפגישות שלו.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <p className="font-semibold text-gray-800 mb-2">שלב 1: צור פרויקט ב-Google Cloud</p>
+                                    <ol className="text-xs text-gray-700 space-y-2 pr-4" style={{ listStyleType: 'decimal' }}>
+                                        <li>היכנס ל-<a href="https://console.cloud.google.com" target="_blank" className="text-blue-600 underline font-medium">Google Cloud Console</a></li>
+                                        <li>לחץ על "Select a project" ואז "NEW PROJECT"</li>
+                                        <li>תן לפרויקט שם (למשל: "LawForce Calendar") ולחץ CREATE</li>
+                                        <li>המתן שהפרויקט ייווצר ובחר בו</li>
+                                    </ol>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <p className="font-semibold text-gray-800 mb-2">שלב 2: הפעל את Google Calendar API</p>
+                                    <ol className="text-xs text-gray-700 space-y-2 pr-4" style={{ listStyleType: 'decimal' }}>
+                                        <li>בתפריט הצד, לחץ על "APIs & Services" → "Library"</li>
+                                        <li>חפש "Google Calendar API"</li>
+                                        <li>לחץ על התוצאה ואז על כפתור "ENABLE"</li>
+                                    </ol>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <p className="font-semibold text-gray-800 mb-2">שלב 3: צור OAuth Consent Screen</p>
+                                    <ol className="text-xs text-gray-700 space-y-2 pr-4" style={{ listStyleType: 'decimal' }}>
+                                        <li>עבור ל-"APIs & Services" → "OAuth consent screen"</li>
+                                        <li>בחר <strong>"External"</strong> ולחץ CREATE</li>
+                                        <li>מלא את הפרטים הבסיסיים:
+                                            <ul className="pr-4 mt-1 space-y-1" style={{ listStyleType: 'circle' }}>
+                                                <li>App name: LawForce (או שם המשרד שלך)</li>
+                                                <li>User support email: האימייל שלך</li>
+                                                <li>Developer contact: האימייל שלך</li>
+                                            </ul>
+                                        </li>
+                                        <li>לחץ "SAVE AND CONTINUE" בכל השלבים (אפשר לדלג על Scopes)</li>
+                                        <li>בשלב "Test users" - הוסף את כל כתובות המייל של עורכי הדין שיצטרכו להתחבר</li>
+                                        <li>לחץ SAVE AND CONTINUE עד הסוף</li>
+                                    </ol>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <p className="font-semibold text-gray-800 mb-2">שלב 4: צור OAuth 2.0 Client ID</p>
+                                    <ol className="text-xs text-gray-700 space-y-2 pr-4" style={{ listStyleType: 'decimal' }}>
+                                        <li>עבור ל-"APIs & Services" → <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">"Credentials"</a></li>
+                                        <li>לחץ על "+ CREATE CREDENTIALS" → "OAuth client ID"</li>
+                                        <li>בחר Application type: <strong>"Web application"</strong></li>
+                                        <li>תן שם (למשל: "LawForce Web Client")</li>
+                                        <li>ב-"Authorized redirect URIs" לחץ "+ ADD URI" והוסף:
+                                            <div className="bg-gray-100 p-2 rounded mt-1 font-mono text-xs break-all">
+                                                {window.location.origin}/Appointments?tab=google
+                                            </div>
+                                        </li>
+                                        <li>לחץ CREATE</li>
+                                        <li><strong className="text-red-600">חשוב!</strong> תיפתח חלונית עם Client ID ו-Client Secret - <strong>העתק אותם!</strong></li>
+                                    </ol>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                                    <p className="font-semibold text-gray-800 mb-2">שלב 5: הזן את הפרטים במערכת</p>
+                                    <ol className="text-xs text-gray-700 space-y-2 pr-4" style={{ listStyleType: 'decimal' }}>
+                                        <li>עבור להגדרות המערכת → סודות (Secrets)</li>
+                                        <li>הוסף סוד חדש בשם: <code className="bg-gray-100 px-2 py-1 rounded">GOOGLE_CLIENT_ID</code></li>
+                                        <li>הדבק את ה-Client ID שקיבלת</li>
+                                        <li>הוסף סוד נוסף בשם: <code className="bg-gray-100 px-2 py-1 rounded">GOOGLE_CLIENT_SECRET</code></li>
+                                        <li>הדבק את ה-Client Secret שקיבלת</li>
+                                        <li>שמור</li>
+                                    </ol>
+                                </div>
+
+                                <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
+                                    <p className="font-semibold text-green-800 mb-2">✅ סיימת! מה עכשיו?</p>
+                                    <p className="text-xs text-gray-700">
+                                        מעכשיו כל עורך דין במשרד יכול ללחוץ על "חבר יומן Google" למטה,<br/>
+                                        להתחבר עם חשבון Google <strong>שלו</strong>, והמערכת תסנכרן את הפגישות <strong>שלו</strong> בלבד.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                         
-                        <p className="text-sm text-gray-600">
-                            חבר את יומן Google שלך כדי:
-                        </p>
-                        <ul className="text-sm text-gray-600 space-y-2 list-disc list-inside">
-                            <li>לסנכרן פגישות אוטומטית</li>
-                            <li>לשלוח הזמנות ללקוחות עם אישור/דחייה</li>
-                            <li>לקבל עדכונים בזמן אמת</li>
-                            <li>ליצור פגישות Google Meet אוטומטיות</li>
-                        </ul>
+                        <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                            <p className="text-sm font-semibold text-gray-800 mb-2">למה זה טוב בשבילך?</p>
+                            <ul className="text-sm text-gray-600 space-y-2 list-disc list-inside">
+                                <li>סנכרון אוטומטי של פגישות ליומן Google שלך</li>
+                                <li>שליחת הזמנות ללקוחות עם אפשרות אישור/דחייה</li>
+                                <li>עדכונים בזמן אמת משני הצדדים</li>
+                                <li>יצירת פגישות Google Meet אוטומטית</li>
+                                <li>כל עורך דין מנהל את היומן שלו בנפרד</li>
+                            </ul>
+                        </div>
+                        
                         <Button
                             onClick={handleConnect}
                             className="w-full bg-[#3568AE] hover:bg-[#2a5390]"
