@@ -112,13 +112,29 @@ export default function Layout({ children, currentPageName }) {
     const navigationItems = getNavigationItems();
     const profileMenuItems = getProfileMenuItems();
 
-    if (loading) {
+    // דפים פומביים ללא Layout
+    const publicPages = ['Booking'];
+    const isPublicPage = publicPages.includes(currentPageName);
+
+    if (loading && !isPublicPage) {
         return (
             <div className="min-h-screen flex items-center justify-center" style={{ background: '#F5F5F5' }}>
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3568AE] mx-auto mb-4"></div>
                     <p style={{ fontFamily: 'Heebo', color: '#858C94' }}>טוען...</p>
                 </div>
+            </div>
+        );
+    }
+
+    // דפים פומביים - הצג רק את התוכן ללא header/navigation
+    if (isPublicPage) {
+        return (
+            <div className="min-h-screen" style={{ 
+                fontFamily: 'Heebo, -apple-system, BlinkMacSystemFont, sans-serif',
+                direction: 'rtl'
+            }}>
+                {children}
             </div>
         );
     }

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Clock, User, Phone, Mail, CheckCircle, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { format, addDays, setHours, setMinutes, isSameDay, parse } from "date-fns";
+import { format, addDays } from "date-fns";
 import { he } from "date-fns/locale";
+import { publicBooking } from "@/functions/publicBooking";
 
 export default function Booking() {
     const [lawyerId, setLawyerId] = useState(null);
@@ -47,10 +47,12 @@ export default function Booking() {
     const loadLawyerData = async (id) => {
         try {
             setLoading(true);
-            // טוען את פרטי עורך הדין
-            const users = await base44.asServiceRole.entities.User.filter({ id });
-            if (users.length > 0) {
-                setLawyer(users[0]);
+            const response = await publicBooking({ 
+                action: 'getLawyer', 
+                lawyerId: id 
+            });
+            if (response.data.lawyer) {
+                setLawyer(response.data.lawyer);
             }
         } catch (error) {
             console.error("שגיאה בטעינת נתונים:", error);
@@ -61,28 +63,14 @@ export default function Booking() {
 
     const loadAvailableSlots = async (date) => {
         try {
-            // טוען את הפגישות הקיימות לתאריך
-            const existingAppointments = await base44.asServiceRole.entities.Appointment.filter({
-                created_by: lawyer.email,
-                date: format(date, 'yyyy-MM-dd')
-            });
-
-            // יצירת שעות זמינות (9:00-18:00, כל חצי שעה)
-            const slots = [];
-            for (let hour = 9; hour < 18; hour++) {
-                for (let minute of [0, 30]) {
-                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-                    
-                    // בדיקה אם השעה תפוסה
-                    const isBooked = existingAppointments.some(apt => apt.time === timeStr);
-                    
-                    if (!isBooked) {
-                        slots.push(timeStr);
-                    }
+            const response = await publicBooking({
+                action: 'getAvailableSlots',
+                date: format(date, 'yyyy-MM-dd'),
+                appointmentData: {
+                    lawyerEmail: lawyer.email
                 }
-            }
-            
-            setAvailableSlots(slots);
+            });
+            setAvailableSlots(response.data.slots || []);
         } catch (error) {
             console.error("שגיאה בטעינת שעות פנויות:", error);
         }
@@ -98,41 +86,26 @@ export default function Booking() {
 
         setSubmitting(true);
         try {
-            // יצירת לקוח חדש
-            const client = await base44.asServiceRole.entities.Client.create({
-                full_name: formData.full_name,
-                phone: formData.phone,
-                email: formData.email,
-                service_type: formData.service_type,
-                status: "ליד",
-                source: "קישור הזמנה",
-                initial_need: formData.notes
+            const response = await publicBooking({
+                action: 'createAppointment',
+                appointmentData: {
+                    full_name: formData.full_name,
+                    phone: formData.phone,
+                    email: formData.email,
+                    service_type: formData.service_type,
+                    notes: formData.notes,
+                    date: format(selectedDate, 'yyyy-MM-dd'),
+                    time: selectedTime,
+                    lawyerName: lawyer.full_name,
+                    lawyerEmail: lawyer.email
+                }
             });
 
-            // יצירת הפגישה
-            await base44.asServiceRole.entities.Appointment.create({
-                title: `פגישה עם ${formData.full_name}`,
-                date: format(selectedDate, 'yyyy-MM-dd'),
-                time: selectedTime,
-                client_name: formData.full_name,
-                notes: formData.notes,
-                type: "פגישה",
-                location_type: "משרד",
-                reminder: true
-            });
-
-            // שליחת אימייל אישור ללקוח
-            try {
-                await base44.asServiceRole.integrations.Core.SendEmail({
-                    to: formData.email,
-                    subject: `אישור פגישה - ${format(selectedDate, 'dd/MM/yyyy')} בשעה ${selectedTime}`,
-                    body: `שלום ${formData.full_name},\n\nפגישתך עם ${lawyer.full_name} נקבעה בהצלחה!\n\nפרטי הפגישה:\nתאריך: ${format(selectedDate, 'dd/MM/yyyy', { locale: he })}\nשעה: ${selectedTime}\n\nנתראה בקרוב!\n\n${lawyer.full_name}`
-                });
-            } catch (emailError) {
-                console.error("שגיאה בשליחת מייל:", emailError);
+            if (response.data.success) {
+                setSubmitted(true);
+            } else {
+                throw new Error('Failed to create appointment');
             }
-
-            setSubmitted(true);
         } catch (error) {
             console.error("שגיאה בקביעת פגישה:", error);
             alert("שגיאה בקביעת הפגישה. אנא נסה שנית.");
