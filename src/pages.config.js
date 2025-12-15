@@ -15,6 +15,7 @@ import Support from './pages/Support';
 import Appointments from './pages/Appointments';
 import TeamManagement from './pages/TeamManagement';
 import PublicBooking from './pages/PublicBooking';
+import Booking from './pages/Booking';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "Appointments": Appointments,
     "TeamManagement": TeamManagement,
     "PublicBooking": PublicBooking,
+    "Booking": Booking,
 }
 
 export const pagesConfig = {
