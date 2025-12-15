@@ -67,17 +67,17 @@ export default function MenuEditor() {
 
     const initializeDefaultMenu = async () => {
         const defaultItems = [
-            { display_name: 'דשבורד', custom_route: '/Dashboard', is_visible: true, order_index: 1, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'לקוחות', custom_route: '/Clients', is_visible: true, order_index: 2, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'תיקים', custom_route: '/Cases', is_visible: true, order_index: 3, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'משימות', custom_route: '/Tasks', is_visible: true, order_index: 4, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'פגישות', custom_route: '/Appointments', is_visible: true, order_index: 5, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'שיווק', custom_route: '/Marketing', is_visible: true, order_index: 6, allowed_roles: ['admin', 'owner', 'department_head'] },
-            { display_name: 'כספים', custom_route: '/Finances', is_visible: true, order_index: 7, allowed_roles: ['admin', 'owner', 'department_head'] },
-            { display_name: 'קרדיטים', custom_route: '/Credits', is_visible: true, order_index: 8, allowed_roles: ['admin', 'owner'] },
-            { display_name: 'תמיכה', custom_route: '/Support', is_visible: true, order_index: 9, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'] },
-            { display_name: 'ניהול צוות', custom_route: '/TeamManagement', is_visible: true, order_index: 10, allowed_roles: ['admin', 'owner', 'department_head'] },
-            { display_name: 'ניהול מערכת', custom_route: '/AdminDashboard', is_visible: true, order_index: 11, allowed_roles: ['admin'] }
+            { display_name: 'דשבורד', custom_route: '/Dashboard', is_visible: true, order_index: 1, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'main' },
+            { display_name: 'לקוחות', custom_route: '/Clients', is_visible: true, order_index: 2, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'main' },
+            { display_name: 'תיקים', custom_route: '/Cases', is_visible: true, order_index: 3, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'main' },
+            { display_name: 'משימות', custom_route: '/Tasks', is_visible: true, order_index: 4, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'main' },
+            { display_name: 'פגישות', custom_route: '/Appointments', is_visible: true, order_index: 5, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'main' },
+            { display_name: 'שיווק', custom_route: '/Marketing', is_visible: true, order_index: 6, allowed_roles: ['admin', 'owner', 'department_head'], menu_group: 'main' },
+            { display_name: 'כספים', custom_route: '/Finances', is_visible: true, order_index: 7, allowed_roles: ['admin', 'owner', 'department_head'], menu_group: 'main' },
+            { display_name: 'קרדיטים', custom_route: '/Credits', is_visible: true, order_index: 8, allowed_roles: ['admin', 'owner'], menu_group: 'more' },
+            { display_name: 'תמיכה', custom_route: '/Support', is_visible: true, order_index: 9, allowed_roles: ['admin', 'owner', 'department_head', 'lawyer'], menu_group: 'more' },
+            { display_name: 'ניהול צוות', custom_route: '/TeamManagement', is_visible: true, order_index: 10, allowed_roles: ['admin', 'owner', 'department_head'], menu_group: 'main' },
+            { display_name: 'ניהול מערכת', custom_route: '/AdminDashboard', is_visible: true, order_index: 11, allowed_roles: ['admin'], menu_group: 'main' }
         ];
 
         for (const item of defaultItems) {

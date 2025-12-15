@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Plus } from 'lucide-react';
 import CreateTaskModal from '../tasks/CreateTaskModal';
 
 export default function WelcomeHeader({ onTaskCreated }) {
+    const [userName, setUserName] = useState('');
+
+    useEffect(() => {
+        loadUser();
+    }, []);
+
+    const loadUser = async () => {
+        try {
+            const user = await base44.auth.me();
+            setUserName(user.full_name || 'משתמש');
+        } catch (error) {
+            console.error('שגיאה בטעינת משתמש:', error);
+        }
+    };
+
     return (
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 md:mb-8 gap-3 md:gap-0">
             {/* Welcome Message */}
@@ -14,7 +30,7 @@ export default function WelcomeHeader({ onTaskCreated }) {
                         fontFamily: 'Heebo'
                     }}
                 >
-                    ברוך הבא עו״ד עוז מוכתר!
+                    ברוך הבא {userName}!
                 </h1>
             </div>
             
