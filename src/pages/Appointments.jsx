@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { Appointment } from "@/entities/Appointment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,14 +7,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Calendar, Clock, MapPin, User, Edit, Trash2, Video, ExternalLink } from 'lucide-react';
 import BookingLinkSection from "../components/appointments/BookingLinkSection";
+import CalendarView from "../components/appointments/CalendarView";
+import DaySchedule from "../components/appointments/DaySchedule";
+import AvailabilitySettings from "../components/appointments/AvailabilitySettings";
 
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingAppointment, setEditingAppointment] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [currentUser, setCurrentUser] = useState(null);
+    const [availabilitySlots, setAvailabilitySlots] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
         date: '',
@@ -27,16 +35,46 @@ export default function Appointments() {
     });
 
     useEffect(() => {
-        loadAppointments();
+        loadData();
     }, []);
 
-    const loadAppointments = async () => {
+    const loadData = async () => {
         try {
-            const data = await Appointment.list('-date');
-            setAppointments(data);
+            const [appointmentsData, user] = await Promise.all([
+                Appointment.list('-date'),
+                base44.auth.me()
+            ]);
+            
+            // סנן פגישות לפי משתמש מחובר
+            const userAppointments = appointmentsData.filter(apt => 
+                apt.created_by === user.email || apt.assigned_to === user.email
+            );
+            
+            setAppointments(userAppointments);
+            setCurrentUser(user);
+            
+            // טען הגדרות זמינות
+            if (user.availability_settings) {
+                const slots = convertAvailabilityToSlots(user.availability_settings);
+                setAvailabilitySlots(slots);
+            }
         } catch (error) {
-            console.error("שגיאה בטעינת פגישות:", error);
+            console.error("שגיאה בטעינת נתונים:", error);
         }
+    };
+
+    const convertAvailabilityToSlots = (settings) => {
+        const slots = [];
+        Object.entries(settings).forEach(([day, config]) => {
+            if (config.enabled) {
+                slots.push({
+                    day,
+                    start_time: config.start,
+                    end_time: config.end
+                });
+            }
+        });
+        return slots;
     };
 
     const handleSubmit = async (e) => {
@@ -48,7 +86,7 @@ export default function Appointments() {
                 await Appointment.create(formData);
             }
             resetForm();
-            loadAppointments();
+            loadData();
         } catch (error) {
             console.error("שגיאה בשמירת פגישה:", error);
         }
@@ -64,11 +102,15 @@ export default function Appointments() {
         if (window.confirm('האם אתה בטוח שברצונך למחוק את הפגישה?')) {
             try {
                 await Appointment.delete(id);
-                loadAppointments();
+                loadData();
             } catch (error) {
                 console.error("שגיאה במחיקת פגישה:", error);
             }
         }
+    };
+
+    const handleAppointmentClick = (appointment) => {
+        handleEdit(appointment);
     };
 
     const resetForm = () => {
@@ -104,9 +146,50 @@ export default function Appointments() {
                         className="text-[32px] font-bold"
                         style={{ color: '#3568AE', fontFamily: 'Heebo' }}
                     >
-                        ניהול פגישות
+                        יומן ופגישות
                     </h1>
-                    <div className="flex items-center gap-4">
+                    <Button 
+                        onClick={() => setShowForm(!showForm)}
+                        className="bg-[#67BF91] hover:bg-[#5AA880] text-white"
+                    >
+                        <Plus className="ml-2 w-4 h-4" />
+                        {showForm ? 'ביטול' : 'פגישה חדשה'}
+                    </Button>
+                </div>
+
+                <Tabs defaultValue="calendar" className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="calendar">יומן</TabsTrigger>
+                        <TabsTrigger value="list">רשימת פגישות</TabsTrigger>
+                        <TabsTrigger value="availability">הגדרות זמינות</TabsTrigger>
+                    </TabsList>
+
+                    {/* Calendar Tab */}
+                    <TabsContent value="calendar" className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2">
+                                <CalendarView
+                                    appointments={appointments}
+                                    selectedDate={selectedDate}
+                                    onDateSelect={setSelectedDate}
+                                    onAppointmentClick={handleAppointmentClick}
+                                />
+                            </div>
+                            <div>
+                                <DaySchedule
+                                    selectedDate={selectedDate}
+                                    appointments={appointments}
+                                    availabilitySlots={availabilitySlots}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                />
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* List Tab */}
+                    <TabsContent value="list" className="space-y-6">
+                        {/* Search */}
                         <div className="relative max-w-sm">
                             <Input
                                 placeholder="חיפוש פגישה..."
@@ -116,18 +199,9 @@ export default function Appointments() {
                             />
                             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         </div>
-                        <Button 
-                            onClick={() => setShowForm(!showForm)}
-                            className="bg-[#67BF91] hover:bg-[#5AA880] text-white"
-                        >
-                            <Plus className="ml-2 w-4 h-4" />
-                            {showForm ? 'ביטול' : 'פגישה חדשה'}
-                        </Button>
-                    </div>
-                </div>
 
-                {/* Booking Link Section */}
-                <BookingLinkSection />
+                        {/* Booking Link Section */}
+                        <BookingLinkSection />
 
                 {/* Form */}
                 {showForm && (
@@ -367,10 +441,22 @@ export default function Appointments() {
                                 <Plus className="ml-2 w-4 h-4" />
                                 צור פגישה ראשונה
                             </Button>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
-        </div>
-    );
-}
+                            </CardContent>
+                            </Card>
+                            )}
+                            </TabsContent>
+
+                            {/* Availability Tab */}
+                            <TabsContent value="availability">
+                            <AvailabilitySettings
+                            onSave={(newAvailability) => {
+                              const slots = convertAvailabilityToSlots(newAvailability);
+                              setAvailabilitySlots(slots);
+                            }}
+                            />
+                            </TabsContent>
+                            </Tabs>
+                            </div>
+                            </div>
+                            );
+                            }
