@@ -16,20 +16,55 @@ Deno.serve(async (req) => {
         }
         
         if (action === 'getAvailableSlots') {
+            // שליפת הגדרות זמינות של עורך הדין
+            const users = await base44.asServiceRole.entities.User.filter({ email: appointmentData.lawyerEmail });
+            const lawyer = users[0];
+            
+            // בדיקה איזה יום בשבוע זה
+            const dayOfWeek = new Date(date).getDay();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayName = dayNames[dayOfWeek];
+            
             // שליפת פגישות קיימות לתאריך
             const existingAppointments = await base44.asServiceRole.entities.Appointment.filter({
                 created_by: appointmentData.lawyerEmail,
                 date: date
             });
             
-            // יצירת שעות זמינות (9:00-18:00, כל חצי שעה)
+            // יצירת שעות זמינות לפי הגדרות המשתמש
             const slots = [];
-            for (let hour = 9; hour < 18; hour++) {
-                for (let minute of [0, 30]) {
-                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+            
+            // אם יש הגדרות זמינות מותאמות אישית
+            if (lawyer?.availability_settings && lawyer.availability_settings[dayName]?.enabled) {
+                const daySettings = lawyer.availability_settings[dayName];
+                const [startHour, startMin] = daySettings.start.split(':').map(Number);
+                const [endHour, endMin] = daySettings.end.split(':').map(Number);
+                
+                let currentHour = startHour;
+                let currentMin = startMin;
+                
+                while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
+                    const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
                     const isBooked = existingAppointments.some(apt => apt.time === timeStr);
                     if (!isBooked) {
                         slots.push(timeStr);
+                    }
+                    
+                    currentMin += 30;
+                    if (currentMin >= 60) {
+                        currentMin = 0;
+                        currentHour++;
+                    }
+                }
+            } else {
+                // ברירת מחדל: 9:00-17:00, כל חצי שעה
+                for (let hour = 9; hour < 17; hour++) {
+                    for (let minute of [0, 30]) {
+                        const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                        const isBooked = existingAppointments.some(apt => apt.time === timeStr);
+                        if (!isBooked) {
+                            slots.push(timeStr);
+                        }
                     }
                 }
             }
@@ -49,7 +84,7 @@ Deno.serve(async (req) => {
                 initial_need: appointmentData.notes
             });
             
-            // יצירת הפגישה
+            // יצירת הפגישה - שייכת לעורך הדין שיצר את קישור ההזמנה
             const appointment = await base44.asServiceRole.entities.Appointment.create({
                 title: `פגישה עם ${appointmentData.full_name}`,
                 date: appointmentData.date,
@@ -58,7 +93,9 @@ Deno.serve(async (req) => {
                 notes: appointmentData.notes,
                 type: "פגישה",
                 location_type: "משרד",
-                reminder: true
+                reminder: true,
+                created_by: appointmentData.lawyerEmail,
+                assigned_to: appointmentData.lawyerEmail
             });
             
             // שליחת אימייל אישור
