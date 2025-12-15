@@ -56,22 +56,43 @@ export default function Layout({ children, currentPageName }) {
             const { base44 } = await import("@/api/base44Client");
             const configs = await base44.entities.MenuConfiguration.list('order_index');
             
-            // סנן רק פריטים גלויים והמר לפורמט הנכון
-            const items = configs
-                .filter(c => c.is_visible)
-                .map(c => ({
-                    title: c.display_name,
-                    url: c.custom_route
-                }));
+            console.log('טען תפריט:', configs.length, 'פריטים');
             
-            setMenuItems(items);
+            if (configs.length === 0) {
+                // אין הגדרות תפריט, השתמש בברירת מחדל
+                console.log('אין הגדרות תפריט, משתמש בברירת מחדל');
+                setMenuItems([
+                    { title: "דשבורד", url: createPageUrl("Dashboard") },
+                    { title: "לקוחות", url: createPageUrl("Clients") },
+                    { title: "תיקים", url: createPageUrl("Cases") },
+                    { title: "משימות", url: createPageUrl("Tasks") },
+                    { title: "פגישות", url: createPageUrl("Appointments") },
+                    { title: "שיווק", url: createPageUrl("Marketing") },
+                    { title: "כספים", url: createPageUrl("Finances") },
+                    { title: "קרדיטים", url: createPageUrl("Credits") },
+                    { title: "תמיכה", url: createPageUrl("Support") }
+                ]);
+            } else {
+                // סנן רק פריטים גלויים והמר לפורמט הנכון
+                const items = configs
+                    .filter(c => c.is_visible)
+                    .map(c => ({
+                        title: c.display_name,
+                        url: c.custom_route
+                    }));
+                
+                console.log('פריטי תפריט גלויים:', items);
+                setMenuItems(items);
+            }
         } catch (error) {
             console.error('שגיאה בטעינת תפריט:', error);
             // ברירת מחדל במקרה של שגיאה
             setMenuItems([
                 { title: "דשבורד", url: createPageUrl("Dashboard") },
                 { title: "לקוחות", url: createPageUrl("Clients") },
-                { title: "משימות", url: createPageUrl("Tasks") }
+                { title: "תיקים", url: createPageUrl("Cases") },
+                { title: "משימות", url: createPageUrl("Tasks") },
+                { title: "פגישות", url: createPageUrl("Appointments") }
             ]);
         }
     };
