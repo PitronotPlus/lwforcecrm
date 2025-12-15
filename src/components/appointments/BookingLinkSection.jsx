@@ -13,6 +13,7 @@ export default function BookingLinkSection() {
     const [iframeCode, setIframeCode] = useState("");
     const [copied, setCopied] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
+    const [activeTab, setActiveTab] = useState('link');
     const embedPreviewRef = useRef(null);
 
     useEffect(() => {
@@ -20,12 +21,24 @@ export default function BookingLinkSection() {
     }, []);
     
     useEffect(() => {
-        if (currentUser && embedPreviewRef.current) {
+        if (currentUser && activeTab === 'embed' && embedPreviewRef.current) {
+            // נקה את התוכן הקודם
+            embedPreviewRef.current.innerHTML = `<div id="lawforce-booking" data-lawyer-id="${currentUser.id}"></div>`;
+            
+            // טען את הסקריפט
             const script = document.createElement('script');
             script.src = `${window.location.origin}/functions/embedBooking`;
+            script.async = true;
             embedPreviewRef.current.appendChild(script);
+            
+            return () => {
+                // נקה בעת יציאה מהטאב
+                if (embedPreviewRef.current) {
+                    embedPreviewRef.current.innerHTML = '';
+                }
+            };
         }
-    }, [currentUser]);
+    }, [currentUser, activeTab]);
 
     const loadBookingLink = async () => {
         try {
@@ -71,7 +84,7 @@ export default function BookingLinkSection() {
                 </p>
             </CardHeader>
             <CardContent>
-                <Tabs defaultValue="link" className="w-full">
+                <Tabs defaultValue="link" className="w-full" onValueChange={setActiveTab}>
                     <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="link">קישור ישיר</TabsTrigger>
                         <TabsTrigger value="button">כפתור</TabsTrigger>
@@ -191,8 +204,8 @@ export default function BookingLinkSection() {
                         </div>
                         <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg">
                             <p className="text-sm font-medium mb-2">תצוגה מקדימה:</p>
-                            <div className="bg-white p-4 rounded-lg" ref={embedPreviewRef}>
-                                <div id="lawforce-booking" data-lawyer-id={currentUser?.id}></div>
+                            <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300" ref={embedPreviewRef}>
+                                {/* הטופס ייטען כאן דינמית */}
                             </div>
                         </div>
                         <div className="bg-purple-50 p-4 rounded-lg">
