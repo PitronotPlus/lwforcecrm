@@ -13,6 +13,7 @@ import BookingLinkSection from "../components/appointments/BookingLinkSection";
 import CalendarView from "../components/appointments/CalendarView";
 import DaySchedule from "../components/appointments/DaySchedule";
 import AvailabilitySettings from "../components/appointments/AvailabilitySettings";
+import GoogleCalendarConnect from "../components/appointments/GoogleCalendarConnect";
 
 export default function Appointments() {
     const [appointments, setAppointments] = useState([]);
@@ -158,10 +159,11 @@ export default function Appointments() {
                 </div>
 
                 <Tabs defaultValue="calendar" className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="calendar">יומן</TabsTrigger>
                         <TabsTrigger value="list">רשימת פגישות</TabsTrigger>
                         <TabsTrigger value="availability">הגדרות זמינות</TabsTrigger>
+                        <TabsTrigger value="google">Google Calendar</TabsTrigger>
                     </TabsList>
 
                     {/* Calendar Tab */}
@@ -448,12 +450,17 @@ export default function Appointments() {
 
                             {/* Availability Tab */}
                             <TabsContent value="availability">
-                            <AvailabilitySettings
-                            onSave={(newAvailability) => {
-                              const slots = convertAvailabilityToSlots(newAvailability);
-                              setAvailabilitySlots(slots);
-                            }}
-                            />
+                                <AvailabilitySettings
+                                    onSave={(newAvailability) => {
+                                        const slots = convertAvailabilityToSlots(newAvailability);
+                                        setAvailabilitySlots(slots);
+                                    }}
+                                />
+                            </TabsContent>
+
+                            {/* Google Calendar Tab */}
+                            <TabsContent value="google">
+                                <GoogleCalendarConnect />
                             </TabsContent>
                             </Tabs>
                             </div>

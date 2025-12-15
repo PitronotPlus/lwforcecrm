@@ -90,6 +90,8 @@ Deno.serve(async (req) => {
                 date: appointmentData.date,
                 time: appointmentData.time,
                 client_name: appointmentData.full_name,
+                client_email: appointmentData.email,
+                client_phone: appointmentData.phone,
                 notes: appointmentData.notes,
                 type: "פגישה",
                 location_type: "משרד",
@@ -97,6 +99,34 @@ Deno.serve(async (req) => {
                 created_by: appointmentData.lawyerEmail,
                 assigned_to: appointmentData.lawyerEmail
             });
+
+            // בדיקה אם לעורך הדין יש Google Calendar מחובר
+            const users = await base44.asServiceRole.entities.User.filter({ email: appointmentData.lawyerEmail });
+            if (users.length > 0 && users[0].google_calendar_connected) {
+                try {
+                    // יצירת האירוע ב-Google Calendar
+                    const [startHour, startMin] = appointmentData.time.split(':');
+                    const startDate = new Date(appointmentData.date);
+                    startDate.setHours(parseInt(startHour), parseInt(startMin), 0, 0);
+                    
+                    const endDate = new Date(startDate);
+                    endDate.setMinutes(endDate.getMinutes() + 30); // פגישה של 30 דקות
+                    
+                    await base44.asServiceRole.functions.invoke('googleCalendarInsert', {
+                        appointmentId: appointment.id,
+                        summary: `פגישה עם ${appointmentData.full_name}`,
+                        description: appointmentData.notes,
+                        location: 'המשרד',
+                        startISO: startDate.toISOString(),
+                        endISO: endDate.toISOString(),
+                        clientEmail: appointmentData.email,
+                        clientName: appointmentData.full_name,
+                        requestMeet: true
+                    });
+                } catch (gcalError) {
+                    console.error('שגיאה ביצירת אירוע Google Calendar:', gcalError);
+                }
+            }
             
             // שליחת אימייל אישור
             try {
