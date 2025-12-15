@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, MoreVertical, Shield, ShieldOff } from 'lucide-react';
@@ -15,17 +16,22 @@ export default function UserManagementTable({ users, onUserAction, searchQuery }
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
     const [subAccounts, setSubAccounts] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        loadSubAccounts();
+        loadData();
     }, []);
 
-    const loadSubAccounts = async () => {
+    const loadData = async () => {
         try {
-            const accounts = await SubAccount.list();
+            const [accounts, user] = await Promise.all([
+                SubAccount.list(),
+                base44.auth.me()
+            ]);
             setSubAccounts(accounts);
+            setCurrentUser(user);
         } catch (error) {
-            console.error('שגיאה בטעינת חשבונות:', error);
+            console.error('שגיאה בטעינת נתונים:', error);
         }
     };
 
@@ -55,11 +61,22 @@ export default function UserManagementTable({ users, onUserAction, searchQuery }
         return colors[role] || 'bg-gray-100 text-gray-800';
     };
 
-    const filteredUsers = users.filter(user => 
-        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.law_firm_name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredUsers = users.filter(user => {
+        // סינון לפי חיפוש
+        const matchesSearch = user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.law_firm_name?.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        if (!matchesSearch) return false;
+        
+        // בעל משרד רואה רק משתמשים במשרד שלו
+        if (currentUser?.user_role === 'owner' && currentUser?.sub_account_id) {
+            return user.sub_account_id === currentUser.sub_account_id;
+        }
+        
+        // מנהל מערכת רואה הכל
+        return true;
+    });
 
     const getSubscriptionBadge = (plan) => {
         const colors = {

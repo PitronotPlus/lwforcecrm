@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { SubAccount } from '@/entities/SubAccount';
 import { User } from '@/entities/User';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, Building2, Users, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Building2, Users, Search, Eye, UserCircle } from 'lucide-react';
 
 export default function SubAccountManager() {
     const [accounts, setAccounts] = useState([]);
@@ -16,6 +17,8 @@ export default function SubAccountManager() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAccount, setEditingAccount] = useState(null);
+    const [viewingAccountUsers, setViewingAccountUsers] = useState(null);
+    const [showUsersModal, setShowUsersModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         owner_email: '',
@@ -104,6 +107,47 @@ export default function SubAccountManager() {
 
     const getUsersCount = (accountId) => {
         return users.filter(u => u.sub_account_id === accountId).length;
+    };
+
+    const getAccountUsers = (accountId) => {
+        return users.filter(u => u.sub_account_id === accountId);
+    };
+
+    const handleViewUsers = (account) => {
+        setViewingAccountUsers(account);
+        setShowUsersModal(true);
+    };
+
+    const handleImpersonate = async (account) => {
+        if (!confirm(`האם אתה בטוח שברצונך להתחזות כבעל המשרד ${account.name}?`)) return;
+        
+        try {
+            // כאן נוסיף לוגיקה להתחזות - נצטרך ליצור את זה בהמשך
+            alert(`התחזות כ-${account.owner_email} (פונקציה תופעל בהמשך)`);
+        } catch (error) {
+            console.error('שגיאה בהתחזות:', error);
+            alert('אירעה שגיאה בהתחזות');
+        }
+    };
+
+    const getUserRoleLabel = (role) => {
+        const labels = {
+            'admin': 'מנהל מערכת',
+            'owner': 'בעל משרד',
+            'department_head': 'ראש מחלקה',
+            'lawyer': 'עורך דין'
+        };
+        return labels[role] || 'עורך דין';
+    };
+
+    const getUserRoleColor = (role) => {
+        const colors = {
+            'admin': 'bg-purple-100 text-purple-800',
+            'owner': 'bg-blue-100 text-blue-800',
+            'department_head': 'bg-orange-100 text-orange-800',
+            'lawyer': 'bg-gray-100 text-gray-800'
+        };
+        return colors[role] || 'bg-gray-100 text-gray-800';
     };
 
     const getStatusColor = (status) => {
@@ -345,6 +389,22 @@ export default function SubAccountManager() {
                                         </td>
                                         <td className="p-3">
                                             <div className="flex gap-1">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => handleViewUsers(account)}
+                                                    title="צפה במשתמשים"
+                                                >
+                                                    <Eye className="w-4 h-4 text-gray-500" />
+                                                </Button>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={() => handleImpersonate(account)}
+                                                    title="התחזה כבעל משרד"
+                                                >
+                                                    <UserCircle className="w-4 h-4 text-purple-500" />
+                                                </Button>
                                                 <Button variant="ghost" size="sm" onClick={() => handleEdit(account)}>
                                                     <Edit className="w-4 h-4 text-blue-500" />
                                                 </Button>
@@ -365,6 +425,56 @@ export default function SubAccountManager() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Users Modal */}
+            <Dialog open={showUsersModal} onOpenChange={setShowUsersModal}>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle style={{ fontFamily: 'Heebo' }}>
+                            משתמשים במשרד: {viewingAccountUsers?.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {viewingAccountUsers && (
+                        <div className="pt-4">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-right">
+                                    <thead>
+                                        <tr className="border-b">
+                                            <th className="p-3 font-medium">שם מלא</th>
+                                            <th className="p-3 font-medium">אימייל</th>
+                                            <th className="p-3 font-medium">תפקיד</th>
+                                            <th className="p-3 font-medium">סטטוס</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {getAccountUsers(viewingAccountUsers.id).map(user => (
+                                            <tr key={user.id} className="border-b hover:bg-gray-50">
+                                                <td className="p-3">{user.full_name || 'לא צוין'}</td>
+                                                <td className="p-3">{user.email}</td>
+                                                <td className="p-3">
+                                                    <Badge className={getUserRoleColor(user.user_role)}>
+                                                        {getUserRoleLabel(user.user_role)}
+                                                    </Badge>
+                                                </td>
+                                                <td className="p-3">
+                                                    <Badge className={user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                                                        {user.is_active ? 'פעיל' : 'לא פעיל'}
+                                                    </Badge>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                {getAccountUsers(viewingAccountUsers.id).length === 0 && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        אין משתמשים במשרד זה
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
