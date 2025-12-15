@@ -63,10 +63,11 @@ export default function BookingLinkSection() {
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="link" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="link">קישור ישיר</TabsTrigger>
-                        <TabsTrigger value="button">כפתור הטמעה</TabsTrigger>
-                        <TabsTrigger value="iframe">Iframe מלא</TabsTrigger>
+                        <TabsTrigger value="button">כפתור</TabsTrigger>
+                        <TabsTrigger value="embed">טופס מוטמע</TabsTrigger>
+                        <TabsTrigger value="iframe">Iframe</TabsTrigger>
                     </TabsList>
 
                     {/* קישור ישיר */}
@@ -143,6 +144,93 @@ export default function BookingLinkSection() {
                         <div className="bg-amber-50 p-4 rounded-lg">
                             <p className="text-sm text-gray-700">
                                 <strong>📌 הוראות שימוש:</strong> העתק את הקוד והדבק אותו בקוד ה-HTML של האתר שלך, בדף הנחיתה או בכל מקום אחר שבו תרצה שהלקוחות יראו את הכפתור.
+                            </p>
+                        </div>
+                    </TabsContent>
+
+                    {/* טופס מוטמע רספונסיבי */}
+                    <TabsContent value="embed" className="space-y-4">
+                        <div>
+                            <label className="text-sm font-medium mb-2 block">
+                                קוד JavaScript להטמעה רספונסיבית
+                            </label>
+                            <Textarea
+                                value={`<div id="lawforce-booking"></div>
+                    <script>
+                    (function() {
+                    const container = document.getElementById('lawforce-booking');
+                    if (!container) return;
+
+                    // יצירת הטופס
+                    container.innerHTML = \`
+                    <div style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 32px; color: white; text-align: center; margin-bottom: 24px;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold;">קביעת פגישה</h2>
+                    <p style="margin: 0; opacity: 0.9; font-size: 16px;">מלא את הפרטים ונחזור אליך בהקדם</p>
+                    </div>
+                    <iframe src="${bookingUrl}" width="100%" height="900" frameborder="0" style="border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></iframe>
+                    </div>
+                    \`;
+                    })();
+                    </script>`}
+                                readOnly
+                                className="font-mono text-xs"
+                                rows={20}
+                            />
+                            <Button
+                                onClick={() => copyToClipboard(`<div id="lawforce-booking"></div>
+                    <script>
+                    (function() {
+                    const container = document.getElementById('lawforce-booking');
+                    if (!container) return;
+
+                    container.innerHTML = \`
+                    <div style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 32px; color: white; text-align: center; margin-bottom: 24px;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold;">קביעת פגישה</h2>
+                    <p style="margin: 0; opacity: 0.9; font-size: 16px;">מלא את הפרטים ונחזור אליך בהקדם</p>
+                    </div>
+                    <iframe src="${bookingUrl}" width="100%" height="900" frameborder="0" style="border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></iframe>
+                    </div>
+                    \`;
+                    })();
+                    </script>`, 'embedjs')}
+                                variant="outline"
+                                className="mt-2"
+                            >
+                                {copied === 'embedjs' ? (
+                                    <>
+                                        <Check className="w-4 h-4 ml-1" />
+                                        הועתק!
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="w-4 h-4 ml-1" />
+                                        העתק קוד
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                        <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg">
+                            <p className="text-sm font-medium mb-2">תצוגה מקדימה:</p>
+                            <div className="bg-white p-4 rounded-lg" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                                <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '16px', padding: '32px', color: 'white', textAlign: 'center', marginBottom: '24px' }}>
+                                    <h2 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: 'bold' }}>קביעת פגישה</h2>
+                                    <p style={{ margin: 0, opacity: 0.9, fontSize: '16px' }}>מלא את הפרטים ונחזור אליך בהקדם</p>
+                                </div>
+                                <iframe 
+                                    src={bookingUrl} 
+                                    width="100%" 
+                                    height="600" 
+                                    frameBorder="0"
+                                    style={{ border: 'none', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+                                    title="תצוגה מקדימה"
+                                />
+                            </div>
+                        </div>
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                            <p className="text-sm text-gray-700">
+                                <strong>🎨 הטמעה מעוצבת:</strong> קוד זה משלב את הטופס באתר שלך עם כותרת מעוצבת ועיצוב רספונסיבי. פשוט הדבק את הקוד בעמוד שלך והטופס יופיע אוטומטית! הקוד מתאים לכל אתר - WordPress, Wix, או כל פלטפורמה אחרת.
                             </p>
                         </div>
                     </TabsContent>
