@@ -4,8 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Menu, GripVertical, Eye, EyeOff, Plus, X } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function MenuEditor() {
+    const availablePages = [
+        { name: 'דשבורד', path: '/Dashboard' },
+        { name: 'לקוחות', path: '/Clients' },
+        { name: 'תיקים', path: '/Cases' },
+        { name: 'משימות', path: '/Tasks' },
+        { name: 'פגישות', path: '/Appointments' },
+        { name: 'שיווק', path: '/Marketing' },
+        { name: 'כספים', path: '/Finances' },
+        { name: 'קרדיטים', path: '/Credits' },
+        { name: 'תמיכה', path: '/Support' },
+        { name: 'הגדרות', path: '/Settings' },
+        { name: 'ניהול צוות', path: '/TeamManagement' },
+        { name: 'ניהול מערכת', path: '/AdminDashboard' }
+    ];
+
     const [menuItems, setMenuItems] = useState([
         { id: '1', title: 'דשבורד', url: '/Dashboard', visible: true, order: 1 },
         { id: '2', title: 'לקוחות', url: '/Clients', visible: true, order: 2 },
@@ -144,16 +160,35 @@ export default function MenuEditor() {
 
                     {showAddForm ? (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
-                            <Input
-                                placeholder="שם הפריט (למשל: דוחות)"
-                                value={newItem.title}
-                                onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
-                            />
-                            <Input
-                                placeholder="נתיב (למשל: /Reports)"
-                                value={newItem.url}
-                                onChange={(e) => setNewItem({ ...newItem, url: e.target.value })}
-                            />
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">בחר דף קיים</label>
+                                <Select
+                                    value={newItem.url}
+                                    onValueChange={(value) => {
+                                        const page = availablePages.find(p => p.path === value);
+                                        setNewItem({ title: page?.name || '', url: value });
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="בחר דף מהרשימה" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availablePages.map((page) => (
+                                            <SelectItem key={page.path} value={page.path}>
+                                                {page.name} ({page.path})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium mb-2 block">שם בתפריט (אופציונלי)</label>
+                                <Input
+                                    placeholder="ישתמש בשם הדף כברירת מחדל"
+                                    value={newItem.title}
+                                    onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
+                                />
+                            </div>
                             <div className="flex gap-2">
                                 <Button onClick={addNewItem} className="bg-[#67BF91] hover:bg-[#5AA880]">
                                     הוסף
