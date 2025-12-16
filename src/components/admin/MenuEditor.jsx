@@ -15,6 +15,8 @@ export default function MenuEditor() {
         { name: 'תיקים', path: '/Cases' },
         { name: 'משימות', path: '/Tasks' },
         { name: 'פגישות', path: '/Appointments' },
+        { name: 'מוצרים', path: '/Products' },
+        { name: 'שירותים', path: '/Services' },
         { name: 'שיווק', path: '/Marketing' },
         { name: 'כספים', path: '/Finances' },
         { name: 'קרדיטים', path: '/Credits' },
