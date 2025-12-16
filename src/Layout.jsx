@@ -358,7 +358,7 @@ export default function Layout({ children, currentPageName }) {
                                 )}
                             </div>
                             {/* Navigation */}
-                            <nav className="flex items-center gap-8">
+                            <nav className="flex items-center gap-4">
                                 {navigationItems.map((item) => (
                                     <Link
                                         key={item.title}
