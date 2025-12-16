@@ -56,7 +56,22 @@ export default function Layout({ children, currentPageName }) {
             const { base44 } = await import("@/api/base44Client");
             const configs = await base44.entities.MenuConfiguration.list('order_index');
             
-            const userRole = currentUser?.user_role || currentUser?.role || 'lawyer';
+            // זיהוי תפקיד המשתמש - בדיקה מרובת שכבות
+            let userRole = 'lawyer'; // ברירת מחדל
+            
+            if (currentUser) {
+                // בדיקה ראשונה: האם יש role מוגדר
+                if (currentUser.role) {
+                    userRole = currentUser.role;
+                }
+                // בדיקה שנייה: האם יש user_role מוגדר (עדיפות גבוהה יותר)
+                if (currentUser.user_role) {
+                    userRole = currentUser.user_role;
+                }
+                
+                console.log('Current user object:', currentUser);
+                console.log('Detected user role:', userRole);
+            }
             
             if (configs.length === 0) {
                 // אין הגדרות תפריט, השתמש בברירת מחדל
