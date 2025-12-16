@@ -78,10 +78,14 @@ export default function Layout({ children, currentPageName }) {
                 const items = configs
                     .filter(c => {
                         // הצג רק פריטים גלויים
-                        if (!c.is_visible) return false;
+                        if (c.is_visible === false) return false;
                         
                         // בדוק אם למשתמש יש הרשאה לראות את הפריט
-                        const allowedRoles = c.allowed_roles || ['admin', 'owner', 'department_head', 'lawyer'];
+                        const allowedRoles = c.allowed_roles && c.allowed_roles.length > 0 
+                            ? c.allowed_roles 
+                            : ['admin', 'owner', 'department_head', 'lawyer'];
+                        
+                        console.log('Menu item:', c.display_name, 'Allowed roles:', allowedRoles, 'User role:', userRole);
                         return allowedRoles.includes(userRole);
                     })
                     .map(c => ({
@@ -89,6 +93,7 @@ export default function Layout({ children, currentPageName }) {
                         url: c.custom_route || createPageUrl(c.object_id || c.display_name)
                     }));
                 
+                console.log('Filtered menu items for role', userRole, ':', items);
                 setMenuItems(items);
             }
         } catch (error) {
