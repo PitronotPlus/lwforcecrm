@@ -16,6 +16,8 @@ import Appointments from './pages/Appointments';
 import TeamManagement from './pages/TeamManagement';
 import PublicBooking from './pages/PublicBooking';
 import Booking from './pages/Booking';
+import Products from './pages/Products';
+import Services from './pages/Services';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +40,8 @@ export const PAGES = {
     "TeamManagement": TeamManagement,
     "PublicBooking": PublicBooking,
     "Booking": Booking,
+    "Products": Products,
+    "Services": Services,
 }
 
 export const pagesConfig = {
