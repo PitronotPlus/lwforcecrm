@@ -9,22 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function MenuEditor() {
-    const availablePages = [
-        { name: 'דשבורד', path: '/Dashboard' },
-        { name: 'לקוחות', path: '/Clients' },
-        { name: 'תיקים', path: '/Cases' },
-        { name: 'משימות', path: '/Tasks' },
-        { name: 'פגישות', path: '/Appointments' },
-        { name: 'מוצרים', path: '/Products' },
-        { name: 'שירותים', path: '/Services' },
-        { name: 'שיווק', path: '/Marketing' },
-        { name: 'כספים', path: '/Finances' },
-        { name: 'קרדיטים', path: '/Credits' },
-        { name: 'תמיכה', path: '/Support' },
-        { name: 'הגדרות', path: '/Settings' },
-        { name: 'ניהול צוות', path: '/TeamManagement' },
-        { name: 'ניהול מערכת', path: '/AdminDashboard' }
-    ];
+    const [availablePages, setAvailablePages] = useState([]);
 
     const userRoles = [
         { value: 'admin', label: 'מנהל מערכת' },
@@ -41,8 +26,25 @@ export default function MenuEditor() {
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
+        loadAvailablePages();
         loadMenuItems();
     }, [selectedRole]);
+
+    const loadAvailablePages = async () => {
+        try {
+            const { data } = await base44.functions.invoke('getAvailablePages');
+            if (data.success) {
+                setAvailablePages(data.pages);
+            }
+        } catch (error) {
+            console.error('שגיאה בטעינת רשימת דפים:', error);
+            // Fallback to basic pages if function fails
+            setAvailablePages([
+                { name: 'דשבורד', path: '/Dashboard' },
+                { name: 'הגדרות', path: '/Settings' }
+            ]);
+        }
+    };
 
     const loadMenuItems = async () => {
         setLoading(true);
