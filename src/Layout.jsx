@@ -150,6 +150,7 @@ export default function Layout({ children, currentPageName }) {
             baseItems.unshift({ title: "ניהול מערכת", url: createPageUrl("AdminDashboard") });
         }
 
+        baseItems.push({ title: "תמיכה", url: createPageUrl("Support") });
         baseItems.push({ title: "יציאה", url: "#", action: "logout" });
         return baseItems;
     };
