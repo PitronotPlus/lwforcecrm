@@ -10,30 +10,43 @@ Deno.serve(async (req) => {
         }
 
         // Get all SystemObject entities to build dynamic page list
-        const systemObjects = await base44.entities.SystemObject.list('order_in_menu');
-        
-        const pages = systemObjects
-            .filter(obj => obj.page_route && obj.is_active !== false)
-            .map(obj => ({
-                name: obj.display_name_singular,
-                path: `/${obj.page_route}`
-            }));
+        let dynamicPages = [];
+        try {
+            const systemObjects = await base44.asServiceRole.entities.SystemObject.list('order_in_menu');
+            dynamicPages = systemObjects
+                .filter(obj => obj.page_route && obj.is_active !== false)
+                .map(obj => ({
+                    name: obj.display_name_singular,
+                    path: `/${obj.page_route}`
+                }));
+        } catch (error) {
+            console.log('Could not load SystemObject:', error.message);
+        }
 
-        // Add built-in system pages that are always available
-        const builtInPages = [
+        // Complete list of all pages in the application
+        const allKnownPages = [
             { name: 'דשבורד', path: '/Dashboard' },
+            { name: 'לקוחות', path: '/Clients' },
+            { name: 'תיקים', path: '/Cases' },
+            { name: 'משימות', path: '/Tasks' },
+            { name: 'פגישות', path: '/Appointments' },
+            { name: 'מוצרים', path: '/Products' },
+            { name: 'שירותים', path: '/Services' },
+            { name: 'שיווק', path: '/Marketing' },
+            { name: 'כספים', path: '/Finances' },
+            { name: 'קרדיטים', path: '/Credits' },
+            { name: 'תמיכה', path: '/Support' },
             { name: 'הגדרות', path: '/Settings' },
             { name: 'ניהול צוות', path: '/TeamManagement' },
             { name: 'ניהול מערכת', path: '/AdminDashboard' },
-            { name: 'תמיכה', path: '/Support' },
-            { name: 'קרדיטים', path: '/Credits' },
-            { name: 'שיווק', path: '/Marketing' },
-            { name: 'כספים', path: '/Finances' },
-            { name: 'חתימה דיגיטלית', path: '/DigitalSignatures' }
+            { name: 'חתימה דיגיטלית', path: '/DigitalSignatures' },
+            { name: 'קביעת פגישה', path: '/Booking' },
+            { name: 'פרטי לקוח', path: '/ClientDetails' },
+            { name: 'תמחור', path: '/PricingPage' }
         ];
 
-        // Combine and remove duplicates based on path
-        const allPages = [...builtInPages, ...pages];
+        // Combine known pages with dynamic pages and remove duplicates
+        const allPages = [...allKnownPages, ...dynamicPages];
         const uniquePages = Array.from(
             new Map(allPages.map(p => [p.path, p])).values()
         );
