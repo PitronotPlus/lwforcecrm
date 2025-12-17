@@ -19,6 +19,8 @@ import Booking from './pages/Booking';
 import Products from './pages/Products';
 import Services from './pages/Services';
 import DigitalSignatures from './pages/DigitalSignatures';
+import SignDocument from './pages/SignDocument';
+import TestSignature from './pages/TestSignature';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +46,8 @@ export const PAGES = {
     "Products": Products,
     "Services": Services,
     "DigitalSignatures": DigitalSignatures,
+    "SignDocument": SignDocument,
+    "TestSignature": TestSignature,
 }
 
 export const pagesConfig = {
