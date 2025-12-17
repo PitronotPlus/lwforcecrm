@@ -18,6 +18,7 @@ import PublicBooking from './pages/PublicBooking';
 import Booking from './pages/Booking';
 import Products from './pages/Products';
 import Services from './pages/Services';
+import DigitalSignatures from './pages/DigitalSignatures';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "Booking": Booking,
     "Products": Products,
     "Services": Services,
+    "DigitalSignatures": DigitalSignatures,
 }
 
 export const pagesConfig = {
