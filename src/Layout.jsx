@@ -135,6 +135,7 @@ export default function Layout({ children, currentPageName }) {
 
         const userRole = currentUser.user_role || currentUser.role || 'lawyer';
         const isManager = userRole === 'owner' || userRole === 'department_head' || userRole === 'admin';
+        const isAdmin = currentUser.role === 'admin' || currentUser.user_role === 'admin';
 
         const baseItems = [
             { title: "פרופיל והגדרות", url: createPageUrl("Settings") }
@@ -145,9 +146,10 @@ export default function Layout({ children, currentPageName }) {
             baseItems.push({ title: "ניהול צוות", url: createPageUrl("TeamManagement") });
         }
 
-        // הוספת ניהול מערכת רק למנהלי מערכת (admin)
-        if (currentUser.role === 'admin' || currentUser.user_role === 'admin') {
+        // הוספת ניהול מערכת וקרדיטים רק למנהלי מערכת (admin)
+        if (isAdmin) {
             baseItems.unshift({ title: "ניהול מערכת", url: createPageUrl("AdminDashboard") });
+            baseItems.push({ title: "קרדיטים", url: createPageUrl("Credits") });
         }
 
         baseItems.push({ title: "תמיכה", url: createPageUrl("Support") });
