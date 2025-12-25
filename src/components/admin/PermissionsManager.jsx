@@ -64,7 +64,8 @@ const PERMISSION_GROUPS = {
         icon: BarChart3,
         permissions: [
             'view_reports', 'view_department_reports',
-            'edit_system_settings', 'edit_sub_account_settings', 'manage_permissions'
+            'edit_system_settings', 'edit_sub_account_settings', 'manage_permissions',
+            'manage_custom_fields'
         ]
     }
 };
@@ -78,7 +79,8 @@ const DEFAULT_PERMISSIONS = {
         view_all_clients: true, edit_all_clients: true,
         view_all_cases: true, edit_all_cases: true,
         view_all_finances: true, edit_finances: true,
-        view_reports: true, edit_system_settings: true, manage_permissions: true
+        view_reports: true, edit_system_settings: true, manage_permissions: true,
+        manage_custom_fields: true
     },
     owner: {
         view_sub_account_users: true, edit_sub_account_users: true,
@@ -87,7 +89,8 @@ const DEFAULT_PERMISSIONS = {
         view_all_clients: true, edit_all_clients: true,
         view_all_cases: true, edit_all_cases: true,
         view_all_finances: true, edit_finances: true,
-        view_reports: true, edit_sub_account_settings: true
+        view_reports: true, edit_sub_account_settings: true,
+        manage_custom_fields: true
     },
     department_head: {
         view_department_users: true,
