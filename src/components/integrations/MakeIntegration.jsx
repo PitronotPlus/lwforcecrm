@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function MakeIntegration({ integration, onConfigChange }) {
   const [copiedWebhook, setCopiedWebhook] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedMappedJson, setCopiedMappedJson] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
   const [fieldMappings, setFieldMappings] = useState(
     Array.isArray(integration.field_mapping) ? integration.field_mapping : []
@@ -23,9 +24,12 @@ export default function MakeIntegration({ integration, onConfigChange }) {
       if (type === 'webhook') {
         setCopiedWebhook(true);
         setTimeout(() => setCopiedWebhook(false), 2000);
-      } else {
+      } else if (type === 'json') {
         setCopiedJson(true);
         setTimeout(() => setCopiedJson(false), 2000);
+      } else if (type === 'mapped') {
+        setCopiedMappedJson(true);
+        setTimeout(() => setCopiedMappedJson(false), 2000);
       }
     } catch (err) {
       console.error('Failed to copy:', err);
@@ -68,6 +72,28 @@ export default function MakeIntegration({ integration, onConfigChange }) {
       email: "{{1.Field data: Email}}",
       source: "make_integration"
     }, null, 2);
+  };
+
+  const generateMappedJson = () => {
+    if (fieldMappings.length === 0) {
+      return JSON.stringify({
+        message: "אין מיפוי שדות. הוסף מיפויים למעלה כדי ליצור JSON מוכן לשימוש."
+      }, null, 2);
+    }
+
+    const jsonObj = {};
+    fieldMappings.forEach((mapping, index) => {
+      if (mapping.source && mapping.destination) {
+        jsonObj[mapping.destination] = `{{${index + 1}.${mapping.source}}}`;
+      }
+    });
+    
+    // הוסף source אם לא נוסף
+    if (!jsonObj.source) {
+      jsonObj.source = "make_integration";
+    }
+
+    return JSON.stringify(jsonObj, null, 2);
   };
 
   return (
@@ -232,6 +258,34 @@ export default function MakeIntegration({ integration, onConfigChange }) {
             <Plus className="w-4 h-4 ml-2" />
             הוסף מיפוי שדה
           </Button>
+
+          {fieldMappings.length > 0 && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex justify-between items-center mb-3">
+                <div>
+                  <h4 className="font-semibold text-gray-900">JSON מוכן לשימוש</h4>
+                  <p className="text-sm text-gray-600">JSON שנוצר אוטומטית על בסיס המיפוי שלך</p>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={() => copyToClipboard(generateMappedJson(), 'mapped')}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {copiedMappedJson ? <Check className="w-4 h-4 ml-1" /> : <Copy className="w-4 h-4 ml-1" />}
+                  העתק JSON
+                </Button>
+              </div>
+              <pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto" dir="ltr">
+                {generateMappedJson()}
+              </pre>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>זה מה שצריך להדביק ב-Make!</strong> ה-JSON הזה נוצר אוטומטית מהמיפוי שהגדרת.
+                  זכור למלא את הערכים עם הכפתור הכחול ב-Make.
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
