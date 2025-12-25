@@ -117,7 +117,8 @@ export const PERMISSION_LABELS = {
     view_reports: 'צפייה בדוחות',
     view_department_reports: 'צפייה בדוחות המחלקה',
     edit_system_settings: 'עריכת הגדרות מערכת',
-    manage_permissions: 'ניהול הרשאות'
+    manage_permissions: 'ניהול הרשאות',
+    manage_custom_fields: 'ניהול שדות מותאמים אישית'
 };
 
 // קטגוריות הרשאות
