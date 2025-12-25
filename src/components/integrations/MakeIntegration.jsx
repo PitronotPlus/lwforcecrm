@@ -36,7 +36,7 @@ export default function MakeIntegration({ integration, onConfigChange }) {
     }
   };
 
-  const systemFields = [
+  const [systemFields, setSystemFields] = React.useState([
     { value: 'full_name', label: 'שם מלא' },
     { value: 'phone', label: 'טלפון' },
     { value: 'email', label: 'אימייל' },
@@ -44,7 +44,30 @@ export default function MakeIntegration({ integration, onConfigChange }) {
     { value: 'initial_need', label: 'צורך ראשוני' },
     { value: 'source', label: 'מקור' },
     { value: 'notes', label: 'הערות' }
-  ];
+  ]);
+
+  React.useEffect(() => {
+    loadCustomFields();
+  }, []);
+
+  const loadCustomFields = async () => {
+    try {
+      const { base44 } = await import('@/api/base44Client');
+      const customFields = await base44.entities.CustomField.filter({ 
+        entity_type: 'Client',
+        is_active: true 
+      });
+      
+      const customFieldOptions = customFields.map(field => ({
+        value: field.field_name,
+        label: `${field.field_label} (מותאם אישית)`
+      }));
+      
+      setSystemFields(prev => [...prev, ...customFieldOptions]);
+    } catch (error) {
+      console.error('שגיאה בטעינת שדות מותאמים:', error);
+    }
+  };
 
   const addFieldMapping = () => {
     const newMappings = [...fieldMappings, { source: '', destination: 'full_name' }];

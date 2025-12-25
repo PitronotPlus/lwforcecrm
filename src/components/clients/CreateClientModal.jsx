@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 export default function CreateClientModal({ onClientCreated, triggerText = "לקוח חדש" }) {
     const [isOpen, setIsOpen] = useState(false);
     const [clientSettings, setClientSettings] = useState(null);
+    const [customFields, setCustomFields] = useState([]);
     const [formData, setFormData] = useState({
         full_name: '',
         phone: '',
@@ -22,11 +23,13 @@ export default function CreateClientModal({ onClientCreated, triggerText = "לק
         notes: '',
         utm_source: '',
         utm_campaign: '',
-        utm_medium: ''
+        utm_medium: '',
+        custom_fields: {}
     });
 
     useEffect(() => {
         loadClientSettings();
+        loadCustomFields();
     }, []);
 
     const loadClientSettings = async () => {
@@ -38,10 +41,30 @@ export default function CreateClientModal({ onClientCreated, triggerText = "לק
         }
     };
 
+    const loadCustomFields = async () => {
+        try {
+            const { base44 } = await import("@/api/base44Client");
+            const fields = await base44.entities.CustomField.filter({ 
+                entity_type: 'Client', 
+                is_active: true 
+            }, 'order');
+            setCustomFields(fields);
+        } catch (error) {
+            console.error('שגיאה בטעינת שדות מותאמים:', error);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const newClient = await Client.create(formData);
+            // מיזוג השדות המותאמים לתוך הנתונים הראשיים
+            const clientData = { ...formData };
+            if (formData.custom_fields) {
+                Object.assign(clientData, formData.custom_fields);
+                delete clientData.custom_fields;
+            }
+            
+            const newClient = await Client.create(clientData);
             
             onClientCreated && onClientCreated(newClient);
             setIsOpen(false);
@@ -56,10 +79,96 @@ export default function CreateClientModal({ onClientCreated, triggerText = "לק
                 notes: '',
                 utm_source: '',
                 utm_campaign: '',
-                utm_medium: ''
+                utm_medium: '',
+                custom_fields: {}
             });
         } catch (error) {
             console.error('שגיאה ביצירת לקוח:', error);
+        }
+    };
+
+    const updateCustomField = (fieldName, value) => {
+        setFormData({
+            ...formData,
+            custom_fields: {
+                ...formData.custom_fields,
+                [fieldName]: value
+            }
+        });
+    };
+
+    const renderCustomField = (field) => {
+        const value = formData.custom_fields[field.field_name] || '';
+        
+        switch (field.field_type) {
+            case 'text':
+                return (
+                    <Input
+                        required={field.is_required}
+                        value={value}
+                        onChange={(e) => updateCustomField(field.field_name, e.target.value)}
+                        placeholder={field.default_value || ''}
+                    />
+                );
+            case 'number':
+                return (
+                    <Input
+                        type="number"
+                        required={field.is_required}
+                        value={value}
+                        onChange={(e) => updateCustomField(field.field_name, e.target.value)}
+                        placeholder={field.default_value || ''}
+                    />
+                );
+            case 'date':
+                return (
+                    <Input
+                        type="date"
+                        required={field.is_required}
+                        value={value}
+                        onChange={(e) => updateCustomField(field.field_name, e.target.value)}
+                    />
+                );
+            case 'textarea':
+                return (
+                    <Textarea
+                        required={field.is_required}
+                        value={value}
+                        onChange={(e) => updateCustomField(field.field_name, e.target.value)}
+                        placeholder={field.default_value || ''}
+                    />
+                );
+            case 'checkbox':
+                return (
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={value === true || value === 'true'}
+                            onChange={(e) => updateCustomField(field.field_name, e.target.checked)}
+                            className="rounded"
+                        />
+                    </div>
+                );
+            case 'select':
+                return (
+                    <Select
+                        value={value}
+                        onValueChange={(val) => updateCustomField(field.field_name, val)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="בחר..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {(field.field_options || []).map((option) => (
+                                <SelectItem key={option} value={option}>
+                                    {option}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                );
+            default:
+                return null;
         }
     };
 
@@ -267,6 +376,23 @@ export default function CreateClientModal({ onClientCreated, triggerText = "לק
                             placeholder="הערות נוספות על הלקוח..."
                         />
                     </div>
+
+                    {/* Custom Fields */}
+                    {customFields.length > 0 && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium" style={{ fontFamily: 'Heebo' }}>שדות נוספים</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {customFields.map((field) => (
+                                    <div key={field.id}>
+                                        <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
+                                            {field.field_label} {field.is_required && '*'}
+                                        </label>
+                                        {renderCustomField(field)}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-end gap-4">
                         <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
