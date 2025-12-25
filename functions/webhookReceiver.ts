@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
         console.log(`[${requestId}] ✅ Found integration: ${integration.name}`);
 
         // Map fields
-        const clientData = {};
+        let clientData = {};
         const fieldMapping = integration.field_mapping || [];
 
         if (fieldMapping.length > 0) {
@@ -89,18 +89,42 @@ Deno.serve(async (req) => {
                     console.log(`  ${mapping.source} -> ${mapping.destination}: "${sourceValue}"`);
                 }
             });
-        } else {
-            console.log(`[${requestId}] ⚠️ No field mapping, using defaults`);
             
-            clientData.full_name = rawData.full_name || rawData.name || rawData['your-name'] || rawData.שם;
-            clientData.email = rawData.email || rawData.mail || rawData['your-email'];
-            clientData.phone = rawData.phone || rawData.telephone || rawData.tel;
-            clientData.notes = rawData.message || rawData.notes || rawData.comment;
+            // אם אין מיפוי לשדות חובה, השתמש בשדות המקוריים
+            if (!clientData.full_name) {
+                clientData.full_name = rawData.full_name || rawData.name || rawData['your-name'] || rawData.שם;
+            }
+            if (!clientData.phone) {
+                clientData.phone = rawData.phone || rawData.telephone || rawData.tel;
+            }
+            if (!clientData.email && rawData.email) {
+                clientData.email = rawData.email || rawData.mail || rawData['your-email'];
+            }
+        } else {
+            console.log(`[${requestId}] ⚠️ No field mapping, using raw data`);
+            
+            // אם אין מיפוי בכלל, העתק את כל השדות מה-raw data
+            clientData = { ...rawData };
+            
+            // אם חסרים שדות חובה, נסה למצוא אותם
+            if (!clientData.full_name) {
+                clientData.full_name = rawData.name || rawData['your-name'] || rawData.שם;
+            }
+            if (!clientData.phone) {
+                clientData.phone = rawData.telephone || rawData.tel;
+            }
+            if (!clientData.email) {
+                clientData.email = rawData.mail || rawData['your-email'];
+            }
         }
 
-        // Set source and status
-        clientData.source = integration.name || 'webhook';
-        clientData.status = 'ליד';
+        // Set source and status (אל תדרוס אם כבר קיימים)
+        if (!clientData.source || clientData.source === 'make_integration') {
+            clientData.source = integration.name || 'webhook';
+        }
+        if (!clientData.status) {
+            clientData.status = 'ליד';
+        }
 
         console.log(`[${requestId}] 💾 Client data prepared:`, JSON.stringify(clientData, null, 2));
 
