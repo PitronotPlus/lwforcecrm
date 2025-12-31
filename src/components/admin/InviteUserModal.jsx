@@ -120,10 +120,7 @@ export default function InviteUserModal({ currentUser, onInviteSuccess }) {
                             </SelectTrigger>
                             <SelectContent>
                                 {isAdmin && (
-                                    <>
-                                        <SelectItem value="owner">בעל משרד</SelectItem>
-                                        <SelectItem value="department_head">ראש מחלקה</SelectItem>
-                                    </>
+                                    <SelectItem value="owner">בעל משרד</SelectItem>
                                 )}
                                 {(isAdmin || isOwner) && (
                                     <SelectItem value="department_head">ראש מחלקה</SelectItem>
