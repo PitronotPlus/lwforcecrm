@@ -30,7 +30,7 @@ export default function WelcomeHeader({ onTaskCreated }) {
                         fontFamily: 'Heebo'
                     }}
                 >
-                    ברוך הבא {userName}!
+                    ברוך הבא!
                 </h1>
             </div>
             
