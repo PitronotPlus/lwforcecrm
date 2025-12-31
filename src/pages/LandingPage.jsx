@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Users, Zap, Shield, Headphones, BookOpen, Settings } from 'lucide-react';
@@ -10,6 +10,47 @@ import { createPageUrl } from '@/utils';
 export default function LandingPage() {
     // Removed: const [isSurveyOpen, setIsSurveyOpen] = useState(false);
 
+    useEffect(() => {
+        handleInviteParameters();
+    }, []);
+
+    const handleInviteParameters = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const inviterId = params.get('inviter_id');
+        const subAccountId = params.get('sub_account_id');
+        const assignedRole = params.get('assigned_role');
+
+        if (inviterId && subAccountId && assignedRole) {
+            // שמירת פרמטרי ההזמנה ל-sessionStorage לשימוש לאחר הרישום
+            sessionStorage.setItem('invite_params', JSON.stringify({
+                inviter_id: inviterId,
+                inviter_email: params.get('inviter_email'),
+                sub_account_id: subAccountId,
+                assigned_role: assignedRole
+            }));
+
+            // עדכון המשתמש לאחר רישום
+            try {
+                const { base44 } = await import("@/api/base44Client");
+                const isAuth = await base44.auth.isAuthenticated();
+                
+                if (isAuth) {
+                    const inviteParams = JSON.parse(sessionStorage.getItem('invite_params'));
+                    if (inviteParams) {
+                        await base44.auth.updateMe({
+                            sub_account_id: inviteParams.sub_account_id,
+                            user_role: inviteParams.assigned_role
+                        });
+                        sessionStorage.removeItem('invite_params');
+                        window.location.href = createPageUrl('Dashboard');
+                    }
+                }
+            } catch (error) {
+                console.error('שגיאה בעדכון משתמש מוזמן:', error);
+            }
+        }
+    };
+
     const handleLogin = async () => {
         const { base44 } = await import("@/api/base44Client");
         const callbackUrl = createPageUrl('Dashboard');
@@ -18,7 +59,7 @@ export default function LandingPage() {
 
     const handleSignup = async () => {
         const { base44 } = await import("@/api/base44Client");
-        const callbackUrl = createPageUrl('Dashboard');
+        const callbackUrl = window.location.href; // חזרה לדף הנוכחי עם הפרמטרים
         base44.auth.redirectToLogin(callbackUrl);
     };
 
