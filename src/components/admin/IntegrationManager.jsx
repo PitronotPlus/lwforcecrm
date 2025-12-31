@@ -23,7 +23,7 @@ import { WebhookLog } from "@/entities/WebhookLog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import IntegrationSetup from "../integrations/IntegrationSetup";
 
-export default function IntegrationManager() {
+export default function IntegrationManager({ subAccountId = null }) {
   const [integrations, setIntegrations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showSetup, setShowSetup] = useState(false);
@@ -34,8 +34,8 @@ export default function IntegrationManager() {
   const [selectedIntegrationForLogs, setSelectedIntegrationForLogs] = useState(null);
 
   useEffect(() => {
-    loadIntegrations();
-  }, []);
+      loadIntegrations();
+  }, [subAccountId]);
 
   const loadIntegrations = async () => {
     setIsLoading(true);

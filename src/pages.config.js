@@ -22,6 +22,7 @@ import Support from './pages/Support';
 import Tasks from './pages/Tasks';
 import TeamManagement from './pages/TeamManagement';
 import TestSignature from './pages/TestSignature';
+import OwnerDashboard from './pages/OwnerDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -50,6 +51,7 @@ export const PAGES = {
     "Tasks": Tasks,
     "TeamManagement": TeamManagement,
     "TestSignature": TestSignature,
+    "OwnerDashboard": OwnerDashboard,
 }
 
 export const pagesConfig = {

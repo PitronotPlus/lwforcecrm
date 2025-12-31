@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +20,7 @@ const FIELD_TYPES = [
   { value: 'checkbox', label: 'תיבת סימון' }
 ];
 
-export default function CustomFieldsManager() {
+export default function CustomFieldsManager({ subAccountId = null }) {
   const [customFields, setCustomFields] = useState([]);
   const [editingField, setEditingField] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -37,8 +38,8 @@ export default function CustomFieldsManager() {
   });
 
   useEffect(() => {
-    loadCustomFields();
-  }, []);
+      loadCustomFields();
+  }, [subAccountId]);
 
   const loadCustomFields = async () => {
     try {

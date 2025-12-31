@@ -166,8 +166,9 @@ export default function Layout({ children, currentPageName }) {
         if (!currentUser) return [];
 
         const userRole = currentUser.user_role || currentUser.role || 'lawyer';
-        const isManager = userRole === 'owner' || userRole === 'department_head' || userRole === 'admin';
+        const isManager = userRole === 'owner' || userRole === 'department_head';
         const isAdmin = currentUser.role === 'admin' || currentUser.user_role === 'admin';
+        const isOwner = userRole === 'owner';
 
         const baseItems = [
             { title: "פרופיל והגדרות", url: createPageUrl("Settings") }
@@ -176,6 +177,11 @@ export default function Layout({ children, currentPageName }) {
         // הוספת ניהול צוות לבעלי משרד וראשי מחלקות
         if (isManager) {
             baseItems.push({ title: "ניהול צוות", url: createPageUrl("TeamManagement") });
+        }
+
+        // הוספת ניהול משרד לבעלי משרד
+        if (isOwner) {
+            baseItems.unshift({ title: "ניהול המשרד", url: createPageUrl("OwnerDashboard") });
         }
 
         // הוספת ניהול מערכת וקרדיטים רק למנהלי מערכת (admin)
