@@ -9,7 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, GripVertical, Save, X } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 
 const FIELD_TYPES = [
   { value: 'text', label: 'טקסט' },
