@@ -28,6 +28,10 @@ export default function LandingPage() {
                 sub_account_id: subAccountId,
                 assigned_role: assignedRole
             }));
+            
+            // הפניה אוטומטית להרשמה
+            const { base44 } = await import("@/api/base44Client");
+            base44.auth.redirectToLogin();
         }
     };
 
