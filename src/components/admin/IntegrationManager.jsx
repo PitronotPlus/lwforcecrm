@@ -40,7 +40,13 @@ export default function IntegrationManager({ subAccountId = null }) {
   const loadIntegrations = async () => {
     setIsLoading(true);
     try {
-      const data = await Integration.list("-created_date");
+      let data = await Integration.list("-created_date");
+      // אם מסונן לפי חשבון, הצג רק אינטגרציות של החשבון
+      if (subAccountId) {
+        data = data.filter(integration => 
+          !integration.sub_account_id || integration.sub_account_id === subAccountId
+        );
+      }
       setIntegrations(data);
     } catch (error) {
       console.error("שגיאה בטעינת האינטגרציות:", error);
