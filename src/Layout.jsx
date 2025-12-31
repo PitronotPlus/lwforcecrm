@@ -15,6 +15,7 @@ export default function Layout({ children, currentPageName }) {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [impersonatingUser, setImpersonatingUser] = useState(null);
 
     useEffect(() => {
         loadUserData();
@@ -32,6 +33,17 @@ export default function Layout({ children, currentPageName }) {
             if (isAuth) {
                 const user = await base44.auth.me();
                 setCurrentUser(user);
+                
+                // בדיקה אם יש התחזות פעילה
+                const impersonating = sessionStorage.getItem('impersonating_user');
+                if (impersonating) {
+                    try {
+                        const impersonatedUser = JSON.parse(impersonating);
+                        setImpersonatingUser(impersonatedUser);
+                    } catch (e) {
+                        sessionStorage.removeItem('impersonating_user');
+                    }
+                }
             } else {
                 setCurrentUser(null);
             }
@@ -220,6 +232,12 @@ export default function Layout({ children, currentPageName }) {
         }
     };
 
+    const stopImpersonation = () => {
+        sessionStorage.removeItem('impersonating_user');
+        setImpersonatingUser(null);
+        window.location.reload();
+    };
+
     return (
         <div className="min-h-screen" style={{ 
             fontFamily: 'Heebo, -apple-system, BlinkMacSystemFont, sans-serif',
@@ -313,6 +331,26 @@ export default function Layout({ children, currentPageName }) {
                 }
             `}
             </style>
+
+            {/* Impersonation Banner */}
+            {impersonatingUser && (
+                <div className="bg-red-600 text-white py-3 px-4 flex items-center justify-between z-50">
+                    <div className="flex items-center gap-3">
+                        <div className="text-sm font-bold">🔍 מצב התחזות פעיל</div>
+                        <div className="text-sm">
+                            צופה כ-{impersonatingUser.full_name} ({impersonatingUser.email})
+                        </div>
+                    </div>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={stopImpersonation}
+                        className="bg-white text-red-600 hover:bg-gray-100 border-white"
+                    >
+                        חזור למשתמש שלי
+                    </Button>
+                </div>
+            )}
 
             {/* Mobile Header */}
             {currentUser && (

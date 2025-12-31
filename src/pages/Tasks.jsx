@@ -30,11 +30,22 @@ export default function Tasks() {
     const loadTasks = async () => {
         try {
             const { base44 } = await import('@/api/base44Client');
-            const user = await base44.auth.me();
             
-            // טען רק משימות של המשתמש המחובר
+            // בדיקה אם יש התחזות פעילה
+            const impersonating = sessionStorage.getItem('impersonating_user');
+            let userEmail;
+            
+            if (impersonating) {
+                const impersonatedUser = JSON.parse(impersonating);
+                userEmail = impersonatedUser.email;
+            } else {
+                const user = await base44.auth.me();
+                userEmail = user.email;
+            }
+            
+            // טען רק משימות של המשתמש (מחובר או מתחזה)
             const data = await Task.filter({
-                created_by: user.email
+                created_by: userEmail
             }, '-created_date');
             
             setTasks(data);
