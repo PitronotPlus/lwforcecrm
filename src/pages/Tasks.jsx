@@ -28,8 +28,19 @@ export default function Tasks() {
     }, []);
 
     const loadTasks = async () => {
-        const data = await Task.list('-created_date');
-        setTasks(data);
+        try {
+            const { base44 } = await import('@/api/base44Client');
+            const user = await base44.auth.me();
+            
+            // טען רק משימות של המשתמש המחובר
+            const data = await Task.filter({
+                created_by: user.email
+            }, '-created_date');
+            
+            setTasks(data);
+        } catch (error) {
+            console.error('שגיאה בטעינת משימות:', error);
+        }
     };
 
     const handleTaskUpdate = async (taskId, updates) => {
