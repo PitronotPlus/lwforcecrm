@@ -18,55 +18,157 @@ const ROLES = [
 ];
 
 const PERMISSION_GROUPS = {
-    users: {
-        label: 'ניהול משתמשים',
-        icon: Users,
-        permissions: [
-            'view_all_users', 'edit_all_users', 'delete_users',
-            'view_sub_account_users', 'edit_sub_account_users', 
-            'invite_users', 'remove_users', 'view_department_users'
-        ]
+    admin: {
+        users: {
+            label: 'ניהול משתמשים',
+            icon: Users,
+            permissions: [
+                'view_all_users', 'edit_all_users', 'delete_users',
+                'view_all_sub_accounts', 'edit_sub_accounts'
+            ]
+        },
+        tasks: {
+            label: 'משימות',
+            icon: CheckSquare,
+            permissions: [
+                'view_all_tasks', 'assign_tasks_anyone'
+            ]
+        },
+        clients: {
+            label: 'לקוחות',
+            icon: UserCheck,
+            permissions: [
+                'view_all_clients', 'edit_all_clients'
+            ]
+        },
+        cases: {
+            label: 'תיקים',
+            icon: Briefcase,
+            permissions: [
+                'view_all_cases', 'edit_all_cases'
+            ]
+        },
+        finances: {
+            label: 'כספים',
+            icon: DollarSign,
+            permissions: ['view_all_finances', 'edit_finances']
+        },
+        reports: {
+            label: 'דוחות והגדרות',
+            icon: BarChart3,
+            permissions: [
+                'view_reports', 'edit_system_settings', 'manage_permissions',
+                'manage_custom_fields'
+            ]
+        }
     },
-    tasks: {
-        label: 'משימות',
-        icon: CheckSquare,
-        permissions: [
-            'view_all_tasks', 'view_team_tasks', 'view_own_tasks',
-            'edit_team_tasks', 'edit_own_tasks',
-            'assign_tasks_anyone', 'assign_tasks_to_team'
-        ]
+    owner: {
+        users: {
+            label: 'ניהול צוות המשרד',
+            icon: Users,
+            permissions: [
+                'view_sub_account_users', 'edit_sub_account_users',
+                'invite_users', 'remove_users'
+            ]
+        },
+        tasks: {
+            label: 'משימות',
+            icon: CheckSquare,
+            permissions: [
+                'view_office_tasks', 'assign_tasks_to_office_staff'
+            ]
+        },
+        clients: {
+            label: 'לקוחות',
+            icon: UserCheck,
+            permissions: [
+                'view_office_clients', 'edit_office_clients'
+            ]
+        },
+        cases: {
+            label: 'תיקים',
+            icon: Briefcase,
+            permissions: [
+                'view_office_cases', 'edit_office_cases'
+            ]
+        },
+        finances: {
+            label: 'כספים',
+            icon: DollarSign,
+            permissions: ['view_office_finances', 'edit_office_finances']
+        },
+        reports: {
+            label: 'דוחות והגדרות',
+            icon: BarChart3,
+            permissions: [
+                'view_office_reports', 'edit_sub_account_settings', 'manage_custom_fields'
+            ]
+        }
     },
-    clients: {
-        label: 'לקוחות',
-        icon: UserCheck,
-        permissions: [
-            'view_all_clients', 'edit_all_clients',
-            'view_department_clients', 'edit_department_clients',
-            'view_assigned_clients', 'edit_assigned_clients'
-        ]
+    department_head: {
+        users: {
+            label: 'ניהול צוות המחלקה',
+            icon: Users,
+            permissions: [
+                'view_department_users'
+            ]
+        },
+        tasks: {
+            label: 'משימות',
+            icon: CheckSquare,
+            permissions: [
+                'view_team_tasks', 'edit_team_tasks', 'assign_tasks_to_team'
+            ]
+        },
+        clients: {
+            label: 'לקוחות',
+            icon: UserCheck,
+            permissions: [
+                'view_department_clients', 'edit_department_clients'
+            ]
+        },
+        cases: {
+            label: 'תיקים',
+            icon: Briefcase,
+            permissions: [
+                'view_department_cases', 'edit_department_cases'
+            ]
+        },
+        finances: {
+            label: 'כספים',
+            icon: DollarSign,
+            permissions: ['view_department_finances']
+        },
+        reports: {
+            label: 'דוחות',
+            icon: BarChart3,
+            permissions: [
+                'view_department_reports'
+            ]
+        }
     },
-    cases: {
-        label: 'תיקים',
-        icon: Briefcase,
-        permissions: [
-            'view_all_cases', 'edit_all_cases',
-            'view_department_cases', 'edit_department_cases',
-            'view_assigned_cases', 'edit_assigned_cases'
-        ]
-    },
-    finances: {
-        label: 'כספים',
-        icon: DollarSign,
-        permissions: ['view_all_finances', 'edit_finances', 'view_own_finances']
-    },
-    reports: {
-        label: 'דוחות והגדרות',
-        icon: BarChart3,
-        permissions: [
-            'view_reports', 'view_department_reports',
-            'edit_system_settings', 'edit_sub_account_settings', 'manage_permissions',
-            'manage_custom_fields'
-        ]
+    lawyer: {
+        tasks: {
+            label: 'המשימות שלי',
+            icon: CheckSquare,
+            permissions: [
+                'view_own_tasks', 'edit_own_tasks'
+            ]
+        },
+        clients: {
+            label: 'הלקוחות שלי',
+            icon: UserCheck,
+            permissions: [
+                'view_assigned_clients', 'edit_assigned_clients'
+            ]
+        },
+        cases: {
+            label: 'התיקים שלי',
+            icon: Briefcase,
+            permissions: [
+                'view_assigned_cases', 'edit_assigned_cases'
+            ]
+        }
     }
 };
 
@@ -85,19 +187,20 @@ const DEFAULT_PERMISSIONS = {
     owner: {
         view_sub_account_users: true, edit_sub_account_users: true,
         invite_users: true, remove_users: true,
-        view_all_tasks: true, assign_tasks_anyone: true,
-        view_all_clients: true, edit_all_clients: true,
-        view_all_cases: true, edit_all_cases: true,
-        view_all_finances: true, edit_finances: true,
-        view_reports: true, edit_sub_account_settings: true,
+        view_office_tasks: true, assign_tasks_to_office_staff: true,
+        view_office_clients: true, edit_office_clients: true,
+        view_office_cases: true, edit_office_cases: true,
+        view_office_finances: true, edit_office_finances: true,
+        view_office_reports: true, edit_sub_account_settings: true,
         manage_custom_fields: true
     },
     department_head: {
         view_department_users: true,
-        assign_tasks_to_team: true, view_team_tasks: true, edit_team_tasks: true,
+        view_team_tasks: true, edit_team_tasks: true, assign_tasks_to_team: true,
         view_department_clients: true, edit_department_clients: true,
         view_department_cases: true, edit_department_cases: true,
-        view_department_reports: true, view_own_finances: true
+        view_department_finances: true,
+        view_department_reports: true
     },
     lawyer: {
         view_own_tasks: true, edit_own_tasks: true,
@@ -180,7 +283,7 @@ export default function PermissionsManager() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6">
-                        {Object.entries(PERMISSION_GROUPS).map(([groupKey, group]) => {
+                        {Object.entries(PERMISSION_GROUPS[selectedRole] || {}).map(([groupKey, group]) => {
                             const Icon = group.icon;
                             return (
                                 <div key={groupKey} className="border rounded-lg p-4">
@@ -231,22 +334,22 @@ export default function PermissionsManager() {
                         <div className="p-4 border rounded-lg">
                             <Badge className="bg-blue-100 text-blue-800 mb-2">בעל משרד (Owner)</Badge>
                             <p className="text-sm text-gray-600">
-                                גישה מלאה לחשבון המשרד שלו. יכול להזמין ולנהל עובדים, לראות את כל הנתונים 
-                                של המשרד ולהקצות משימות לכל העובדים.
+                                גישה מלאה לחשבון המשרד שלו בלבד. יכול להזמין ולנהל עובדים במשרד, 
+                                לראות את כל הנתונים של המשרד (לקוחות, משימות, כספים) ולהקצות משימות לעובדי המשרד בלבד.
                             </p>
                         </div>
                         <div className="p-4 border rounded-lg">
                             <Badge className="bg-orange-100 text-orange-800 mb-2">ראש מחלקה (Department Head)</Badge>
                             <p className="text-sm text-gray-600">
-                                מנהל את עורכי הדין במחלקה שלו. יכול להקצות משימות, לעקוב אחר התקדמות 
-                                ולראות דוחות על ביצועי הצוות.
+                                מנהל את עורכי הדין במחלקה שלו בלבד. יכול להקצות משימות לצוות המחלקה, 
+                                לעקוב אחר התקדמות ולראות דוחות על ביצועי עובדי המחלקה בלבד.
                             </p>
                         </div>
                         <div className="p-4 border rounded-lg">
                             <Badge className="bg-gray-100 text-gray-800 mb-2">עורך דין (Lawyer)</Badge>
                             <p className="text-sm text-gray-600">
-                                גישה למשימות, לקוחות ותיקים המשויכים אליו בלבד. 
-                                מדווח לראש המחלקה ומקבל ממנו משימות.
+                                גישה למשימות, לקוחות ותיקים המשויכים אליו אישית בלבד. 
+                                אין גישה לנתוני משתמשים אחרים, הגדרות מערכת או דוחות כלליים.
                             </p>
                         </div>
                     </div>
