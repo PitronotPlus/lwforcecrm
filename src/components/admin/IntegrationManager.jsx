@@ -371,6 +371,7 @@ export default function IntegrationManager({ subAccountId = null }) {
         <IntegrationSetup
           type={selectedIntegrationType}
           integration={editingIntegration}
+          subAccountId={subAccountId}
           onClose={() => {
             setShowSetup(false);
             setSelectedIntegrationType(null);

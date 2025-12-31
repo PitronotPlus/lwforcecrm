@@ -13,7 +13,7 @@ import VoicecenterIntegration from "./VoicecenterIntegration";
 
 const generateId = () => `int_${Date.now().toString(36)}${Math.random().toString(36).substr(2, 9)}`;
 
-export default function IntegrationSetup({ type, integration: initialIntegration, onClose, onSave }) {
+export default function IntegrationSetup({ type, integration: initialIntegration, onClose, onSave, subAccountId = null }) {
   const [integration, setIntegration] = useState(
     initialIntegration || {
       name: "",
@@ -22,7 +22,8 @@ export default function IntegrationSetup({ type, integration: initialIntegration
       integration_id: generateId(),
       configuration: {},
       field_mapping: [],
-      automation_rules: {}
+      automation_rules: {},
+      sub_account_id: subAccountId
     }
   );
   const [isLoading, setIsLoading] = useState(false);
