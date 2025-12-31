@@ -16,15 +16,28 @@ import PermissionsManager from "../components/admin/PermissionsManager";
 import MenuEditor from "../components/admin/MenuEditor";
 import ObjectStudio from "../components/admin/ObjectStudio";
 import CustomFieldsManager from "../components/admin/CustomFieldsManager";
+import InviteUserModal from "../components/admin/InviteUserModal";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [searchQuery, setSearchQuery] = useState('');
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
+        loadCurrentUser();
         loadUsers(); // Load users for stats regardless of tab
     }, []);
+
+    const loadCurrentUser = async () => {
+        try {
+            const { base44 } = await import('@/api/base44Client');
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+        } catch (error) {
+            console.error('שגיאה בטעינת משתמש נוכחי:', error);
+        }
+    };
 
     useEffect(() => {
         if (activeTab === 'users') {
@@ -136,12 +149,10 @@ export default function AdminDashboard() {
                                 />
                                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                             </div>
-                            <Button 
-                                className="bg-[#67BF91] hover:bg-[#5AA880] text-white"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                הוסף עורך דין
-                            </Button>
+                            <InviteUserModal 
+                                currentUser={currentUser}
+                                onInviteSuccess={loadUsers}
+                            />
                         </div>
                     )}
                 </div>
