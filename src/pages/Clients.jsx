@@ -8,6 +8,8 @@ import CreateClientModal from "../components/clients/CreateClientModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ExportClients from "../components/clients/ExportClients";
+import ImportClients from "../components/clients/ImportClients";
 
 export default function Clients() {
     const [clients, setClients] = useState([]);
@@ -215,6 +217,8 @@ export default function Clients() {
                     {/* Left side - New Client Button */}
                     <div className="flex items-center gap-4">
                         <CreateClientModal onClientCreated={loadClients} />
+                        <ExportClients clients={filteredClients} />
+                        <ImportClients onImportComplete={loadClients} />
                     </div>
 
                     {/* Center - Search */}
@@ -270,6 +274,10 @@ export default function Clients() {
                 <div className="md:hidden space-y-3 mb-4">
                     <div className="flex items-center justify-between gap-2">
                         <CreateClientModal onClientCreated={loadClients} />
+                        <ExportClients clients={filteredClients} />
+                        <ImportClients onImportComplete={loadClients} />
+                    </div>
+                    <div className="flex items-center gap-2">
                         <Select value={currentView} onValueChange={setCurrentView}>
                             <SelectTrigger className="flex-1">
                                 <SelectValue />
