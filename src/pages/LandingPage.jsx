@@ -28,39 +28,17 @@ export default function LandingPage() {
                 sub_account_id: subAccountId,
                 assigned_role: assignedRole
             }));
-
-            // עדכון המשתמש לאחר רישום
-            try {
-                const { base44 } = await import("@/api/base44Client");
-                const isAuth = await base44.auth.isAuthenticated();
-                
-                if (isAuth) {
-                    const inviteParams = JSON.parse(sessionStorage.getItem('invite_params'));
-                    if (inviteParams) {
-                        await base44.auth.updateMe({
-                            sub_account_id: inviteParams.sub_account_id,
-                            user_role: inviteParams.assigned_role
-                        });
-                        sessionStorage.removeItem('invite_params');
-                        window.location.href = createPageUrl('Dashboard');
-                    }
-                }
-            } catch (error) {
-                console.error('שגיאה בעדכון משתמש מוזמן:', error);
-            }
         }
     };
 
     const handleLogin = async () => {
         const { base44 } = await import("@/api/base44Client");
-        const callbackUrl = createPageUrl('Dashboard');
-        base44.auth.redirectToLogin(callbackUrl);
+        base44.auth.redirectToLogin();
     };
 
     const handleSignup = async () => {
         const { base44 } = await import("@/api/base44Client");
-        const callbackUrl = window.location.href; // חזרה לדף הנוכחי עם הפרמטרים
-        base44.auth.redirectToLogin(callbackUrl);
+        base44.auth.redirectToLogin();
     };
 
     return (

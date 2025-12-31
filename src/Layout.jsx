@@ -32,7 +32,27 @@ export default function Layout({ children, currentPageName }) {
             const isAuth = await base44.auth.isAuthenticated();
             if (isAuth) {
                 const user = await base44.auth.me();
-                setCurrentUser(user);
+                
+                // בדיקה אם יש פרמטרי הזמנה לעדכון
+                const inviteParams = sessionStorage.getItem('invite_params');
+                if (inviteParams && !user.sub_account_id) {
+                    try {
+                        const params = JSON.parse(inviteParams);
+                        await base44.auth.updateMe({
+                            sub_account_id: params.sub_account_id,
+                            user_role: params.assigned_role
+                        });
+                        sessionStorage.removeItem('invite_params');
+                        // טען מחדש את המשתמש עם הנתונים המעודכנים
+                        const updatedUser = await base44.auth.me();
+                        setCurrentUser(updatedUser);
+                    } catch (error) {
+                        console.error('שגיאה בעדכון משתמש מוזמן:', error);
+                        setCurrentUser(user);
+                    }
+                } else {
+                    setCurrentUser(user);
+                }
                 
                 // בדיקה אם יש התחזות פעילה
                 const impersonating = sessionStorage.getItem('impersonating_user');
