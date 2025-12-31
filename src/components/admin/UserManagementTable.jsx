@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, MoreVertical, Shield, ShieldOff } from 'lucide-react';
+import { Edit, Trash2, MoreVertical, Shield, ShieldOff, Eye } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -273,6 +273,16 @@ export default function UserManagementTable({ users, onUserAction, searchQuery }
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => {
+                                                sessionStorage.setItem('impersonating_user', JSON.stringify({
+                                                    email: user.email,
+                                                    full_name: user.full_name
+                                                }));
+                                                window.location.href = '/';
+                                            }}>
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                התחזות למשתמש
+                                            </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setEditingUser(user)}>
                                                 <Edit className="w-4 h-4 mr-2" />
                                                 ערוך
