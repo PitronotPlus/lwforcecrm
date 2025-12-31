@@ -14,7 +14,6 @@ import SupportTicketManagement from "../components/admin/SupportTicketManagement
 import SubAccountManager from "../components/admin/SubAccountManager";
 import PermissionsManager from "../components/admin/PermissionsManager";
 import MenuEditor from "../components/admin/MenuEditor";
-import ObjectStudio from "../components/admin/ObjectStudio";
 import CustomFieldsManager from "../components/admin/CustomFieldsManager";
 import InviteUserModal from "../components/admin/InviteUserModal";
 
@@ -108,8 +107,6 @@ export default function AdminDashboard() {
                 return <SupportTicketManagement />;
             case 'menuEditor':
                 return <MenuEditor />;
-            case 'objectStudio':
-                return <ObjectStudio />;
             case 'customFields':
                 return <CustomFieldsManager />;
             case 'settings':
@@ -263,20 +260,7 @@ export default function AdminDashboard() {
                             <Menu className="w-5 h-5" />
                             עריכת תפריט
                         </button>
-                        
-                        <button
-                            onClick={() => setActiveTab('objectStudio')}
-                            className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
-                                activeTab === 'objectStudio' 
-                                    ? 'bg-[#3568AE] text-white' 
-                                    : 'text-[#484848] hover:bg-gray-100'
-                            }`}
-                            style={{ fontFamily: 'Heebo' }}
-                        >
-                            <Database className="w-5 h-5" />
-                            הגדרת רשומות
-                        </button>
-                        
+
                         <button
                             onClick={() => setActiveTab('customFields')}
                             className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
