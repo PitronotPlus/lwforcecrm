@@ -21,11 +21,6 @@ export default function Layout({ children, currentPageName }) {
         loadUserData();
     }, []);
 
-    useEffect(() => {
-        // Reload user data when URL changes (after login redirect)
-        loadUserData();
-    }, [location.pathname]);
-
     const loadUserData = async () => {
         try {
             const { base44 } = await import("@/api/base44Client");
@@ -78,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
     const [menuItems, setMenuItems] = useState([]);
 
     useEffect(() => {
-        if (currentUser) {
+        if (currentUser && menuItems.length === 0) {
             loadMenuItems();
         }
     }, [currentUser]);
@@ -101,8 +96,7 @@ export default function Layout({ children, currentPageName }) {
                     userRole = currentUser.user_role;
                 }
                 
-                console.log('Current user object:', currentUser);
-                console.log('Detected user role:', userRole);
+
             }
             
             if (configs.length === 0) {
@@ -132,15 +126,13 @@ export default function Layout({ children, currentPageName }) {
                             ? c.allowed_roles 
                             : ['admin', 'owner', 'department_head', 'lawyer'];
                         
-                        console.log('Menu item:', c.display_name, 'Allowed roles:', allowedRoles, 'User role:', userRole);
                         return allowedRoles.includes(userRole);
                     })
                     .map(c => ({
                         title: c.display_name,
                         url: c.custom_route || createPageUrl(c.object_id || c.display_name)
                     }));
-                
-                console.log('Filtered menu items for role', userRole, ':', items);
+
                 setMenuItems(items);
             }
         } catch (error) {

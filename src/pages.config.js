@@ -11,6 +11,7 @@ import Finances from './pages/Finances';
 import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
 import Marketing from './pages/Marketing';
+import OwnerDashboard from './pages/OwnerDashboard';
 import PostSignupSurvey from './pages/PostSignupSurvey';
 import PricingPage from './pages/PricingPage';
 import Products from './pages/Products';
@@ -22,7 +23,6 @@ import Support from './pages/Support';
 import Tasks from './pages/Tasks';
 import TeamManagement from './pages/TeamManagement';
 import TestSignature from './pages/TestSignature';
-import OwnerDashboard from './pages/OwnerDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +40,7 @@ export const PAGES = {
     "Home": Home,
     "LandingPage": LandingPage,
     "Marketing": Marketing,
+    "OwnerDashboard": OwnerDashboard,
     "PostSignupSurvey": PostSignupSurvey,
     "PricingPage": PricingPage,
     "Products": Products,
@@ -51,7 +52,6 @@ export const PAGES = {
     "Tasks": Tasks,
     "TeamManagement": TeamManagement,
     "TestSignature": TestSignature,
-    "OwnerDashboard": OwnerDashboard,
 }
 
 export const pagesConfig = {
