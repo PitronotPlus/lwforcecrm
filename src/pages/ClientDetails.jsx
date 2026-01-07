@@ -330,17 +330,6 @@ export default function ClientDetails() {
 
                                         <div>
                                             <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
-                                                משרד
-                                            </label>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-semibold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
-                                                    {subAccountName}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
                                                 תאריך יצירה
                                             </label>
                                             <div className="flex items-center gap-2">
@@ -358,6 +347,17 @@ export default function ClientDetails() {
                                         <CardTitle style={{ fontFamily: 'Heebo' }}>מידע מקצועי</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-6">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
+                                                משרד משוייך
+                                            </label>
+                                            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                                <span className="font-semibold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
+                                                    {subAccountName}
+                                                </span>
+                                                <Badge variant="outline" className="text-xs">לא ניתן לשינוי</Badge>
+                                            </div>
+                                        </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
                                                 סוג שירות
