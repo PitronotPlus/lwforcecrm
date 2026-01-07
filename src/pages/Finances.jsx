@@ -20,7 +20,20 @@ export default function Finances() {
     const loadRecords = async () => {
         try {
             setLoading(true);
-            const data = await Financial.list('-date');
+            const { base44 } = await import("@/api/base44Client");
+            const user = await base44.auth.me();
+            
+            // Admin רואה הכל, אחרים רואים רק מהמשרד שלהם
+            let data;
+            if (user.role === 'admin') {
+                data = await Financial.list('-date');
+            } else if (user.sub_account_id) {
+                data = await Financial.filter({ sub_account_id: user.sub_account_id }, '-date');
+            } else {
+                // עצמאי - רואה רק שלו
+                data = await Financial.filter({ created_by: user.email }, '-date');
+            }
+            
             setRecords(data);
         } catch (error) {
             console.error('שגיאה בטעינת רישומים כספיים:', error);

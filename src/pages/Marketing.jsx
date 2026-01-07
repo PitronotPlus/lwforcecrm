@@ -16,7 +16,20 @@ export default function Marketing() {
     const loadClients = async () => {
         try {
             setLoading(true);
-            const data = await Client.list();
+            const { base44 } = await import("@/api/base44Client");
+            const user = await base44.auth.me();
+            
+            // Admin רואה הכל, אחרים רואים רק מהמשרד שלהם
+            let data;
+            if (user.role === 'admin') {
+                data = await Client.list();
+            } else if (user.sub_account_id) {
+                data = await Client.filter({ sub_account_id: user.sub_account_id });
+            } else {
+                // עצמאי - רואה רק שלו
+                data = await Client.filter({ created_by: user.email });
+            }
+            
             setClients(data);
         } catch (error) {
             console.error("Failed to load clients:", error);

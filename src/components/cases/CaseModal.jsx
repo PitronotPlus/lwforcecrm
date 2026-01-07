@@ -66,7 +66,13 @@ export default function CaseModal({ client = null, caseToEdit = null, onCaseSave
             if (isEditing) {
                 await Case.update(caseToEdit.id, formData);
             } else {
-                await Case.create(formData);
+                const { base44 } = await import("@/api/base44Client");
+                const currentUser = await base44.auth.me();
+                const caseData = {
+                    ...formData,
+                    sub_account_id: currentUser?.sub_account_id || null
+                };
+                await Case.create(caseData);
             }
             onCaseSaved();
             setIsOpen(false);

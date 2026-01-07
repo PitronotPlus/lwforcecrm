@@ -57,8 +57,14 @@ export default function CreateClientModal({ onClientCreated, triggerText = "לק
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const { base44 } = await import("@/api/base44Client");
+            const currentUser = await base44.auth.me();
+            
             // מיזוג השדות המותאמים לתוך הנתונים הראשיים
-            const clientData = { ...formData };
+            const clientData = { 
+                ...formData,
+                sub_account_id: currentUser?.sub_account_id || null
+            };
             if (formData.custom_fields) {
                 Object.assign(clientData, formData.custom_fields);
                 delete clientData.custom_fields;
