@@ -68,11 +68,42 @@ export default function Services() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const user = await base44.auth.me();
+            const serviceData = {
+                ...formData,
+                sub_account_id: user?.sub_account_id || null
+            };
+
+            let service;
             if (editingService) {
-                await base44.entities.Service.update(editingService.id, formData);
+                await base44.entities.Service.update(editingService.id, serviceData);
+                service = { ...editingService, ...serviceData };
             } else {
-                await base44.entities.Service.create(formData);
+                service = await base44.entities.Service.create(serviceData);
             }
+
+            // יצירת רשומה פיננסית אם יש תשלום
+            if (formData.payment_status !== 'לא שולם' && formData.price) {
+                const amount = formData.payment_status === 'שולם במלואו' 
+                    ? parseFloat(formData.price) 
+                    : parseFloat(formData.amount_paid || 0);
+
+                if (amount > 0) {
+                    await base44.entities.Financial.create({
+                        description: `תשלום עבור שירות: ${formData.product_name}`,
+                        amount: amount,
+                        type: 'הכנסה',
+                        category: 'שכ"ט',
+                        date: new Date().toISOString().split('T')[0],
+                        client_id: formData.client_id,
+                        client_name: formData.client_name,
+                        payment_method: 'העברה בנקאית',
+                        invoice_issued: false,
+                        sub_account_id: user?.sub_account_id || null
+                    });
+                }
+            }
+
             resetForm();
             loadData();
         } catch (error) {

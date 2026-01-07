@@ -38,6 +38,7 @@ import ClientAppointments from "../components/client-details/ClientAppointments"
 import ClientActivityLogComponent from "../components/client-details/ClientActivityLog";
 import ClientFinances from "../components/client-details/ClientFinances";
 import ClientDocuments from "../components/client-details/ClientDocuments";
+import ClientServices from "../components/client-details/ClientServices";
 import { logClientChanges, logClientActivity } from "../components/client-details/activityLogger";
 
 export default function ClientDetails() {
@@ -209,23 +210,48 @@ export default function ClientDetails() {
                     </div>
 
                     <Tabs defaultValue="details" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-4 lg:grid-cols-11 gap-1 h-auto">
-                            <TabsTrigger value="details" className="text-xs md:text-sm py-2">פרטי לקוח</TabsTrigger>
-                            <TabsTrigger value="tasks" className="text-xs md:text-sm py-2">משימות</TabsTrigger>
-                            <TabsTrigger value="interactions" className="text-xs md:text-sm py-2">תיעוד</TabsTrigger>
-                            <TabsTrigger value="appointments" className="text-xs md:text-sm py-2">פגישות</TabsTrigger>
-                            <TabsTrigger value="activity" className="text-xs md:text-sm py-2 hidden sm:block">לוג</TabsTrigger>
-                            <TabsTrigger value="finances" className="text-xs md:text-sm py-2">כספים</TabsTrigger>
-                            <TabsTrigger value="documents" className="text-xs md:text-sm py-2 hidden sm:block">מסמכים</TabsTrigger>
-                            <TabsTrigger value="cases" className="text-xs md:text-sm py-2">תיקים</TabsTrigger>
-                            <TabsTrigger value="marketing" className="text-xs md:text-sm py-2 hidden lg:block">שיווק</TabsTrigger>
-                            <TabsTrigger value="communication" className="text-xs md:text-sm py-2 hidden lg:block">תקשורת</TabsTrigger>
-                            <TabsTrigger value="automation" className="text-xs md:text-sm py-2 hidden lg:block">אוטומציות</TabsTrigger>
-                        </TabsList>
+                        <div className="bg-white rounded-lg p-4 mb-6">
+                            <div className="space-y-3">
+                                {/* שורה ראשונה - לשוניות עיקריות */}
+                                <div className="flex flex-wrap gap-2">
+                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
+                                        <TabsTrigger value="details" className="text-sm px-4 py-2 data-[state=active]:bg-white">פרטי לקוח</TabsTrigger>
+                                        <TabsTrigger value="tasks" className="text-sm px-4 py-2 data-[state=active]:bg-white">משימות</TabsTrigger>
+                                        <TabsTrigger value="services" className="text-sm px-4 py-2 data-[state=active]:bg-white">שירותים</TabsTrigger>
+                                        <TabsTrigger value="finances" className="text-sm px-4 py-2 data-[state=active]:bg-white">כספים</TabsTrigger>
+                                        <TabsTrigger value="cases" className="text-sm px-4 py-2 data-[state=active]:bg-white">תיקים</TabsTrigger>
+                                    </TabsList>
+                                </div>
+
+                                {/* שורה שנייה - לשוניות משניות */}
+                                <div className="flex flex-wrap gap-2">
+                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
+                                        <TabsTrigger value="appointments" className="text-sm px-4 py-2 data-[state=active]:bg-white">פגישות</TabsTrigger>
+                                        <TabsTrigger value="interactions" className="text-sm px-4 py-2 data-[state=active]:bg-white">תיעוד</TabsTrigger>
+                                        <TabsTrigger value="documents" className="text-sm px-4 py-2 data-[state=active]:bg-white">מסמכים</TabsTrigger>
+                                        <TabsTrigger value="activity" className="text-sm px-4 py-2 data-[state=active]:bg-white">לוג פעילות</TabsTrigger>
+                                    </TabsList>
+                                </div>
+
+                                {/* שורה שלישית - הגדרות ושיווק */}
+                                <div className="flex flex-wrap gap-2">
+                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
+                                        <TabsTrigger value="communication" className="text-sm px-4 py-2 data-[state=active]:bg-white">תקשורת</TabsTrigger>
+                                        <TabsTrigger value="marketing" className="text-sm px-4 py-2 data-[state=active]:bg-white">שיווק</TabsTrigger>
+                                        <TabsTrigger value="automation" className="text-sm px-4 py-2 data-[state=active]:bg-white">אוטומציות</TabsTrigger>
+                                    </TabsList>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* משימות */}
                         <TabsContent value="tasks">
                             <ClientTasks client={client} />
+                        </TabsContent>
+
+                        {/* שירותים */}
+                        <TabsContent value="services">
+                            <ClientServices client={client} />
                         </TabsContent>
 
                         {/* תיעוד אינטרקציות */}
