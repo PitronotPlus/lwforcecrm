@@ -22,12 +22,14 @@ import {
 export default function Services() {
     const [services, setServices] = useState([]);
     const [clients, setClients] = useState([]);
-    const [products, setProducts] = useState([]);
+    const [serviceTypes, setServiceTypes] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingService, setEditingService] = useState(null);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [newServiceType, setNewServiceType] = useState('');
+    const [showNewServiceInput, setShowNewServiceInput] = useState(false);
     const [formData, setFormData] = useState({
         client_id: '',
         client_name: '',
@@ -47,14 +49,14 @@ export default function Services() {
 
     const loadData = async () => {
         try {
-            const [servicesData, clientsData, productsData] = await Promise.all([
+            const [servicesData, clientsData, settingsData] = await Promise.all([
                 base44.entities.Service.list('-created_date'),
                 base44.entities.Client.list('full_name'),
-                base44.entities.Product.list('product_name')
+                base44.entities.ClientSettings.list()
             ]);
             setServices(servicesData);
             setClients(clientsData);
-            setProducts(productsData);
+            setServiceTypes(settingsData[0]?.service_type_options || []);
         } catch (error) {
             console.error("שגיאה בטעינת נתונים:", error);
         }
@@ -134,14 +136,64 @@ export default function Services() {
         });
     };
 
-    const handleProductChange = (productId) => {
-        const product = products.find(p => p.id === productId);
-        setFormData({
-            ...formData,
-            product_id: productId,
-            product_name: product?.product_name || '',
-            price: product?.price || formData.price
-        });
+    const handleServiceTypeChange = (value) => {
+        if (value === '__new__') {
+            setShowNewServiceInput(true);
+            setFormData({
+                ...formData,
+                product_id: '',
+                product_name: ''
+            });
+        } else {
+            setFormData({
+                ...formData,
+                product_id: value,
+                product_name: value
+            });
+        }
+    };
+
+    const handleAddNewServiceType = async () => {
+        if (!newServiceType.trim()) return;
+        
+        try {
+            const settingsData = await base44.entities.ClientSettings.list();
+            const settings = settingsData[0];
+            const updatedServiceTypes = [...(settings?.service_type_options || []), newServiceType.trim()];
+            
+            await base44.entities.ClientSettings.update(settings.id, {
+                service_type_options: updatedServiceTypes
+            });
+            
+            setServiceTypes(updatedServiceTypes);
+            setFormData({
+                ...formData,
+                product_id: newServiceType.trim(),
+                product_name: newServiceType.trim()
+            });
+            setNewServiceType('');
+            setShowNewServiceInput(false);
+        } catch (error) {
+            console.error("שגיאה בהוספת סוג שירות:", error);
+        }
+    };
+
+    const handleRemoveServiceType = async (typeToRemove) => {
+        if (!confirm(`האם למחוק את סוג השירות "${typeToRemove}"?`)) return;
+        
+        try {
+            const settingsData = await base44.entities.ClientSettings.list();
+            const settings = settingsData[0];
+            const updatedServiceTypes = (settings?.service_type_options || []).filter(t => t !== typeToRemove);
+            
+            await base44.entities.ClientSettings.update(settings.id, {
+                service_type_options: updatedServiceTypes
+            });
+            
+            setServiceTypes(updatedServiceTypes);
+        } catch (error) {
+            console.error("שגיאה במחיקת סוג שירות:", error);
+        }
     };
 
     const resetForm = () => {
@@ -328,18 +380,78 @@ export default function Services() {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">סוג שירות *</label>
-                                    <Select value={formData.product_id} onValueChange={handleProductChange} required>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="בחר מוצר" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {products.map((product) => (
-                                                <SelectItem key={product.id} value={product.id}>
-                                                    {product.product_name} - ₪{product.price}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {showNewServiceInput ? (
+                                        <div className="space-y-2">
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    value={newServiceType}
+                                                    onChange={(e) => setNewServiceType(e.target.value)}
+                                                    placeholder="הקלד סוג שירות חדש"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            handleAddNewServiceType();
+                                                        }
+                                                    }}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    onClick={handleAddNewServiceType}
+                                                    size="sm"
+                                                    className="bg-[#67BF91]"
+                                                >
+                                                    הוסף
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setShowNewServiceInput(false);
+                                                        setNewServiceType('');
+                                                    }}
+                                                    size="sm"
+                                                    variant="outline"
+                                                >
+                                                    ביטול
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <Select value={formData.product_id} onValueChange={handleServiceTypeChange} required>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="בחר או הוסף סוג שירות" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {serviceTypes.map((type) => (
+                                                        <SelectItem key={type} value={type}>
+                                                            <div className="flex items-center justify-between w-full">
+                                                                <span>{type}</span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                    <SelectItem value="__new__" className="text-[#67BF91] font-medium">
+                                                        + הוסף סוג שירות חדש
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {serviceTypes.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded">
+                                                    {serviceTypes.map((type) => (
+                                                        <Badge key={type} variant="outline" className="flex items-center gap-1">
+                                                            {type}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveServiceType(type)}
+                                                                className="ml-1 hover:text-red-600"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
