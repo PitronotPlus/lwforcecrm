@@ -52,6 +52,7 @@ export default function ClientDetails() {
     const [refreshLogKey, setRefreshLogKey] = useState(0);
     const [refreshActivityKey, setRefreshActivityKey] = useState(0);
     const [currentUser, setCurrentUser] = useState(null);
+    const [subAccountName, setSubAccountName] = useState('');
 
     useEffect(() => {
         loadCurrentUser();
@@ -79,6 +80,15 @@ export default function ClientDetails() {
             const data = await Client.get(clientId);
             setClient(data);
             setEditForm(data);
+            
+            // טען שם המשרד
+            if (data.sub_account_id) {
+                const { SubAccount } = await import('@/entities/SubAccount');
+                const subAccount = await SubAccount.get(data.sub_account_id);
+                setSubAccountName(subAccount?.name || 'לא ידוע');
+            } else {
+                setSubAccountName('עצמאי');
+            }
         } catch (error) {
             console.error('שגיאה בטעינת לקוח:', error);
         }
@@ -316,6 +326,17 @@ export default function ClientDetails() {
                                                     </a>
                                                 </div>
                                             )}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
+                                                משרד
+                                            </label>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
+                                                    {subAccountName}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div>
