@@ -40,6 +40,8 @@ export default function Services() {
         action_date: '',
         price: '',
         payment_status: 'לא שולם',
+        amount_paid: '',
+        balance: '',
         attachments: []
     });
 
@@ -90,6 +92,8 @@ export default function Services() {
             action_date: service.action_date || '',
             price: service.price || '',
             payment_status: service.payment_status || 'לא שולם',
+            amount_paid: service.amount_paid || '',
+            balance: service.balance || '',
             attachments: service.attachments || []
         });
         setShowForm(true);
@@ -207,6 +211,8 @@ export default function Services() {
             action_date: '',
             price: '',
             payment_status: 'לא שולם',
+            amount_paid: '',
+            balance: '',
             attachments: []
         });
         setEditingService(null);
@@ -322,6 +328,9 @@ export default function Services() {
                                         <div>
                                             <span className="text-gray-500">מחיר:</span>
                                             <p className="font-medium text-[#67BF91]">₪{service.price || 0}</p>
+                                            {service.payment_status === 'שולם חלקית' && service.amount_paid && (
+                                                <p className="text-xs text-gray-500">שולם: ₪{service.amount_paid} | יתרה: ₪{service.balance}</p>
+                                            )}
                                         </div>
                                         <div>
                                             <span className="text-gray-500">קבצים מצורפים:</span>
@@ -519,6 +528,38 @@ export default function Services() {
                                     </SelectContent>
                                 </Select>
                             </div>
+
+                            {formData.payment_status === 'שולם חלקית' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">סכום ששולם</label>
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            value={formData.amount_paid}
+                                            onChange={(e) => {
+                                                const paid = parseFloat(e.target.value) || 0;
+                                                const total = parseFloat(formData.price) || 0;
+                                                setFormData({ 
+                                                    ...formData, 
+                                                    amount_paid: e.target.value,
+                                                    balance: total - paid
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">יתרה לתשלום</label>
+                                        <Input
+                                            type="number"
+                                            placeholder="0"
+                                            value={formData.balance}
+                                            disabled
+                                            className="bg-gray-100"
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">קבצים מצורפים</label>
