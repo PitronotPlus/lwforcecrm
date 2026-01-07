@@ -228,72 +228,59 @@ export default function ClientDetails() {
                     <Tabs defaultValue="details" className="w-full">
                         <Card className="mb-6 shadow-sm">
                             <CardContent className="pt-4 pb-4">
-                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                    {/* קטגוריה: מידע כללי */}
-                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
-                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">מידע כללי</span>
+                                {/* קטגוריה: מידע כללי */}
+                                <div className="mb-4">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2">מידע כללי</h3>
+                                    <TabsList className="h-auto bg-transparent p-0 flex flex-wrap gap-2">
+                                        <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <User className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">פרטי לקוח</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="tasks" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Activity className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">משימות</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="services" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Briefcase className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">שירותים</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="finances" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <DollarSign className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">כספים</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="cases" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Folder className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">תיקים</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="appointments" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Calendar className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">פגישות</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="interactions" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <MessageCircle className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">תיעוד</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="documents" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <FileText className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">מסמכים</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="activity" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Activity className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">לוג פעילות</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="communication" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Send className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">תקשורת</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="marketing" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <ExternalLink className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">שיווק</span>
+                                        </TabsTrigger>
+                                        <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                            <Settings className="w-4 h-4 ml-2" />
+                                            <span className="text-sm">אוטומציות</span>
+                                        </TabsTrigger>
                                     </TabsList>
-
-                                    <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <User className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">פרטי לקוח</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="tasks" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Activity className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">משימות</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="services" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Briefcase className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">שירותים</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="finances" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <DollarSign className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">כספים</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="cases" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Folder className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">תיקים</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="appointments" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Calendar className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">פגישות</span>
-                                    </TabsTrigger>
-
-                                    {/* קטגוריה: תיעוד ומעקב */}
-                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mt-4 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
-                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">תיעוד ומעקב</span>
-                                    </TabsList>
-
-                                    <TabsTrigger value="interactions" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <MessageCircle className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">תיעוד</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="documents" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <FileText className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">מסמכים</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="activity" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Activity className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">לוג פעילות</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="communication" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Send className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">תקשורת</span>
-                                    </TabsTrigger>
-
-                                    {/* קטגוריה: הגדרות */}
-                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mt-4 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
-                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">הגדרות ושיווק</span>
-                                    </TabsList>
-
-                                    <TabsTrigger value="marketing" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <ExternalLink className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">שיווק</span>
-                                    </TabsTrigger>
-                                    <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
-                                        <Settings className="w-4 h-4 ml-2" />
-                                        <span className="text-sm">אוטומציות</span>
-                                    </TabsTrigger>
                                 </div>
                             </CardContent>
                         </Card>
