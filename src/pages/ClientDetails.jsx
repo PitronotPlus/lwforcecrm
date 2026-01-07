@@ -25,7 +25,8 @@ import {
     Folder,
     FileText,
     Activity,
-    DollarSign
+    DollarSign,
+    Briefcase
 } from "lucide-react";
 import CommunicationLogStream from "../components/clients/CommunicationLogStream";
 import CommunicationPanel from "../components/clients/CommunicationPanel";
@@ -170,79 +171,132 @@ export default function ClientDetails() {
                 
                 {/* Main Content on the right */}
                 <div className="lg:col-span-2">
-                    {/* Header */}
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
-                        <div className="flex items-center gap-3 md:gap-4">
-                            <User className="w-6 md:w-8 h-6 md:h-8 text-[#3568AE]" />
-                            <h1 
-                                className="text-2xl md:text-[32px] font-bold"
-                                style={{ 
-                                    color: '#3568AE',
-                                    fontFamily: 'Heebo'
-                                }}
-                            >
-                                {client.full_name}
-                            </h1>
-                            <Badge className={getStatusColor(client.status)}>
-                                {client.status}
-                            </Badge>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row gap-2 md:gap-4 w-full md:w-auto">
-                            <Button
-                                onClick={() => setIsEditing(!isEditing)}
-                                variant="outline"
-                                className="border-[#3568AE] text-[#3568AE] hover:bg-[#3568AE]/10 w-full sm:w-auto"
-                            >
-                                <Edit className="ml-2 w-4 h-4" />
-                                <span className="text-sm md:text-base">{isEditing ? 'בטל עריכה' : 'ערוך פרטים'}</span>
-                            </Button>
-
-                            {isEditing && (
-                                <Button
-                                    onClick={handleSave}
-                                    className="bg-[#67BF91] hover:bg-[#5AA880] text-white w-full sm:w-auto"
-                                >
-                                    שמור שינויים
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-
-                    <Tabs defaultValue="details" className="w-full">
-                        <div className="bg-white rounded-lg p-4 mb-6">
-                            <div className="space-y-3">
-                                {/* שורה ראשונה - לשוניות עיקריות */}
-                                <div className="flex flex-wrap gap-2">
-                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
-                                        <TabsTrigger value="details" className="text-sm px-4 py-2 data-[state=active]:bg-white">פרטי לקוח</TabsTrigger>
-                                        <TabsTrigger value="tasks" className="text-sm px-4 py-2 data-[state=active]:bg-white">משימות</TabsTrigger>
-                                        <TabsTrigger value="services" className="text-sm px-4 py-2 data-[state=active]:bg-white">שירותים</TabsTrigger>
-                                        <TabsTrigger value="finances" className="text-sm px-4 py-2 data-[state=active]:bg-white">כספים</TabsTrigger>
-                                        <TabsTrigger value="cases" className="text-sm px-4 py-2 data-[state=active]:bg-white">תיקים</TabsTrigger>
-                                    </TabsList>
+                    {/* Header Card */}
+                    <Card className="mb-6 shadow-md">
+                        <CardContent className="pt-6">
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4 flex-1">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3568AE] to-[#67BF91] flex items-center justify-center text-white text-2xl font-bold">
+                                        {client.full_name?.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h1 
+                                            className="text-2xl md:text-3xl font-bold mb-2"
+                                            style={{ 
+                                                color: '#3568AE',
+                                                fontFamily: 'Heebo'
+                                            }}
+                                        >
+                                            {client.full_name}
+                                        </h1>
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <Badge className={getStatusColor(client.status) + " text-sm"}>
+                                                {client.status}
+                                            </Badge>
+                                            {subAccountName && (
+                                                <Badge variant="outline" className="text-sm">
+                                                    {subAccountName}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* שורה שנייה - לשוניות משניות */}
-                                <div className="flex flex-wrap gap-2">
-                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
-                                        <TabsTrigger value="appointments" className="text-sm px-4 py-2 data-[state=active]:bg-white">פגישות</TabsTrigger>
-                                        <TabsTrigger value="interactions" className="text-sm px-4 py-2 data-[state=active]:bg-white">תיעוד</TabsTrigger>
-                                        <TabsTrigger value="documents" className="text-sm px-4 py-2 data-[state=active]:bg-white">מסמכים</TabsTrigger>
-                                        <TabsTrigger value="activity" className="text-sm px-4 py-2 data-[state=active]:bg-white">לוג פעילות</TabsTrigger>
-                                    </TabsList>
-                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                    <Button
+                                        onClick={() => setIsEditing(!isEditing)}
+                                        variant="outline"
+                                        className="border-[#3568AE] text-[#3568AE] hover:bg-[#3568AE]/10 w-full sm:w-auto"
+                                    >
+                                        <Edit className="ml-2 w-4 h-4" />
+                                        <span className="text-sm">{isEditing ? 'בטל עריכה' : 'ערוך פרטים'}</span>
+                                    </Button>
 
-                                {/* שורה שלישית - הגדרות ושיווק */}
-                                <div className="flex flex-wrap gap-2">
-                                    <TabsList className="inline-flex h-auto bg-gray-100 p-1 rounded-lg">
-                                        <TabsTrigger value="communication" className="text-sm px-4 py-2 data-[state=active]:bg-white">תקשורת</TabsTrigger>
-                                        <TabsTrigger value="marketing" className="text-sm px-4 py-2 data-[state=active]:bg-white">שיווק</TabsTrigger>
-                                        <TabsTrigger value="automation" className="text-sm px-4 py-2 data-[state=active]:bg-white">אוטומציות</TabsTrigger>
-                                    </TabsList>
+                                    {isEditing && (
+                                        <Button
+                                            onClick={handleSave}
+                                            className="bg-[#67BF91] hover:bg-[#5AA880] text-white w-full sm:w-auto"
+                                        >
+                                            שמור שינויים
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
-                        </div>
+                        </CardContent>
+                    </Card>
+
+                    <Tabs defaultValue="details" className="w-full">
+                        <Card className="mb-6 shadow-sm">
+                            <CardContent className="pt-4 pb-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                    {/* קטגוריה: מידע כללי */}
+                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">מידע כללי</span>
+                                    </TabsList>
+
+                                    <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <User className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">פרטי לקוח</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="tasks" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Activity className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">משימות</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="services" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Briefcase className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">שירותים</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="finances" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <DollarSign className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">כספים</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="cases" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Folder className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">תיקים</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="appointments" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Calendar className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">פגישות</span>
+                                    </TabsTrigger>
+
+                                    {/* קטגוריה: תיעוד ומעקב */}
+                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mt-4 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">תיעוד ומעקב</span>
+                                    </TabsList>
+
+                                    <TabsTrigger value="interactions" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <MessageCircle className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">תיעוד</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="documents" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <FileText className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">מסמכים</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="activity" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Activity className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">לוג פעילות</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="communication" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Send className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">תקשורת</span>
+                                    </TabsTrigger>
+
+                                    {/* קטגוריה: הגדרות */}
+                                    <TabsList className="col-span-2 md:col-span-4 lg:col-span-6 mt-4 mb-2 h-auto bg-transparent p-0 justify-start border-b pb-2">
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">הגדרות ושיווק</span>
+                                    </TabsList>
+
+                                    <TabsTrigger value="marketing" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <ExternalLink className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">שיווק</span>
+                                    </TabsTrigger>
+                                    <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <Settings className="w-4 h-4 ml-2" />
+                                        <span className="text-sm">אוטומציות</span>
+                                    </TabsTrigger>
+                                </div>
+                            </CardContent>
+                        </Card>
 
                         {/* משימות */}
                         <TabsContent value="tasks">
