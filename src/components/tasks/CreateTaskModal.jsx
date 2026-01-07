@@ -52,7 +52,15 @@ export default function CreateTaskModal({
             setCurrentUser(user);
             
             if (!client) {
-                const clientsData = await Client.list();
+                // טען רק לקוחות מהמשרד של המשתמש
+                let clientsData;
+                if (user.role === 'admin') {
+                    clientsData = await Client.list();
+                } else if (user.sub_account_id) {
+                    clientsData = await Client.filter({ sub_account_id: user.sub_account_id });
+                } else {
+                    clientsData = await Client.filter({ created_by: user.email });
+                }
                 setAllClients(clientsData);
             }
             

@@ -21,7 +21,20 @@ export default function Cases() {
     const loadCases = async () => {
         try {
             setLoading(true);
-            const data = await Case.list('-created_date');
+            const { base44 } = await import("@/api/base44Client");
+            const user = await base44.auth.me();
+            
+            // Admin רואה הכל, אחרים רואים רק מהמשרד שלהם
+            let data;
+            if (user.role === 'admin') {
+                data = await Case.list('-created_date');
+            } else if (user.sub_account_id) {
+                data = await Case.filter({ sub_account_id: user.sub_account_id }, '-created_date');
+            } else {
+                // עצמאי - רואה רק שלו
+                data = await Case.filter({ created_by: user.email }, '-created_date');
+            }
+            
             setCases(data);
         } catch (error) {
             console.error("שגיאה בטעינת תיקים:", error);

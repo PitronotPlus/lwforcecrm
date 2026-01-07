@@ -44,7 +44,19 @@ export default function CaseModal({ client = null, caseToEdit = null, onCaseSave
 
     const loadClients = async () => {
         try {
-            const data = await Client.list();
+            const { base44 } = await import("@/api/base44Client");
+            const user = await base44.auth.me();
+            
+            // טען רק לקוחות מהמשרד של המשתמש
+            let data;
+            if (user.role === 'admin') {
+                data = await Client.list();
+            } else if (user.sub_account_id) {
+                data = await Client.filter({ sub_account_id: user.sub_account_id });
+            } else {
+                data = await Client.filter({ created_by: user.email });
+            }
+            
             setAllClients(data);
         } catch (error) {
             console.error('שגיאה בטעינת לקוחות:', error);

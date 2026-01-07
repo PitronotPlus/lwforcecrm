@@ -39,7 +39,18 @@ export default function CreateFinancialRecordModal({ onRecordCreated, recordToEd
     const loadClients = async () => {
         try {
             setLoadingClients(true);
-            const data = await Client.list('full_name');
+            const user = await base44.auth.me();
+            
+            // טען רק לקוחות מהמשרד של המשתמש
+            let data;
+            if (user.role === 'admin') {
+                data = await Client.list('full_name');
+            } else if (user.sub_account_id) {
+                data = await Client.filter({ sub_account_id: user.sub_account_id }, 'full_name');
+            } else {
+                data = await Client.filter({ created_by: user.email }, 'full_name');
+            }
+            
             setClients(data);
         } catch (error) {
             console.error("שגיאה בטעינת לקוחות:", error);
@@ -87,6 +98,8 @@ export default function CreateFinancialRecordModal({ onRecordCreated, recordToEd
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const user = await base44.auth.me();
+            
             if (recordToEdit) {
                 await Financial.update(recordToEdit.id, {
                     ...formData,
@@ -95,7 +108,8 @@ export default function CreateFinancialRecordModal({ onRecordCreated, recordToEd
             } else {
                 await Financial.create({
                     ...formData,
-                    amount: parseFloat(formData.amount)
+                    amount: parseFloat(formData.amount),
+                    sub_account_id: user?.sub_account_id || null
                 });
             }
             onRecordCreated();

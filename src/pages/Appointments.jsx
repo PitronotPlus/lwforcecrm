@@ -41,17 +41,20 @@ export default function Appointments() {
 
     const loadData = async () => {
         try {
-            const [appointmentsData, user] = await Promise.all([
-                Appointment.list('-date'),
-                base44.auth.me()
-            ]);
+            const user = await base44.auth.me();
             
-            // סנן פגישות לפי משתמש מחובר
-            const userAppointments = appointmentsData.filter(apt => 
-                apt.created_by === user.email || apt.assigned_to === user.email
-            );
+            // Admin רואה הכל, אחרים רואים רק מהמשרד שלהם
+            let appointmentsData;
+            if (user.role === 'admin') {
+                appointmentsData = await Appointment.list('-date');
+            } else if (user.sub_account_id) {
+                appointmentsData = await Appointment.filter({ sub_account_id: user.sub_account_id }, '-date');
+            } else {
+                // עצמאי - רואה רק שלו
+                appointmentsData = await Appointment.filter({ created_by: user.email }, '-date');
+            }
             
-            setAppointments(userAppointments);
+            setAppointments(appointmentsData);
             setCurrentUser(user);
             
             // טען הגדרות זמינות
@@ -84,7 +87,11 @@ export default function Appointments() {
             if (editingAppointment) {
                 await Appointment.update(editingAppointment.id, formData);
             } else {
-                await Appointment.create(formData);
+                const appointmentData = {
+                    ...formData,
+                    sub_account_id: currentUser?.sub_account_id || null
+                };
+                await Appointment.create(appointmentData);
             }
             resetForm();
             loadData();
