@@ -84,12 +84,13 @@ export default function Appointments() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const user = await base44.auth.me();
             if (editingAppointment) {
                 await Appointment.update(editingAppointment.id, formData);
             } else {
                 const appointmentData = {
                     ...formData,
-                    sub_account_id: currentUser?.sub_account_id || null
+                    sub_account_id: user?.sub_account_id || null
                 };
                 await Appointment.create(appointmentData);
             }
