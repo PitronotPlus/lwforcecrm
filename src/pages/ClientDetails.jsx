@@ -230,53 +230,53 @@ export default function ClientDetails() {
                             <CardContent className="pt-4 pb-4">
                                 {/* קטגוריה: מידע כללי */}
                                 <div className="mb-4">
-                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2">מידע כללי</h3>
-                                    <TabsList className="h-auto bg-transparent p-0 flex flex-wrap gap-2">
-                                        <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2 text-right">מידע כללי</h3>
+                                    <TabsList className="h-auto bg-transparent p-0 flex flex-wrap gap-2 justify-end">
+                                        <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <User className="w-4 h-4 ml-2" />
                                             <span className="text-sm">פרטי לקוח</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="tasks" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="tasks" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <Activity className="w-4 h-4 ml-2" />
                                             <span className="text-sm">משימות</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="services" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="services" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <Briefcase className="w-4 h-4 ml-2" />
                                             <span className="text-sm">שירותים</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="finances" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="finances" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <DollarSign className="w-4 h-4 ml-2" />
                                             <span className="text-sm">כספים</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="cases" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="cases" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <Folder className="w-4 h-4 ml-2" />
                                             <span className="text-sm">תיקים</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="appointments" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="appointments" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <Calendar className="w-4 h-4 ml-2" />
                                             <span className="text-sm">פגישות</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="interactions" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="interactions" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#67BF91] data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:border-[#67BF91] data-[state=active]:shadow-md transition-all">
                                             <MessageCircle className="w-4 h-4 ml-2" />
                                             <span className="text-sm">תיעוד</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="documents" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="documents" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#67BF91] data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:border-[#67BF91] data-[state=active]:shadow-md transition-all">
                                             <FileText className="w-4 h-4 ml-2" />
                                             <span className="text-sm">מסמכים</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="activity" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="activity" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#67BF91] data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:border-[#67BF91] data-[state=active]:shadow-md transition-all">
                                             <Activity className="w-4 h-4 ml-2" />
                                             <span className="text-sm">לוג פעילות</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="communication" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="communication" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#67BF91] data-[state=active]:bg-[#67BF91] data-[state=active]:text-white data-[state=active]:border-[#67BF91] data-[state=active]:shadow-md transition-all">
                                             <Send className="w-4 h-4 ml-2" />
                                             <span className="text-sm">תקשורת</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="marketing" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="marketing" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-gray-700 data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:border-gray-700 data-[state=active]:shadow-md transition-all">
                                             <ExternalLink className="w-4 h-4 ml-2" />
                                             <span className="text-sm">שיווק</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:shadow-md transition-all">
+                                        <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-gray-700 data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:border-gray-700 data-[state=active]:shadow-md transition-all">
                                             <Settings className="w-4 h-4 ml-2" />
                                             <span className="text-sm">אוטומציות</span>
                                         </TabsTrigger>
