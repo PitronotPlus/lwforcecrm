@@ -231,7 +231,7 @@ export default function ClientDetails() {
                                 {/* קטגוריה: מידע כללי */}
                                 <div className="mb-4">
                                     <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 border-b pb-2 text-right">מידע כללי</h3>
-                                    <TabsList className="h-auto bg-transparent p-0 flex flex-wrap gap-2 justify-end">
+                                    <TabsList className="h-auto bg-transparent p-0 flex flex-wrap gap-2 justify-start">
                                         <TabsTrigger value="details" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-[#3568AE] data-[state=active]:bg-[#3568AE] data-[state=active]:text-white data-[state=active]:border-[#3568AE] data-[state=active]:shadow-md transition-all">
                                             <User className="w-4 h-4 ml-2" />
                                             <span className="text-sm">פרטי לקוח</span>
