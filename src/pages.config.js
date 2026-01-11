@@ -23,6 +23,7 @@ import Support from './pages/Support';
 import Tasks from './pages/Tasks';
 import TeamManagement from './pages/TeamManagement';
 import TestSignature from './pages/TestSignature';
+import CustomObject from './pages/CustomObject';
 import __Layout from './Layout.jsx';
 
 
@@ -52,6 +53,7 @@ export const PAGES = {
     "Tasks": Tasks,
     "TeamManagement": TeamManagement,
     "TestSignature": TestSignature,
+    "CustomObject": CustomObject,
 }
 
 export const pagesConfig = {
