@@ -34,13 +34,8 @@ export default function CustomObject() {
     }, [objectId]);
 
     useEffect(() => {
-        setCurrentPage(1);
         filterRecords();
     }, [records, searchQuery, selectedFilter]);
-
-    useEffect(() => {
-        filterRecords();
-    }, [currentPage, itemsPerPage]);
 
     const loadObjectData = async () => {
         try {
@@ -67,10 +62,14 @@ export default function CustomObject() {
     };
 
     const filterRecords = () => {
+        if (!records.length && !searchQuery && selectedFilter === 'הכל') {
+            setFilteredRecords([]);
+            return;
+        }
+
         let filtered = [...records];
 
         if (searchQuery.trim()) {
-            // חיפוש בכל השדות
             filtered = filtered.filter(record => {
                 return fields.some(field => {
                     const value = record.data?.[field.field_name];
@@ -80,7 +79,6 @@ export default function CustomObject() {
         }
 
         if (selectedFilter !== 'הכל') {
-            // סינון לפי מקטע
             const section = sections.find(s => s.section_name === selectedFilter);
             if (section && section.filter_field_name && section.filter_value) {
                 filtered = filtered.filter(record => {
@@ -90,6 +88,7 @@ export default function CustomObject() {
         }
 
         setFilteredRecords(filtered);
+        setCurrentPage(1);
     };
 
     const handleDeleteRecord = async (recordId) => {
