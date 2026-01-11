@@ -257,31 +257,34 @@ function CreateObjectModal({ children, onObjectCreated }) {
 function ObjectEditorCard({ object, onClose }) {
     const [sections, setSections] = useState([]);
     const [fields, setFields] = useState([]);
+    const [columns, setColumns] = useState([]);
     const [activeTab, setActiveTab] = useState('fields');
 
     useEffect(() => {
-        loadSectionsAndFields();
+        loadObjectData();
     }, [object.id]);
 
-    const loadSectionsAndFields = async () => {
+    const loadObjectData = async () => {
         try {
-            const [sectionsData, fieldsData] = await Promise.all([
+            const [sectionsData, fieldsData, columnsData] = await Promise.all([
                 base44.entities.ObjectSection.filter({ object_id: object.id }),
-                base44.entities.ObjectField.filter({ object_id: object.id })
+                base44.entities.ObjectField.filter({ object_id: object.id }),
+                base44.entities.ObjectColumn.filter({ object_id: object.id })
             ]);
             setSections(sectionsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
             setFields(fieldsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
+            setColumns(columnsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
         } catch (error) {
-            console.error('שגיאה בטעינת מקטעים ושדות:', error);
+            console.error('שגיאה בטעינת נתוני הדף:', error);
         }
     };
 
     const handleDeleteSection = async (sectionId) => {
-        if (!confirm('האם למחוק את המקטע? זה לא ימחק את השדות, רק את המקטע לתצוגה.')) return;
+        if (!confirm('האם למחוק את המקטע מהסיידבר?')) return;
         
         try {
             await base44.entities.ObjectSection.delete(sectionId);
-            loadSectionsAndFields();
+            loadObjectData();
         } catch (error) {
             console.error('שגיאה במחיקת מקטע:', error);
         }
@@ -292,9 +295,20 @@ function ObjectEditorCard({ object, onClose }) {
         
         try {
             await base44.entities.ObjectField.delete(fieldId);
-            loadSectionsAndFields();
+            loadObjectData();
         } catch (error) {
             console.error('שגיאה במחיקת שדה:', error);
+        }
+    };
+
+    const handleDeleteColumn = async (columnId) => {
+        if (!confirm('האם למחוק את העמודה?')) return;
+        
+        try {
+            await base44.entities.ObjectColumn.delete(columnId);
+            loadObjectData();
+        } catch (error) {
+            console.error('שגיאה במחיקת עמודה:', error);
         }
     };
 
@@ -320,11 +334,18 @@ function ObjectEditorCard({ object, onClose }) {
                         שדות הרשומה
                     </Button>
                     <Button
+                        variant={activeTab === 'columns' ? 'default' : 'ghost'}
+                        onClick={() => setActiveTab('columns')}
+                        className={activeTab === 'columns' ? 'bg-[#3568AE] text-white' : ''}
+                    >
+                        עמודות רשימה
+                    </Button>
+                    <Button
                         variant={activeTab === 'sections' ? 'default' : 'ghost'}
                         onClick={() => setActiveTab('sections')}
                         className={activeTab === 'sections' ? 'bg-[#3568AE] text-white' : ''}
                     >
-                        מקטעים בתצוגה
+                        מקטעי סיידבר
                     </Button>
                 </div>
 
@@ -334,11 +355,11 @@ function ObjectEditorCard({ object, onClose }) {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>שדות הרשומה</h3>
-                                <p className="text-sm text-gray-500">הגדר את כל השדות שיהיו ברשומות של הדף</p>
+                                <p className="text-sm text-gray-500">הגדר את כל השדות שיהיו בטופס הוספה/עריכה</p>
                             </div>
                             <CreateFieldModal 
                                 objectId={object.id}
-                                onFieldCreated={loadSectionsAndFields}
+                                onFieldCreated={loadObjectData}
                             >
                                 <Button size="sm" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
                                     <Plus className="w-4 h-4 ml-2" />
@@ -373,7 +394,7 @@ function ObjectEditorCard({ object, onClose }) {
                                         <div className="flex gap-2">
                                             <EditFieldModal 
                                                 field={field}
-                                                onFieldUpdated={loadSectionsAndFields}
+                                                onFieldUpdated={loadObjectData}
                                             >
                                                 <Button size="sm" variant="ghost">
                                                     <Edit className="w-4 h-4" />
@@ -395,15 +416,67 @@ function ObjectEditorCard({ object, onClose }) {
                     </div>
                 )}
 
-                {/* מקטעים בתצוגה */}
+                {/* עמודות רשימה */}
+                {activeTab === 'columns' && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>עמודות תצוגת רשימה</h3>
+                                <p className="text-sm text-gray-500">הגדר אילו עמודות יוצגו בתצוגת רשימה</p>
+                            </div>
+                            <CreateColumnModal objectId={object.id} fields={fields} onColumnCreated={loadObjectData}>
+                                <Button size="sm" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                    <Plus className="w-4 h-4 ml-2" />
+                                    הוסף עמודה
+                                </Button>
+                            </CreateColumnModal>
+                        </div>
+
+                        {columns.length === 0 ? (
+                            <p className="text-center py-8 text-gray-500">אין עמודות עדיין. צור עמודה ראשונה.</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {columns.map(column => (
+                                    <div key={column.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:border-gray-300 transition-colors">
+                                        <div>
+                                            <p className="font-medium">{column.column_label}</p>
+                                            <p className="text-sm text-gray-500">{column.field_name} • סדר: {column.order_index || 0}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <EditColumnModal 
+                                                column={column}
+                                                fields={fields}
+                                                onColumnUpdated={loadObjectData}
+                                            >
+                                                <Button size="sm" variant="ghost">
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                            </EditColumnModal>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDeleteColumn(column.id)}
+                                                className="text-red-600"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* מקטעים בסיידבר */}
                 {activeTab === 'sections' && (
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <div>
-                                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>מקטעים בתצוגה</h3>
-                                <p className="text-sm text-gray-500">הגדר איך לארגן את השדות בתצוגת הרשומה</p>
+                                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>מקטעי סיידבר (סינון)</h3>
+                                <p className="text-sm text-gray-500">קבוצות סינון שיופיעו בסיידבר כמו "ליד", "פולואפ" וכו'</p>
                             </div>
-                            <CreateSectionModal objectId={object.id} onSectionCreated={loadSectionsAndFields}>
+                            <CreateSectionModal objectId={object.id} fields={fields} onSectionCreated={loadObjectData}>
                                 <Button size="sm" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
                                     <Plus className="w-4 h-4 ml-2" />
                                     הוסף מקטע
@@ -417,14 +490,25 @@ function ObjectEditorCard({ object, onClose }) {
                             <div className="space-y-2">
                                 {sections.map(section => (
                                     <div key={section.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:border-gray-300 transition-colors">
-                                        <div>
-                                            <p className="font-medium">{section.section_name}</p>
-                                            <p className="text-sm text-gray-500">סדר: {section.order_index || 0}</p>
+                                        <div className="flex items-center gap-3">
+                                            <div 
+                                                className="w-4 h-4 rounded"
+                                                style={{ background: section.color || '#3568AE' }}
+                                            />
+                                            <div>
+                                                <p className="font-medium">{section.section_name}</p>
+                                                <p className="text-sm text-gray-500">
+                                                    {section.filter_field_name && section.filter_value ? 
+                                                        `סינון: ${section.filter_field_name} = ${section.filter_value}` 
+                                                        : 'ללא סינון'}
+                                                </p>
+                                            </div>
                                         </div>
                                         <div className="flex gap-2">
                                             <EditSectionModal 
                                                 section={section}
-                                                onSectionUpdated={loadSectionsAndFields}
+                                                fields={fields}
+                                                onSectionUpdated={loadObjectData}
                                             >
                                                 <Button size="sm" variant="ghost">
                                                     <Edit className="w-4 h-4" />
