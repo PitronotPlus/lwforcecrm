@@ -37,6 +37,8 @@ Deno.serve(async (req) => {
                 mockFieldValues[field.id] = `דוגמה: ${field.label}`;
             } else if (field.type === 'date') {
                 mockFieldValues[field.id] = new Date().toLocaleDateString('he-IL');
+            } else if (field.type === 'checkbox') {
+                mockFieldValues[field.id] = 'true'; // Show checked in preview
             } else if (field.type === 'signature') {
                 // Small signature image placeholder
                 mockFieldValues[field.id] = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQYV2NgYGD4DwABBAEAW9JJQQAAAABJRU5ErkJggg==';
