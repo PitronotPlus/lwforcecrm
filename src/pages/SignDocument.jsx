@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Loader2, AlertTriangle, PartyPopper, RotateCw } from 'lucide-react';
+import { Loader2, AlertTriangle, PartyPopper, RotateCw, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import SignatureStepper from '../components/signatures/SignatureStepper';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -102,16 +101,14 @@ export default function SignDocument() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
-  const [step, setStep] = useState(1); // 1: review, 2: form, 3: success
-  
-  const [isConsentChecked, setIsConsentChecked] = useState(false);
-  
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [finalPdfUrl, setFinalPdfUrl] = useState(null);
   const [fieldValues, setFieldValues] = useState({});
   const [signatureData, setSignatureData] = useState(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -161,19 +158,30 @@ export default function SignDocument() {
     fetchDoc();
   }, [location.search]);
 
-  const handleProceedToForm = () => {
-    if (!isConsentChecked) {
-      alert('יש לאשר את קריאת המסמך לפני שממשיכים.');
-      return;
-    }
-    setStep(2);
+  const getRequiredFieldCount = () => {
+    return template?.fields?.filter(f => f.required).length || 0;
+  };
+
+  const getFilledRequiredFieldCount = () => {
+    if (!template?.fields) return 0;
+    return template.fields.filter(f => {
+      if (!f.required) return false;
+      const value = fieldValues[f.id];
+      if (f.type === 'checkbox') return value === true;
+      return value && value.toString().trim() !== '';
+    }).length;
+  };
+
+  const isFormComplete = () => {
+    const requiredCount = getRequiredFieldCount();
+    const filledCount = getFilledRequiredFieldCount();
+    return requiredCount > 0 && requiredCount === filledCount && signatureData;
   };
   
   const handleSubmitSignature = async (e) => {
     e.preventDefault();
-    const signatureField = data?.template?.fields.find(f => f.type === 'signature');
-    if (signatureField?.required && !signatureData) {
-      alert('יש למלא את החתימה');
+    if (!isFormComplete()) {
+      setError('יש למלא את כל השדות החובה וחתום על המסמך');
       return;
     }
 
@@ -197,7 +205,7 @@ export default function SignDocument() {
 
       if (submitResult.success) {
         setFinalPdfUrl(submitResult.download_url);
-        setStep(3);
+        setIsSuccess(true);
       } else {
         setError(submitResult.error || 'שגיאה בשליחת החתימה.');
       }
@@ -230,132 +238,149 @@ export default function SignDocument() {
   }
 
   const { template, lead } = data || {};
-  const signatureFieldExists = template?.fields.some(f => f.type === 'signature');
 
-  const renderContent = () => {
-    switch (step) {
-      case 1: // Review Step
-        return (
-          <>
-            <div className="text-center bg-gray-50 p-3 sm:p-4 border-t border-b border-gray-200 sticky top-[148px] z-10">
-                <div className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base px-2">בלחיצה על הכפתור אני מאשר/ת כי קראתי את המסמך לפני החתימה עליו</div>
-                <div className="flex justify-center items-center gap-2 sm:gap-4 px-2">
-                  <Button onClick={handleProceedToForm} className="bg-green-500 hover:bg-green-600 rounded-full px-4 sm:px-8 py-2 sm:py-3 text-sm sm:text-base" size="sm" disabled={!isConsentChecked}>
-                    למילוי המסמך ו/או חתימה - לחצו כאן
-                  </Button>
-                </div>
-                 <div className="flex items-center justify-center gap-2 mt-3 sm:mt-4">
-                    <Checkbox id="terms" checked={isConsentChecked} onCheckedChange={setIsConsentChecked} />
-                    <label htmlFor="terms" className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      קראתי ומאשר/ת את המסמך
-                    </label>
-                  </div>
-                 <button onClick={handleRefresh} className="text-xs text-blue-600 hover:underline mt-3 sm:mt-4">
-                  אם המסמך אינו נטען כראוי - לחצו כאן
-                </button>
-            </div>
-            <div className="flex-grow overflow-y-auto bg-gray-200 p-2 sm:p-4">
-              <div className="max-w-4xl mx-auto bg-white shadow-lg">
-                {template.page_image_urls && template.page_image_urls.map((url, index) => (
-                  <img key={index} src={url} alt={`עמוד ${index + 1}`} className="w-full h-auto border" />
-                ))}
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50 flex items-center justify-center p-4" dir="rtl">
+        <div className="max-w-2xl w-full">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-8 md:p-12 text-center">
+            <div className="mb-6 animate-in zoom-in duration-500">
+              <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <PartyPopper className="w-14 h-14 text-white" />
               </div>
+              <h2 className="text-4xl font-bold mb-3 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">המסמך נחתם בהצלחה!</h2>
+              <p className="text-lg text-gray-600 mb-8">עותק חתום של המסמך נשלח אליך במייל</p>
             </div>
-          </>
-        );
-      case 2: // Form Step
-        return (
-          <div className="flex-grow overflow-y-auto bg-gray-100 p-3 sm:p-4 md:p-8">
-            <div className="w-full max-w-2xl mx-auto p-3 sm:p-4 md:p-8 bg-white rounded-lg shadow-md">
-              <form onSubmit={handleSubmitSignature} className="space-y-4 sm:space-y-6">
-                <h2 className="text-lg sm:text-xl font-bold text-center">הזנת פרטים וחתימה</h2>
-                {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 rounded-md" role="alert"><p className="font-bold text-sm sm:text-base">שגיאה</p><p className="text-sm sm:text-base">{error}</p></div>}
-
-                {template.fields.map(field => {
-                  if (field.type === 'text' || field.type === 'date') {
-                    return (
-                      <div key={field.id} className="space-y-2">
-                        <Label htmlFor={field.id} className="text-right block w-full font-semibold text-sm sm:text-base">
-                          {field.label} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <Input
-                          id={field.id}
-                          type={field.type === 'date' ? 'date' : 'text'}
-                          placeholder={field.type === 'date' ? 'DD/MM/YYYY' : ''}
-                          value={fieldValues[field.id] || ''}
-                          onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
-                          required={field.required}
-                          className="bg-gray-50 border-gray-300 text-sm sm:text-base"
-                        />
-                      </div>
-                    );
-                  } else if (field.type === 'checkbox') {
-                    return (
-                      <div key={field.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Checkbox
-                          id={field.id}
-                          checked={fieldValues[field.id] === true}
-                          onCheckedChange={(checked) => setFieldValues(prev => ({...prev, [field.id]: checked}))}
-                        />
-                        <Label htmlFor={field.id} className="text-sm sm:text-base font-medium cursor-pointer">
-                          {field.label} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-
-                {signatureFieldExists && (
-                  <div className="space-y-2">
-                    <Label className="text-right block w-full font-semibold text-sm sm:text-base">נא לחתום במסגרת</Label>
-                    <InlineSignaturePad onSignatureChange={setSignatureData} />
-                  </div>
-                )}
-
-                <Button type="submit" disabled={isSubmitting} className="w-full bg-green-600 hover:bg-green-700 text-base sm:text-lg py-4 sm:py-6 rounded-lg">
-                  {isSubmitting ? <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" /> : 'הקליקו כאן לאחר החתימה'}
+            <div className="flex flex-col gap-4 mb-8">
+              <a href={finalPdfUrl} download="signed_document.pdf">
+                <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-lg py-6 rounded-xl shadow-lg">
+                  📥 הורד עותק חתום
                 </Button>
-              </form>
+              </a>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-emerald-50 border-2 border-blue-200 rounded-xl p-6">
+              <p className="text-sm text-gray-700 flex items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-blue-600" />
+                המסמך החתום מאובטח ומוצפן בטכנולוגיה מתקדמת
+              </p>
             </div>
           </div>
-        );
-      case 3: // Success Step
-        return (
-          <div className="flex-grow overflow-y-auto bg-gray-100 p-3 sm:p-4 text-center">
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 shadow-md">
-                 <PartyPopper className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 mx-auto mb-3 sm:mb-4" />
-                <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-800">המסמך נחתם בהצלחה!</h2>
-                <p className="mb-4 sm:mb-6 text-sm sm:text-base text-gray-600">עותק חתום של המסמך נשלח אליך למייל.</p>
-                <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
-                  <a href={finalPdfUrl} download={`signed_document.pdf`} className="inline-block">
-                    <Button className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">הורד עותק</Button>
-                  </a>
-                  <Button variant="outline" onClick={() => window.close()} className="w-full sm:w-auto">סגור</Button>
-                </div>
-              </div>
-              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                <iframe src={finalPdfUrl} className="w-full h-[60vh] sm:h-[80vh]" title="מסמך חתום" />
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+        </div>
+      </div>
+    );
+  }
+
+  const requiredFilled = getFilledRequiredFieldCount();
+  const requiredTotal = getRequiredFieldCount();
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col" dir="rtl">
-      {data && (
-        <header className="bg-white border-b sticky top-0 z-20 px-2 sm:px-0">
-          <SignatureStepper currentStep={step} />
-        </header>
-      )}
-      <main className="flex-1 flex flex-col">
-        {renderContent()}
+    <div className="h-screen bg-gray-100 flex flex-col" dir="rtl">
+      {/* Header */}
+      <header className="bg-white border-b shadow-sm p-4 flex-shrink-0">
+        <div className="max-w-full mx-auto">
+          <h1 className="text-2xl font-bold text-gray-800">{data?.template?.name}</h1>
+          <div className="mt-3 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">{requiredFilled} מתוך {requiredTotal} שדות חובה מולאו</span>
+              <span className="text-emerald-600 font-semibold">{Math.round((requiredFilled / requiredTotal) * 100)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-emerald-600 h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${requiredTotal > 0 ? (requiredFilled / requiredTotal) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden flex gap-4 p-4">
+        {/* Document */}
+        <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-md p-4">
+          {template?.page_image_urls?.map((url, index) => (
+            <img key={index} src={url} alt={`עמוד ${index + 1}`} className="w-full mb-4 last:mb-0 shadow" />
+          ))}
+        </div>
+
+        {/* Sidebar - Fields */}
+        <div className="w-96 flex-shrink-0 bg-white rounded-lg shadow-md flex flex-col overflow-hidden">
+          {/* Fields List */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <p className="text-sm font-semibold text-gray-700 sticky top-0 bg-white pb-2">שדות למילוי:</p>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <p className="text-red-800 text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            {template?.fields?.map(field => {
+              if (field.type === 'text' || field.type === 'date') {
+                return (
+                  <div key={field.id} className="space-y-1">
+                    <Label htmlFor={field.id} className="text-xs font-semibold text-gray-700">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                    <Input
+                      id={field.id}
+                      type={field.type === 'date' ? 'date' : 'text'}
+                      value={fieldValues[field.id] || ''}
+                      onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
+                      className="h-8 text-sm bg-gray-50 border-gray-300"
+                    />
+                  </div>
+                );
+              } else if (field.type === 'checkbox') {
+                return (
+                  <div key={field.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <Checkbox
+                      id={field.id}
+                      checked={fieldValues[field.id] === true}
+                      onCheckedChange={(checked) => setFieldValues(prev => ({...prev, [field.id]: checked}))}
+                    />
+                    <Label htmlFor={field.id} className="text-xs font-medium cursor-pointer flex-1">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                  </div>
+                );
+              } else if (field.type === 'signature') {
+                return (
+                  <div key={field.id} className="space-y-1">
+                    <Label className="text-xs font-semibold text-gray-700">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                    <InlineSignaturePad onSignatureChange={setSignatureData} />
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t bg-gray-50 p-4 flex-shrink-0 space-y-3">
+            {requiredFilled < requiredTotal && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-3">
+                <p className="text-amber-800 text-xs font-medium">
+                  יש למלא {requiredTotal - requiredFilled} שדות נוספים
+                </p>
+              </div>
+            )}
+            <div className="text-xs text-gray-500 flex items-center justify-center gap-2">
+              <Lock className="w-3 h-3" />
+              <span>תהליך מאובטח</span>
+            </div>
+            <Button 
+              onClick={handleSubmitSignature}
+              disabled={!isFormComplete() || isSubmitting}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : '✓'} סיום ושליחה
+            </Button>
+          </div>
+        </div>
       </main>
     </div>
   );
-}
+  }
