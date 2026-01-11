@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, List, LayoutGrid, Filter, ChevronLeft, ChevronRight, ChevronDown, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import CreateClientModal from "../components/clients/CreateClientModal";
-import ViewClientModal from "../components/clients/ViewClientModal";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -121,11 +120,11 @@ export default function Clients() {
             <div>
                  <div className="flex items-start justify-between mb-3">
                     <div className="flex gap-2">
-                        <ViewClientModal client={client}>
+                        <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`}>
                             <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
                                 <Eye className="w-4 h-4" />
                             </Button>
-                        </ViewClientModal>
+                        </Link>
                         <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`}>
                             <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
                                 <Edit className="w-4 h-4" />
@@ -479,11 +478,11 @@ export default function Clients() {
                                             </div>
                                             <div className="text-right">
                                                 <div className="flex gap-2 justify-end">
-                                                    <ViewClientModal client={client}>
+                                                    <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`}>
                                                         <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
                                                             <Eye className="w-4 h-4" />
                                                         </Button>
-                                                    </ViewClientModal>
+                                                    </Link>
                                                     <Link to={`${createPageUrl('ClientDetails')}?id=${client.id}`}>
                                                         <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
                                                             <Edit className="w-4 h-4" />
