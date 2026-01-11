@@ -199,9 +199,9 @@ export default function CustomObject() {
                 
                 <div className="space-y-2">
                     {subAccount && (
-                        <div className="pb-2 border-b">
-                            <div className="text-sm text-gray-500">משרד מקושר</div>
-                            <div className="text-base font-medium" style={{ fontFamily: 'Heebo' }}>
+                        <div className="pb-2 mb-2 border-b border-gray-200">
+                            <div className="text-xs font-medium text-gray-600 mb-1">משרד מקושר</div>
+                            <div className="text-sm font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
                                 {subAccount.name}
                             </div>
                         </div>
@@ -470,62 +470,62 @@ export default function CustomObject() {
                                 {paginatedRecords.map((record) => (
                                     <div key={record.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
                                         {/* Desktop Table Row */}
-                                        <div className="hidden md:block">
-                                            {subAccounts.find(s => s.id === record.sub_account_id) && (
-                                                <div className="mb-3 pb-2 border-b">
-                                                    <span className="text-sm font-medium text-gray-600">משרד: </span>
-                                                    <span className="text-sm font-bold text-[#3568AE]">
-                                                        {subAccounts.find(s => s.id === record.sub_account_id)?.name}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
-                                                {fields.slice(0, 5).map(field => (
-                                                    <div key={field.id} className="text-right">
-                                                        {record.data?.[field.field_name] || '-'}
+                                                <div className="hidden md:block">
+                                                    {subAccounts.find(s => s.id === record.sub_account_id) && (
+                                                        <div className="mb-3 pb-2 border-b border-gray-200">
+                                                            <span className="text-xs font-medium text-gray-600">משרד מקושר: </span>
+                                                            <span className="text-sm font-bold text-[#3568AE]">
+                                                                {subAccounts.find(s => s.id === record.sub_account_id)?.name}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
+                                                        {fields.slice(0, 5).map(field => (
+                                                            <div key={field.id} className="text-right">
+                                                                {record.data?.[field.field_name] || '-'}
+                                                            </div>
+                                                        ))}
+                                                        <div className="text-right">
+                                                            <div className="flex gap-2 justify-end">
+                                                                <ViewRecordModal
+                                                                    record={record}
+                                                                    object={object}
+                                                                    fields={fields}
+                                                                    sections={sections}
+                                                                    subAccount={subAccounts.find(s => s.id === record.sub_account_id)}
+                                                                >
+                                                                    <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
+                                                                        <Eye className="w-4 h-4" />
+                                                                    </Button>
+                                                                </ViewRecordModal>
+                                                                <EditRecordModal
+                                                                    record={record}
+                                                                    object={object}
+                                                                    fields={fields}
+                                                                    sections={sections}
+                                                                    onRecordUpdated={loadObjectData}
+                                                                >
+                                                                    <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
+                                                                        <Edit className="w-4 h-4" />
+                                                                    </Button>
+                                                                </EditRecordModal>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleDeleteRecord(record.id)}
+                                                                    className="text-red-500 hover:text-red-700"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                ))}
-                                                <div className="text-right">
-                                                    <div className="flex gap-2 justify-end">
-                                                    <ViewRecordModal
-                                                        record={record}
-                                                        object={object}
-                                                        fields={fields}
-                                                        sections={sections}
-                                                        subAccount={subAccounts.find(s => s.id === record.sub_account_id)}
-                                                    >
-                                                        <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
-                                                            <Eye className="w-4 h-4" />
-                                                        </Button>
-                                                    </ViewRecordModal>
-                                                    <EditRecordModal
-                                                        record={record}
-                                                        object={object}
-                                                        fields={fields}
-                                                        sections={sections}
-                                                        onRecordUpdated={loadObjectData}
-                                                    >
-                                                        <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
-                                                            <Edit className="w-4 h-4" />
-                                                        </Button>
-                                                    </EditRecordModal>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleDeleteRecord(record.id)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                        </div>
-                                                        </div>
-                                                        </div>
-                                                        </div>
+                                                </div>
 
-                                        {/* Mobile Card Layout */}
-                                        <div className="md:hidden">
-                                            <RecordCard record={record} />
-                                        </div>
+                                                {/* Mobile Card Layout */}
+                                                <div className="md:hidden">
+                                                    <RecordCard record={record} />
+                                                </div>
                                     </div>
                                 ))}
                             </div>
