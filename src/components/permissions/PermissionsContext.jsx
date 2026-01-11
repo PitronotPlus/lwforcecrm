@@ -118,7 +118,11 @@ export const PERMISSION_LABELS = {
     view_department_reports: 'צפייה בדוחות המחלקה',
     edit_system_settings: 'עריכת הגדרות מערכת',
     manage_permissions: 'ניהול הרשאות',
-    manage_custom_fields: 'ניהול שדות מותאמים אישית'
+    manage_custom_fields: 'ניהול שדות מותאמים אישית',
+    
+    // סטודיו דפים
+    manage_custom_objects: 'ניהול דפים מותאמים אישית',
+    create_custom_pages: 'יצירת דפים חדשים'
 };
 
 // קטגוריות הרשאות
