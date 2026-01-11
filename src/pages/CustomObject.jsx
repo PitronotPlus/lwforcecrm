@@ -486,7 +486,7 @@ export default function CustomObject() {
                                                     </div>
                                                 ))}
                                                 <div className="text-right">
-                                                <div className="flex gap-2 justify-end">
+                                                    <div className="flex gap-2 justify-end">
                                                     <ViewRecordModal
                                                         record={record}
                                                         object={object}
@@ -516,10 +516,11 @@ export default function CustomObject() {
                                                         className="text-red-500 hover:text-red-700"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                        </Button>
+                                                        </div>
+                                                        </div>
+                                                        </div>
+                                                        </div>
 
                                         {/* Mobile Card Layout */}
                                         <div className="md:hidden">
