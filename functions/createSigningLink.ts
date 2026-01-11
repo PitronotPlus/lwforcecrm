@@ -27,8 +27,9 @@ Deno.serve(async (req) => {
 
         const signingToken = crypto.randomUUID();
         
-        // Return relative URL - the frontend will construct the full URL
-        const signingUrl = `/SignDocument?token=${signingToken}`;
+        // Build full signing URL
+        const baseUrl = 'https://lawforce.co.il';
+        const signingUrl = `${baseUrl}/SignDocument?token=${signingToken}`;
 
         const signedDocument = await base44.entities.SignedDocument.create({
             template_id: templateId,
