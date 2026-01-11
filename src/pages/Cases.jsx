@@ -3,10 +3,11 @@ import { Case } from "@/entities/Case";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, ExternalLink, Eye } from 'lucide-react';
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import CaseModal from "../components/cases/CaseModal";
+import ViewCaseModal from "../components/cases/ViewCaseModal";
 
 export default function Cases() {
     const [cases, setCases] = useState([]);
@@ -149,6 +150,11 @@ export default function Cases() {
                                         </td>
                                         <td className="p-4">
                                             <div className="flex gap-2">
+                                                <ViewCaseModal caseItem={caseItem}>
+                                                    <Button variant="ghost" size="sm" className="text-green-500">
+                                                        <Eye className="w-4 h-4" />
+                                                    </Button>
+                                                </ViewCaseModal>
                                                 <CaseModal caseToEdit={caseItem} onCaseSaved={handleCaseSaved}>
                                                     <Button variant="ghost" size="sm" className="text-blue-500">
                                                         <Edit className="w-4 h-4" />
@@ -205,6 +211,12 @@ export default function Cases() {
                             </div>
                             
                             <div className="flex gap-2 pt-3 border-t">
+                                <ViewCaseModal caseItem={caseItem}>
+                                    <Button variant="outline" size="sm" className="flex-1 text-green-500">
+                                        <Eye className="w-4 h-4 ml-1" />
+                                        צפה
+                                    </Button>
+                                </ViewCaseModal>
                                 <CaseModal caseToEdit={caseItem} onCaseSaved={handleCaseSaved}>
                                     <Button variant="outline" size="sm" className="flex-1">
                                         <Edit className="w-4 h-4 ml-1" />
