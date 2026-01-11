@@ -15,14 +15,19 @@ Deno.serve(async (req) => {
             return new Response(JSON.stringify({ success: false, error: 'Template ID and Lead ID are required' }), { status: 400 });
         }
 
-        const [template, lead] = await Promise.all([
+        const [template, client] = await Promise.all([
             base44.entities.DigitalSignatureTemplate.get(templateId),
-            base44.entities.Lead.get(leadId)
+            base44.entities.Client.get(leadId)
         ]);
 
-        if (!template || !lead) {
-            return new Response(JSON.stringify({ success: false, error: 'Template or Lead not found' }), { status: 404 });
+        if (!template || !client) {
+            return new Response(JSON.stringify({ success: false, error: 'Template or Client not found' }), { status: 404 });
         }
+        
+        const lead = {
+            full_name: client.full_name,
+            email: client.email
+        };
 
         // Generate signing token
         const signingToken = crypto.randomUUID();
