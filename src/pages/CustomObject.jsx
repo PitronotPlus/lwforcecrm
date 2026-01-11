@@ -639,7 +639,7 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {filterField && groupOptions.length > 0 && (
+                    {sections.length > 0 && sections.some(s => s.filter_field_name && s.filter_value) && (
                         <div className="border-b pb-4">
                             <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
                                 קבוצה
@@ -762,7 +762,7 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {filterField && groupOptions.length > 0 && (
+                    {sections.length > 0 && sections.some(s => s.filter_field_name && s.filter_value) && (
                         <div className="border-b pb-4">
                             <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
                                 קבוצה
