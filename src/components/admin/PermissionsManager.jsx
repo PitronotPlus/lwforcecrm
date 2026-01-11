@@ -115,7 +115,7 @@ const PERMISSION_GROUPS = {
             label: 'דפים מותאמים',
             icon: Layers,
             permissions: [
-                'add_custom_records'
+                'view_office_custom_records', 'add_custom_records', 'edit_office_custom_records'
             ]
         }
     },
@@ -164,7 +164,7 @@ const PERMISSION_GROUPS = {
             label: 'דפים מותאמים',
             icon: Layers,
             permissions: [
-                'add_custom_records'
+                'view_department_custom_records', 'add_custom_records', 'edit_department_custom_records'
             ]
         }
     },
@@ -188,6 +188,13 @@ const PERMISSION_GROUPS = {
             icon: Briefcase,
             permissions: [
                 'view_assigned_cases', 'edit_assigned_cases'
+            ]
+        },
+        studio: {
+            label: 'דפים מותאמים',
+            icon: Layers,
+            permissions: [
+                'view_assigned_custom_records', 'add_custom_records', 'edit_assigned_custom_records'
             ]
         }
     }
@@ -215,7 +222,7 @@ const DEFAULT_PERMISSIONS = {
         view_office_finances: true, edit_office_finances: true,
         view_office_reports: true, edit_sub_account_settings: true,
         manage_custom_fields: true,
-        add_custom_records: true
+        view_office_custom_records: true, add_custom_records: true, edit_office_custom_records: true
     },
     department_head: {
         view_department_users: true,
@@ -224,12 +231,13 @@ const DEFAULT_PERMISSIONS = {
         view_department_cases: true, edit_department_cases: true,
         view_department_finances: true,
         view_department_reports: true,
-        add_custom_records: true
+        view_department_custom_records: true, add_custom_records: true, edit_department_custom_records: true
     },
     lawyer: {
         view_own_tasks: true, edit_own_tasks: true,
         view_assigned_clients: true, edit_assigned_clients: true,
-        view_assigned_cases: true, edit_assigned_cases: true
+        view_assigned_cases: true, edit_assigned_cases: true,
+        view_assigned_custom_records: false, add_custom_records: false, edit_assigned_custom_records: false
     }
 };
 

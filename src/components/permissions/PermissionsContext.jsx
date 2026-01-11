@@ -123,7 +123,24 @@ export const PERMISSION_LABELS = {
     // סטודיו דפים
     manage_custom_objects: 'ניהול דפים מותאמים אישית',
     create_custom_pages: 'יצירת דפים חדשים',
-    add_custom_records: 'הוספת רשומות בדפים מותאמים'
+    add_custom_records: 'הוספת רשומות בדפים מותאמים',
+    view_office_custom_records: 'צפייה ברשומות המשרד',
+    edit_office_custom_records: 'עריכת רשומות המשרד',
+    view_department_custom_records: 'צפייה ברשומות המחלקה',
+    edit_department_custom_records: 'עריכת רשומות המחלקה',
+    view_assigned_custom_records: 'צפייה ברשומות משויכות',
+    edit_assigned_custom_records: 'עריכת רשומות משויכות',
+    
+    // הרשאות משרד
+    view_office_tasks: 'צפייה במשימות המשרד',
+    assign_tasks_to_office_staff: 'הקצאת משימות לעובדי המשרד',
+    view_office_clients: 'צפייה בלקוחות המשרד',
+    edit_office_clients: 'עריכת לקוחות המשרד',
+    view_office_cases: 'צפייה בתיקי המשרד',
+    edit_office_cases: 'עריכת תיקי המשרד',
+    view_office_finances: 'צפייה בכספים של המשרד',
+    edit_office_finances: 'עריכת כספים של המשרד',
+    view_office_reports: 'צפייה בדוחות המשרד'
 };
 
 // קטגוריות הרשאות
