@@ -10,6 +10,7 @@ import {
   Type,
   Calendar,
   PenTool,
+  CheckSquare,
   X,
   Save,
   Settings,
@@ -21,7 +22,8 @@ import { base44 } from '@/api/base44Client';
 const FIELD_TYPES = [
   { id: 'signature', label: 'חתימה', icon: PenTool, color: 'bg-blue-500' },
   { id: 'text', label: 'טקסט', icon: Type, color: 'bg-green-500' },
-  { id: 'date', label: 'תאריך', icon: Calendar, color: 'bg-purple-500' }
+  { id: 'date', label: 'תאריך', icon: Calendar, color: 'bg-purple-500' },
+  { id: 'checkbox', label: 'תיבת סימון ✓', icon: CheckSquare, color: 'bg-orange-500' }
 ];
 
 export default function TemplateEditor({ template, onSave, onCancel }) {
@@ -313,17 +315,20 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
+    const isSignature = selectedFieldType === 'signature';
+    const isCheckbox = selectedFieldType === 'checkbox';
+    
     const newField = {
       id: Date.now().toString(),
       type: selectedFieldType,
       page: pageNum,
-      x: Math.max(0, Math.min(100 - (selectedFieldType === 'signature' ? 15 : 10), x)),
-      y: Math.max(0, Math.min(100 - (selectedFieldType === 'signature' ? 6 : 4), y)),
-      width: selectedFieldType === 'signature' ? 15 : 10,
-      height: selectedFieldType === 'signature' ? 6 : 4,
+      x: Math.max(0, Math.min(100 - (isSignature ? 15 : isCheckbox ? 2 : 10), x)),
+      y: Math.max(0, Math.min(100 - (isSignature ? 6 : isCheckbox ? 2 : 4), y)),
+      width: isSignature ? 15 : isCheckbox ? 2 : 10,
+      height: isSignature ? 6 : isCheckbox ? 2 : 4,
       label: `${FIELD_TYPES.find(f => f.id === selectedFieldType)?.label} ${templateData.fields.filter(f => f.type === selectedFieldType).length + 1}`,
-      required: selectedFieldType === 'signature',
-      fontSize: selectedFieldType === 'signature' ? undefined : 16
+      required: isSignature,
+      fontSize: isSignature || isCheckbox ? undefined : 16
     };
 
     setTemplateData(prev => ({
