@@ -389,12 +389,21 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
     setShowFieldSettings(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!templateData.name || !templateData.original_pdf_url || templateData.page_image_urls.length === 0) {
       alert('אנא העלה קובץ PDF ומלא את שם התבנית.');
       return;
     }
-    onSave(templateData);
+    try {
+      const user = await base44.auth.me();
+      onSave({
+        ...templateData,
+        sub_account_id: user.sub_account_id
+      });
+    } catch (error) {
+      alert('שגיאה בשמירת התבנית');
+      console.error('Error:', error);
+    }
   };
 
   const handleGeneratePreview = async () => {
