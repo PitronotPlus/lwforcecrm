@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User } from "@/entities/User";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2, Lock, Menu, Database } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Shield, Users, Settings, BarChart3, SlidersHorizontal, Bot, LifeBuoy, Building2, Lock, Menu, Database, Layers } from "lucide-react";
 import AdminStatsCards from "../components/admin/AdminStatsCards";
 import UserManagementTable from "../components/admin/UserManagementTable";
 import SystemSettings from "../components/admin/SystemSettings";
@@ -16,6 +16,7 @@ import PermissionsManager from "../components/admin/PermissionsManager";
 import MenuEditor from "../components/admin/MenuEditor";
 import CustomFieldsManager from "../components/admin/CustomFieldsManager";
 import InviteUserModal from "../components/admin/InviteUserModal";
+import ObjectStudioManager from "../components/admin/ObjectStudioManager";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -109,6 +110,8 @@ export default function AdminDashboard() {
                 return <MenuEditor />;
             case 'customFields':
                 return <CustomFieldsManager />;
+            case 'objectStudio':
+                return <ObjectStudioManager />;
             case 'settings':
                 return <SystemSettings />;
             default:
@@ -272,6 +275,19 @@ export default function AdminDashboard() {
                         >
                             <SlidersHorizontal className="w-5 h-5" />
                             שדות מותאמים
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('objectStudio')}
+                            className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
+                                activeTab === 'objectStudio' 
+                                    ? 'bg-[#3568AE] text-white' 
+                                    : 'text-[#484848] hover:bg-gray-100'
+                            }`}
+                            style={{ fontFamily: 'Heebo' }}
+                        >
+                            <Layers className="w-5 h-5" />
+                            סטודיו דפים
                         </button>
                         
                         <button
