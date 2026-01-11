@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 export default function ExportClients({ clients }) {
+  const [customFields, setCustomFields] = useState([]);
+
+  useEffect(() => {
+    loadCustomFields();
+  }, []);
+
+  const loadCustomFields = async () => {
+    try {
+      const fields = await base44.entities.CustomField.filter({ entity_type: 'Client', is_active: true });
+      setCustomFields(fields);
+    } catch (error) {
+      console.error('שגיאה בטעינת שדות מותאמים:', error);
+    }
+  };
+
   const handleExport = () => {
     if (clients.length === 0) {
       alert('אין לקוחות לייצוא');
       return;
     }
 
-    // הכנת הנתונים לייצוא
+    // הכנת הנתונים לייצוא - כולל שדות מותאמים
     const headers = [
       'שם מלא',
       'טלפון',
@@ -19,6 +35,7 @@ export default function ExportClients({ clients }) {
       'צורך ראשוני',
       'מקור',
       'הערות',
+      ...customFields.map(field => field.field_label),
       'תאריך יצירה'
     ];
 
@@ -34,6 +51,7 @@ export default function ExportClients({ clients }) {
         client.initial_need || '',
         client.source || '',
         (client.notes || '').replace(/,/g, ';').replace(/\n/g, ' '),
+        ...customFields.map(field => client[field.field_name] || ''),
         new Date(client.created_date).toLocaleDateString('he-IL')
       ];
       csvRows.push(row.map(cell => `"${cell}"`).join(','));
