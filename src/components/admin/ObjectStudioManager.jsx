@@ -760,11 +760,9 @@ function EditFieldModal({ field, onFieldUpdated, children }) {
         field_type: field?.field_type || 'text',
         is_required: field?.is_required || false,
         is_read_only: field?.is_read_only || false,
-        is_tracked: field?.is_tracked || false,
         default_value: field?.default_value || '',
         select_options: field?.select_options || [],
-        order_index: field?.order_index || 0,
-        column_index: field?.column_index || 0
+        order_index: field?.order_index || 0
     });
 
     const [optionsText, setOptionsText] = useState('');
@@ -777,11 +775,9 @@ function EditFieldModal({ field, onFieldUpdated, children }) {
                 field_type: field.field_type,
                 is_required: field.is_required || false,
                 is_read_only: field.is_read_only || false,
-                is_tracked: field.is_tracked || false,
                 default_value: field.default_value || '',
                 select_options: field.select_options || [],
-                order_index: field.order_index || 0,
-                column_index: field.column_index || 0
+                order_index: field.order_index || 0
             });
             setOptionsText((field.select_options || []).join('\n'));
         }
@@ -869,27 +865,14 @@ function EditFieldModal({ field, onFieldUpdated, children }) {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">עמודה</label>
-                            <select
-                                value={formData.column_index}
-                                onChange={(e) => setFormData({...formData, column_index: parseInt(e.target.value)})}
-                                className="w-full p-2 border rounded-md text-right"
-                            >
-                                <option value={0}>עמודה ימין</option>
-                                <option value={1}>עמודה שמאל</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">סדר</label>
-                            <Input
-                                type="number"
-                                value={formData.order_index}
-                                onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
-                                className="text-right"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סדר בטופס</label>
+                        <Input
+                            type="number"
+                            value={formData.order_index}
+                            onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                            className="text-right"
+                        />
                     </div>
 
                     <div className="space-y-2 pt-2 border-t">
@@ -912,16 +895,6 @@ function EditFieldModal({ field, onFieldUpdated, children }) {
                             />
                             <span className="text-sm">שדה לקריאה בלבד (נעול)</span>
                         </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={formData.is_tracked}
-                                onChange={(e) => setFormData({...formData, is_tracked: e.target.checked})}
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">עקוב אחר שינויים בשדה זה</span>
-                        </label>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
@@ -938,6 +911,197 @@ function EditFieldModal({ field, onFieldUpdated, children }) {
     );
 }
 
+function CreateColumnModal({ objectId, fields, onColumnCreated, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        field_name: '',
+        column_label: '',
+        order_index: 0,
+        width: 'auto',
+        is_visible: true
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await base44.entities.ObjectColumn.create({
+                ...formData,
+                object_id: objectId
+            });
+            onColumnCreated();
+            setIsOpen(false);
+            setFormData({ field_name: '', column_label: '', order_index: 0, width: 'auto', is_visible: true });
+        } catch (error) {
+            console.error('שגיאה ביצירת עמודה:', error);
+            alert('שגיאה ביצירת העמודה');
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>יצירת עמודה חדשה</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">בחר שדה *</label>
+                        <select
+                            required
+                            value={formData.field_name}
+                            onChange={(e) => {
+                                const selectedField = fields.find(f => f.field_name === e.target.value);
+                                setFormData({
+                                    ...formData, 
+                                    field_name: e.target.value,
+                                    column_label: selectedField?.field_label || ''
+                                });
+                            }}
+                            className="w-full p-2 border rounded-md text-right"
+                        >
+                            <option value="">בחר שדה...</option>
+                            {fields.map(f => (
+                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">כותרת העמודה *</label>
+                        <Input
+                            required
+                            value={formData.column_label}
+                            onChange={(e) => setFormData({...formData, column_label: e.target.value})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סדר תצוגה</label>
+                        <Input
+                            type="number"
+                            value={formData.order_index}
+                            onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            ביטול
+                        </Button>
+                        <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            צור עמודה
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function EditColumnModal({ column, fields, onColumnUpdated, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        field_name: column?.field_name || '',
+        column_label: column?.column_label || '',
+        order_index: column?.order_index || 0,
+        width: column?.width || 'auto',
+        is_visible: column?.is_visible !== false
+    });
+
+    useEffect(() => {
+        if (column) {
+            setFormData({
+                field_name: column.field_name,
+                column_label: column.column_label,
+                order_index: column.order_index || 0,
+                width: column.width || 'auto',
+                is_visible: column.is_visible !== false
+            });
+        }
+    }, [column]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await base44.entities.ObjectColumn.update(column.id, formData);
+            onColumnUpdated();
+            setIsOpen(false);
+        } catch (error) {
+            console.error('שגיאה בעדכון עמודה:', error);
+            alert('שגיאה בעדכון העמודה');
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>עריכת עמודה</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">בחר שדה *</label>
+                        <select
+                            required
+                            value={formData.field_name}
+                            onChange={(e) => {
+                                const selectedField = fields.find(f => f.field_name === e.target.value);
+                                setFormData({
+                                    ...formData, 
+                                    field_name: e.target.value,
+                                    column_label: selectedField?.field_label || formData.column_label
+                                });
+                            }}
+                            className="w-full p-2 border rounded-md text-right"
+                        >
+                            {fields.map(f => (
+                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">כותרת העמודה *</label>
+                        <Input
+                            required
+                            value={formData.column_label}
+                            onChange={(e) => setFormData({...formData, column_label: e.target.value})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סדר תצוגה</label>
+                        <Input
+                            type="number"
+                            value={formData.order_index}
+                            onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            ביטול
+                        </Button>
+                        <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            עדכן עמודה
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -946,11 +1110,9 @@ function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
         field_type: 'text',
         is_required: false,
         is_read_only: false,
-        is_tracked: false,
         default_value: '',
         select_options: [],
-        order_index: 0,
-        column_index: 0
+        order_index: 0
     });
 
     const [optionsText, setOptionsText] = useState('');
@@ -960,8 +1122,7 @@ function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
         try {
             const fieldData = {
                 ...formData,
-                object_id: objectId,
-                section_id: sectionId
+                object_id: objectId
             };
 
             // המר אפשרויות select מטקסט למערך
@@ -978,11 +1139,9 @@ function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
                 field_type: 'text',
                 is_required: false,
                 is_read_only: false,
-                is_tracked: false,
                 default_value: '',
                 select_options: [],
-                order_index: 0,
-                column_index: 0
+                order_index: 0
             });
             setOptionsText('');
         } catch (error) {
@@ -1057,27 +1216,14 @@ function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">עמודה</label>
-                            <select
-                                value={formData.column_index}
-                                onChange={(e) => setFormData({...formData, column_index: parseInt(e.target.value)})}
-                                className="w-full p-2 border rounded-md text-right"
-                            >
-                                <option value={0}>עמודה ימין</option>
-                                <option value={1}>עמודה שמאל</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">סדר</label>
-                            <Input
-                                type="number"
-                                value={formData.order_index}
-                                onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
-                                className="text-right"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סדר בטופס</label>
+                        <Input
+                            type="number"
+                            value={formData.order_index}
+                            onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                            className="text-right"
+                        />
                     </div>
 
                     <div className="space-y-2 pt-2 border-t">
@@ -1099,16 +1245,6 @@ function CreateFieldModal({ objectId, sectionId, onFieldCreated, children }) {
                                 className="w-4 h-4"
                             />
                             <span className="text-sm">שדה לקריאה בלבד (נעול)</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={formData.is_tracked}
-                                onChange={(e) => setFormData({...formData, is_tracked: e.target.checked})}
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">עקוב אחר שינויים בשדה זה</span>
                         </label>
                     </div>
 
