@@ -34,7 +34,8 @@ Deno.serve(async (req) => {
             template_id: templateId,
             lead_id: clientId || client.id,
             status: 'created',
-            signing_token: signingToken
+            signing_token: signingToken,
+            sub_account_id: user.sub_account_id
         });
 
         return new Response(JSON.stringify({ 
