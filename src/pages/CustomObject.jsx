@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Search, List, LayoutGrid, ChevronLeft, ChevronRight, Columns } from "lucide-react";
+import { Plus, Edit, Trash2, Search, List, LayoutGrid, ChevronLeft, ChevronRight, Columns, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { createPageUrl } from "@/utils";
 
@@ -28,6 +28,7 @@ export default function CustomObject() {
     const [selectedFilter, setSelectedFilter] = useState('הכל');
     const [currentUser, setCurrentUser] = useState(null);
     const [canAddRecords, setCanAddRecords] = useState(false);
+    const [subAccounts, setSubAccounts] = useState([]);
 
     useEffect(() => {
         if (objectId) {
@@ -55,16 +56,18 @@ export default function CustomObject() {
 
     const loadObjectData = async () => {
         try {
-            const [objectData, sectionsData, fieldsData, columnsData] = await Promise.all([
+            const [objectData, sectionsData, fieldsData, columnsData, subAccountsData] = await Promise.all([
                 base44.entities.SystemObject.get(objectId),
                 base44.entities.ObjectSection.filter({ object_id: objectId }),
                 base44.entities.ObjectField.filter({ object_id: objectId }),
-                base44.entities.ObjectColumn.filter({ object_id: objectId })
+                base44.entities.ObjectColumn.filter({ object_id: objectId }),
+                base44.entities.SubAccount.list()
             ]);
             
             setObject(objectData);
             setSections(sectionsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
             setFields(fieldsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
+            setSubAccounts(subAccountsData);
             
             // טען רשומות
             const recordsData = await base44.entities.CustomRecord.filter({ object_id: objectId });
@@ -155,19 +158,23 @@ export default function CustomObject() {
 
     const RecordCard = ({ record }) => {
         const displayFields = fields.slice(0, 3);
+        const subAccount = subAccounts.find(s => s.id === record.sub_account_id);
         
         return (
             <div className="bg-white border border-[#D9D9D9] rounded-[15px] p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteRecord(record.id)}
-                            className="text-red-500 hover:text-red-700"
+                        <ViewRecordModal
+                            record={record}
+                            object={object}
+                            fields={fields}
+                            sections={sections}
+                            subAccount={subAccount}
                         >
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                            <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
+                                <Eye className="w-4 h-4" />
+                            </Button>
+                        </ViewRecordModal>
                         <EditRecordModal
                             record={record}
                             object={object}
@@ -179,10 +186,26 @@ export default function CustomObject() {
                                 <Edit className="w-4 h-4" />
                             </Button>
                         </EditRecordModal>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteRecord(record.id)}
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </Button>
                     </div>
                 </div>
                 
                 <div className="space-y-2">
+                    {subAccount && (
+                        <div className="pb-2 border-b">
+                            <div className="text-sm text-gray-500">משרד מקושר</div>
+                            <div className="text-base font-medium" style={{ fontFamily: 'Heebo' }}>
+                                {subAccount.name}
+                            </div>
+                        </div>
+                    )}
                     {displayFields.map(field => (
                         <div key={field.id}>
                             <div className="text-sm text-gray-500">{field.field_label}</div>
@@ -455,6 +478,17 @@ export default function CustomObject() {
                                             ))}
                                             <div className="text-right">
                                                 <div className="flex gap-2 justify-end">
+                                                    <ViewRecordModal
+                                                        record={record}
+                                                        object={object}
+                                                        fields={fields}
+                                                        sections={sections}
+                                                        subAccount={subAccounts.find(s => s.id === record.sub_account_id)}
+                                                    >
+                                                        <Button variant="ghost" size="sm" className="text-green-500 hover:text-green-700">
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                    </ViewRecordModal>
                                                     <EditRecordModal
                                                         record={record}
                                                         object={object}
@@ -691,6 +725,67 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
                         </Button>
                     </div>
                 </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function ViewRecordModal({ record, object, fields, sections, subAccount, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const section = sections.find(s => s.id === record.section_id);
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>
+                        צפייה ב{object.object_name_singular}
+                    </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6">
+                    {subAccount && (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="text-sm font-medium text-gray-700 mb-1">משרד מקושר</div>
+                            <div className="text-lg font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
+                                {subAccount.name}
+                            </div>
+                        </div>
+                    )}
+                    
+                    {section && (
+                        <div className="border-b pb-4">
+                            <div className="text-sm font-medium text-gray-700 mb-1">מקטע</div>
+                            <Badge className="text-base" style={{ backgroundColor: section.color || '#3568AE' }}>
+                                {section.section_name}
+                            </Badge>
+                        </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {fields.map(field => (
+                            <div key={field.id} className="space-y-1">
+                                <div className="text-sm font-medium text-gray-700">
+                                    {field.field_label}
+                                </div>
+                                <div className="text-base p-3 bg-gray-50 rounded-lg" style={{ fontFamily: 'Heebo' }}>
+                                    {field.field_type === 'checkbox' 
+                                        ? (record.data?.[field.field_name] ? 'כן' : 'לא')
+                                        : (record.data?.[field.field_name] || '-')
+                                    }
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="flex justify-end pt-4 border-t">
+                        <Button type="button" onClick={() => setIsOpen(false)}>
+                            סגור
+                        </Button>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     );
