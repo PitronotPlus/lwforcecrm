@@ -65,7 +65,7 @@ const PERMISSION_GROUPS = {
             label: 'סטודיו דפים',
             icon: Layers,
             permissions: [
-                'manage_custom_objects', 'create_custom_pages'
+                'manage_custom_objects', 'create_custom_pages', 'add_custom_records'
             ]
         }
     },
@@ -110,6 +110,13 @@ const PERMISSION_GROUPS = {
             permissions: [
                 'view_office_reports', 'edit_sub_account_settings', 'manage_custom_fields'
             ]
+        },
+        studio: {
+            label: 'דפים מותאמים',
+            icon: Layers,
+            permissions: [
+                'add_custom_records'
+            ]
         }
     },
     department_head: {
@@ -152,6 +159,13 @@ const PERMISSION_GROUPS = {
             permissions: [
                 'view_department_reports'
             ]
+        },
+        studio: {
+            label: 'דפים מותאמים',
+            icon: Layers,
+            permissions: [
+                'add_custom_records'
+            ]
         }
     },
     lawyer: {
@@ -189,7 +203,8 @@ const DEFAULT_PERMISSIONS = {
         view_all_cases: true, edit_all_cases: true,
         view_all_finances: true, edit_finances: true,
         view_reports: true, edit_system_settings: true, manage_permissions: true,
-        manage_custom_fields: true, manage_custom_objects: true, create_custom_pages: true
+        manage_custom_fields: true, manage_custom_objects: true, create_custom_pages: true,
+        add_custom_records: true
     },
     owner: {
         view_sub_account_users: true, edit_sub_account_users: true,
@@ -199,7 +214,8 @@ const DEFAULT_PERMISSIONS = {
         view_office_cases: true, edit_office_cases: true,
         view_office_finances: true, edit_office_finances: true,
         view_office_reports: true, edit_sub_account_settings: true,
-        manage_custom_fields: true
+        manage_custom_fields: true,
+        add_custom_records: true
     },
     department_head: {
         view_department_users: true,
@@ -207,7 +223,8 @@ const DEFAULT_PERMISSIONS = {
         view_department_clients: true, edit_department_clients: true,
         view_department_cases: true, edit_department_cases: true,
         view_department_finances: true,
-        view_department_reports: true
+        view_department_reports: true,
+        add_custom_records: true
     },
     lawyer: {
         view_own_tasks: true, edit_own_tasks: true,
@@ -222,6 +239,11 @@ export default function PermissionsManager() {
     const [hasChanges, setHasChanges] = useState(false);
 
     const togglePermission = (role, permKey) => {
+        // מנהל מערכת תמיד עם כל ההרשאות - לא ניתן לשנות
+        if (role === 'admin') {
+            return;
+        }
+        
         setPermissions(prev => ({
             ...prev,
             [role]: {
@@ -299,20 +321,21 @@ export default function PermissionsManager() {
                                         <h3 className="font-bold">{group.label}</h3>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {group.permissions.map(permKey => (
-                                            <div 
-                                                key={permKey} 
-                                                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                                            >
-                                                <span className="text-sm">
-                                                    {PERMISSION_LABELS[permKey] || permKey}
-                                                </span>
-                                                <Switch
-                                                    checked={permissions[selectedRole]?.[permKey] || false}
-                                                    onCheckedChange={() => togglePermission(selectedRole, permKey)}
-                                                />
-                                            </div>
-                                        ))}
+                                       {group.permissions.map(permKey => (
+                                           <div 
+                                               key={permKey} 
+                                               className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                                           >
+                                               <span className="text-sm">
+                                                   {PERMISSION_LABELS[permKey] || permKey}
+                                               </span>
+                                               <Switch
+                                                   checked={permissions[selectedRole]?.[permKey] || false}
+                                                   onCheckedChange={() => togglePermission(selectedRole, permKey)}
+                                                   disabled={selectedRole === 'admin'}
+                                               />
+                                           </div>
+                                       ))}
                                     </div>
                                 </div>
                             );
