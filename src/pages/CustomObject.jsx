@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Search, List, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Edit, Trash2, Search, List, LayoutGrid, ChevronLeft, ChevronRight, Columns } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { createPageUrl } from "@/utils";
 
@@ -155,9 +155,16 @@ export default function CustomObject() {
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
-                            <Edit className="w-4 h-4" />
-                        </Button>
+                        <EditRecordModal
+                            record={record}
+                            object={object}
+                            fields={fields}
+                            onRecordUpdated={loadObjectData}
+                        >
+                            <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
+                                <Edit className="w-4 h-4" />
+                            </Button>
+                        </EditRecordModal>
                     </div>
                 </div>
                 
@@ -212,8 +219,8 @@ export default function CustomObject() {
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={`h-full px-4 flex items-center gap-2 text-[16px] rounded-r-none ${currentView === 'כרטיסיה' ? 'bg-[#3568AE] text-white hover:bg-[#3568AE]' : 'bg-white text-[#858C94] hover:bg-gray-100'}`}
-                            style={{ fontFamily: 'Heebo' }}
+                            className={`h-full px-4 flex items-center gap-2 text-[16px] rounded-none ${currentView === 'כרטיסיה' ? 'bg-[#3568AE] text-white hover:bg-[#3568AE]' : 'bg-white text-[#858C94] hover:bg-gray-100'}`}
+                            style={{ fontFamily: 'Heebo', borderRadius: '15px 0 0 15px' }}
                             onClick={() => setCurrentView('כרטיסיה')}
                         >
                             <LayoutGrid className="w-5 h-5" />
@@ -222,8 +229,18 @@ export default function CustomObject() {
                         <Button
                             variant="ghost"
                             size="sm"
-                            className={`h-full px-4 flex items-center gap-2 text-[16px] rounded-l-none ${currentView === 'רשימה' ? 'bg-[#3568AE] text-white hover:bg-[#3568AE]' : 'bg-white text-[#858C94] hover:bg-gray-100'}`}
+                            className={`h-full px-4 flex items-center gap-2 text-[16px] rounded-none border-x ${currentView === 'לוח' ? 'bg-[#3568AE] text-white hover:bg-[#3568AE]' : 'bg-white text-[#858C94] hover:bg-gray-100'}`}
                             style={{ fontFamily: 'Heebo' }}
+                            onClick={() => setCurrentView('לוח')}
+                        >
+                            <Columns className="w-5 h-5" />
+                            לוח
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`h-full px-4 flex items-center gap-2 text-[16px] rounded-none ${currentView === 'רשימה' ? 'bg-[#3568AE] text-white hover:bg-[#3568AE]' : 'bg-white text-[#858C94] hover:bg-gray-100'}`}
+                            style={{ fontFamily: 'Heebo', borderRadius: '0 15px 15px 0' }}
                             onClick={() => setCurrentView('רשימה')}
                         >
                             <List className="w-5 h-5" />
@@ -358,6 +375,35 @@ export default function CustomObject() {
                                     <RecordCard key={record.id} record={record} />
                                 ))}
                             </div>
+                        ) : currentView === 'לוח' ? (
+                            /* Board View */
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {sections.map(section => {
+                                    const sectionRecords = section.filter_field_name && section.filter_value
+                                        ? records.filter(r => r.data?.[section.filter_field_name] === section.filter_value)
+                                        : [];
+                                    
+                                    return (
+                                        <div key={section.id} className="bg-white rounded-[15px] p-4">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <div 
+                                                    className="w-3 h-3 rounded-full"
+                                                    style={{ background: section.color || '#3568AE' }}
+                                                />
+                                                <h3 className="font-bold text-[16px]" style={{ fontFamily: 'Heebo' }}>
+                                                    {section.section_name}
+                                                </h3>
+                                                <Badge variant="outline" className="mr-auto">{sectionRecords.length}</Badge>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {sectionRecords.map(record => (
+                                                    <RecordCard key={record.id} record={record} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         ) : (
                             /* Table View */
                             <div className="space-y-2">
@@ -380,20 +426,25 @@ export default function CustomObject() {
                                                     {record.data?.[field.field_name] || '-'}
                                                 </div>
                                             ))}
-                                            <div className="text-right">
-                                                <div className="flex gap-2 justify-end">
-                                                    <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
-                                                        <Edit className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleDeleteRecord(record.id)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
+                                            <div className="flex gap-2 justify-end">
+                                               <EditRecordModal
+                                                   record={record}
+                                                   object={object}
+                                                   fields={fields}
+                                                   onRecordUpdated={loadObjectData}
+                                               >
+                                                   <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
+                                                       <Edit className="w-4 h-4" />
+                                                   </Button>
+                                               </EditRecordModal>
+                                               <Button
+                                                   variant="ghost"
+                                                   size="sm"
+                                                   onClick={() => handleDeleteRecord(record.id)}
+                                                   className="text-red-500 hover:text-red-700"
+                                               >
+                                                   <Trash2 className="w-4 h-4" />
+                                               </Button>
                                             </div>
                                         </div>
                                         
@@ -503,12 +554,87 @@ function FieldInput({ field, value, onChange }) {
     );
 }
 
+function EditRecordModal({ record, object, fields, onRecordUpdated, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({});
+
+    useEffect(() => {
+        if (record?.data) {
+            setFormData(record.data);
+        }
+    }, [record]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        const missingFields = fields.filter(f => f.is_required && !formData[f.field_name]);
+        if (missingFields.length > 0) {
+            alert(`יש למלא את השדות הבאים: ${missingFields.map(f => f.field_label).join(', ')}`);
+            return;
+        }
+
+        try {
+            await base44.entities.CustomRecord.update(record.id, {
+                data: formData
+            });
+            
+            onRecordUpdated();
+            setIsOpen(false);
+        } catch (error) {
+            console.error('שגיאה בעדכון רשומה:', error);
+            alert('שגיאה בעדכון הרשומה');
+        }
+    };
+
+    const updateField = (fieldName, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [fieldName]: value
+        }));
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>
+                        ערוך {object.object_name_singular}
+                    </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {fields.map(field => (
+                            <FieldInput 
+                                key={field.id} 
+                                field={field} 
+                                value={formData[field.field_name] || ''}
+                                onChange={(value) => updateField(field.field_name, value)}
+                            />
+                        ))}
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            ביטול
+                        </Button>
+                        <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            עדכן
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 function CreateRecordModal({ object, sections, fields, onRecordCreated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
-        // אתחל את הטופס עם ערכי ברירת מחדל
         const initialData = {};
         fields.forEach(field => {
             if (field.default_value) {
@@ -521,7 +647,6 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // בדיקת שדות חובה
         const missingFields = fields.filter(f => f.is_required && !formData[f.field_name]);
         if (missingFields.length > 0) {
             alert(`יש למלא את השדות הבאים: ${missingFields.map(f => f.field_label).join(', ')}`);
