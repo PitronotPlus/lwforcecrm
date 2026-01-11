@@ -270,22 +270,41 @@ export default function SignDocument() {
               <form onSubmit={handleSubmitSignature} className="space-y-4 sm:space-y-6">
                 <h2 className="text-lg sm:text-xl font-bold text-center">הזנת פרטים וחתימה</h2>
                 {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 rounded-md" role="alert"><p className="font-bold text-sm sm:text-base">שגיאה</p><p className="text-sm sm:text-base">{error}</p></div>}
-                {template.fields.filter(f => f.type === 'text' || f.type === 'date').map(field => (
-                  <div key={field.id} className="space-y-2">
-                    <Label htmlFor={field.id} className="text-right block w-full font-semibold text-sm sm:text-base">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
-                    </Label>
-                    <Input
-                      id={field.id}
-                      type="text"
-                      placeholder={field.type === 'date' ? 'DD/MM/YYYY' : ''}
-                      value={fieldValues[field.id] || ''}
-                      onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
-                      required={field.required}
-                      className="bg-gray-50 border-gray-300 text-sm sm:text-base"
-                    />
-                  </div>
-                ))}
+
+                {template.fields.map(field => {
+                  if (field.type === 'text' || field.type === 'date') {
+                    return (
+                      <div key={field.id} className="space-y-2">
+                        <Label htmlFor={field.id} className="text-right block w-full font-semibold text-sm sm:text-base">
+                          {field.label} {field.required && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Input
+                          id={field.id}
+                          type={field.type === 'date' ? 'date' : 'text'}
+                          placeholder={field.type === 'date' ? 'DD/MM/YYYY' : ''}
+                          value={fieldValues[field.id] || ''}
+                          onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
+                          required={field.required}
+                          className="bg-gray-50 border-gray-300 text-sm sm:text-base"
+                        />
+                      </div>
+                    );
+                  } else if (field.type === 'checkbox') {
+                    return (
+                      <div key={field.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Checkbox
+                          id={field.id}
+                          checked={fieldValues[field.id] === true}
+                          onCheckedChange={(checked) => setFieldValues(prev => ({...prev, [field.id]: checked}))}
+                        />
+                        <Label htmlFor={field.id} className="text-sm sm:text-base font-medium cursor-pointer">
+                          {field.label} {field.required && <span className="text-red-500">*</span>}
+                        </Label>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
 
                 {signatureFieldExists && (
                   <div className="space-y-2">
