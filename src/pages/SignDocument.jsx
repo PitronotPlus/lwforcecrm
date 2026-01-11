@@ -106,6 +106,7 @@ export default function SignDocument() {
   const [finalPdfUrl, setFinalPdfUrl] = useState(null);
   const [fieldValues, setFieldValues] = useState({});
   const [signatureData, setSignatureData] = useState(null);
+  const [selectedFieldId, setSelectedFieldId] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -238,7 +239,6 @@ export default function SignDocument() {
   }
 
   const { template, lead } = data || {};
-  const [selectedFieldId, setSelectedFieldId] = useState(null);
 
   const isFieldFilled = (field) => {
     const value = fieldValues[field.id];
