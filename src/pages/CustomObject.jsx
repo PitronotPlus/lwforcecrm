@@ -455,8 +455,7 @@ export default function CustomObject() {
                             <div className="space-y-2">
                                 {/* Table Header - Desktop Only */}
                                 <div className="hidden md:block bg-white rounded-[15px] p-6 mb-2">
-                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `200px repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
-                                        <div className="text-right">משרד מקושר</div>
+                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
                                         {fields.slice(0, 5).map(field => (
                                             <div key={field.id} className="text-right">{field.field_label}</div>
                                         ))}
@@ -472,14 +471,7 @@ export default function CustomObject() {
                                     <div key={record.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
                                         {/* Desktop Table Row */}
                                         <div className="hidden md:block">
-                                            <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `200px repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
-                                                <div className="text-right">
-                                                    {subAccounts.find(s => s.id === record.sub_account_id) ? (
-                                                        <div className="text-sm font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
-                                                            {subAccounts.find(s => s.id === record.sub_account_id)?.name}
-                                                        </div>
-                                                    ) : '-'}
-                                                </div>
+                                            <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
                                                 {fields.slice(0, 5).map(field => (
                                                     <div key={field.id} className="text-right">
                                                         {record.data?.[field.field_name] || '-'}
@@ -756,14 +748,12 @@ function ViewRecordModal({ record, object, fields, sections, subAccount, childre
                     </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6">
-                    {subAccount && (
-                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <div className="text-sm font-medium text-gray-700 mb-1">משרד מקושר</div>
-                            <div className="text-lg font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
-                                {subAccount.name}
-                            </div>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="text-sm font-medium text-gray-700 mb-1">משרד מקושר</div>
+                        <div className="text-lg font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
+                            {subAccount ? subAccount.name : 'לא משויך'}
                         </div>
-                    )}
+                    </div>
                     
                     {section && (
                         <div className="border-b pb-4">
