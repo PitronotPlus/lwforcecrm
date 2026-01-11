@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         }
 
         // טען את התבנית
-        const templates = await base44.asServiceRole.entities.DocumentTemplate.filter({ 
+        const templates = await base44.asServiceRole.entities.DigitalSignatureTemplate.filter({ 
             id: doc.template_id 
         });
 
@@ -56,24 +56,24 @@ Deno.serve(async (req) => {
 
         const template = templates[0];
 
-        // טען את הליד
-        const leads = await base44.asServiceRole.entities.Lead.filter({ 
+        // טען את הלקוח
+        const clients = await base44.asServiceRole.entities.Client.filter({ 
             id: doc.lead_id 
         });
 
-        if (leads.length === 0) {
+        if (clients.length === 0) {
             return Response.json({ 
                 success: false, 
                 error: 'פרטי הלקוח לא נמצאו' 
             }, { status: 404 });
         }
 
-        const lead = leads[0];
+        const client = clients[0];
 
         return Response.json({
             success: true,
             template,
-            lead,
+            lead: client,
             document: doc
         });
 
