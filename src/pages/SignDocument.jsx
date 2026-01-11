@@ -339,9 +339,9 @@ export default function SignDocument() {
         {/* Document */}
         <div className="flex-1 overflow-y-auto bg-gray-200 rounded-lg shadow-md p-4">
           <div className="max-w-4xl mx-auto">
-            {template?.page_image_urls?.map((pageIndex, imgIndex) => (
+            {template?.page_image_urls?.map((url, imgIndex) => (
               <div key={imgIndex} className="relative bg-white shadow-lg mb-4 last:mb-0">
-                <img src={pageIndex} alt={`עמוד ${imgIndex + 1}`} className="w-full" />
+                <img src={url} alt={`עמוד ${imgIndex + 1}`} className="w-full" />
                 {/* Field Overlays */}
                 {template?.fields?.map(field => {
                   if (field.page !== (imgIndex + 1)) return null;
