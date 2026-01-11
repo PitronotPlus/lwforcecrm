@@ -336,7 +336,8 @@ export default function CustomObject() {
 
                     {/* Main Content */}
                     <div className="flex-1 w-full">
-                        {/* Pagination Controls - Desktop only */}
+                        {/* Pagination Controls - Desktop only, מוסתר בתצוגת לוח */}
+                        {currentView !== 'לוח' && (
                         <div className="hidden md:flex items-center justify-between mb-6">
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
@@ -367,48 +368,58 @@ export default function CustomObject() {
                                 עמוד {currentPage} מתוך {totalPages || 1}
                             </div>
                         </div>
+                        )}
 
-                        {currentView === 'כרטיסיה' ? (
+                        {currentView === 'לוח' ? (
+                            /* Board View */
+                            <div className="hidden md:grid grid-cols-4 gap-4">
+                                {sections.length > 0 ? (
+                                    sections.map(section => {
+                                        const sectionRecords = section.filter_field_name && section.filter_value
+                                            ? filteredRecords.filter(r => r.data?.[section.filter_field_name] === section.filter_value)
+                                            : [];
+                                        
+                                        return (
+                                            <div key={section.id} className="bg-gray-50/50 rounded-lg p-3 min-h-[200px]">
+                                                <h3 
+                                                    className="text-[18px] font-medium text-right mb-4"
+                                                    style={{ 
+                                                        color: '#484848',
+                                                        fontFamily: 'Heebo'
+                                                    }}
+                                                >
+                                                    {section.section_name} ({sectionRecords.length})
+                                                </h3>
+                                                <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+                                                    {sectionRecords.map((record) => (
+                                                        <RecordCard key={record.id} record={record} />
+                                                    ))}
+                                                    {sectionRecords.length === 0 && (
+                                                        <p className="text-sm text-gray-400 text-center py-4">אין רשומות</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="col-span-4 text-center py-12">
+                                        <p className="text-gray-500">אין מקטעי סיידבר מוגדרים</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : currentView === 'כרטיסיה' ? (
                             /* Card Grid View */
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                 {paginatedRecords.map((record) => (
                                     <RecordCard key={record.id} record={record} />
                                 ))}
                             </div>
-                        ) : currentView === 'לוח' ? (
-                            /* Board View */
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {sections.map(section => {
-                                    const sectionRecords = section.filter_field_name && section.filter_value
-                                        ? records.filter(r => r.data?.[section.filter_field_name] === section.filter_value)
-                                        : [];
-                                    
-                                    return (
-                                        <div key={section.id} className="bg-white rounded-[15px] p-4">
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <div 
-                                                    className="w-3 h-3 rounded-full"
-                                                    style={{ background: section.color || '#3568AE' }}
-                                                />
-                                                <h3 className="font-bold text-[16px]" style={{ fontFamily: 'Heebo' }}>
-                                                    {section.section_name}
-                                                </h3>
-                                                <Badge variant="outline" className="mr-auto">{sectionRecords.length}</Badge>
-                                            </div>
-                                            <div className="space-y-2">
-                                                {sectionRecords.map(record => (
-                                                    <RecordCard key={record.id} record={record} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
                         ) : (
                             /* Table View */
                             <div className="space-y-2">
+                                {/* Table Header - Desktop Only */}
                                 <div className="hidden md:block bg-white rounded-[15px] p-6 mb-2">
-                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length + 1, 6)}, 1fr)` }}>
+                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
                                         {fields.slice(0, 5).map(field => (
                                             <div key={field.id} className="text-right">{field.field_label}</div>
                                         ))}
@@ -416,38 +427,44 @@ export default function CustomObject() {
                                     </div>
                                 </div>
 
+                                {/* Divider */}
                                 <div className="border-t border-[#D9D9D9] mb-4"></div>
 
+                                {/* Table Rows */}
                                 {paginatedRecords.map((record) => (
                                     <div key={record.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
-                                        <div className="hidden md:grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length + 1, 6)}, 1fr)` }}>
+                                        {/* Desktop Table Row */}
+                                        <div className="hidden md:grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
                                             {fields.slice(0, 5).map(field => (
                                                 <div key={field.id} className="text-right">
                                                     {record.data?.[field.field_name] || '-'}
                                                 </div>
                                             ))}
-                                            <div className="flex gap-2 justify-end">
-                                               <EditRecordModal
-                                                   record={record}
-                                                   object={object}
-                                                   fields={fields}
-                                                   onRecordUpdated={loadObjectData}
-                                               >
-                                                   <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
-                                                       <Edit className="w-4 h-4" />
-                                                   </Button>
-                                               </EditRecordModal>
-                                               <Button
-                                                   variant="ghost"
-                                                   size="sm"
-                                                   onClick={() => handleDeleteRecord(record.id)}
-                                                   className="text-red-500 hover:text-red-700"
-                                               >
-                                                   <Trash2 className="w-4 h-4" />
-                                               </Button>
+                                            <div className="text-right">
+                                                <div className="flex gap-2 justify-end">
+                                                    <EditRecordModal
+                                                        record={record}
+                                                        object={object}
+                                                        fields={fields}
+                                                        onRecordUpdated={loadObjectData}
+                                                    >
+                                                        <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
+                                                            <Edit className="w-4 h-4" />
+                                                        </Button>
+                                                    </EditRecordModal>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleDeleteRecord(record.id)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
-                                        
+
+                                        {/* Mobile Card Layout */}
                                         <div className="md:hidden">
                                             <RecordCard record={record} />
                                         </div>
