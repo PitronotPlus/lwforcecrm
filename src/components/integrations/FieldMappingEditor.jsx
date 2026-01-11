@@ -5,18 +5,42 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function FieldMappingEditor({ initialMapping, onMappingChange }) {
   const [fieldMappings, setFieldMappings] = React.useState(initialMapping || []);
+  const [customFields, setCustomFields] = React.useState([]);
+
+  React.useEffect(() => {
+    loadCustomFields();
+  }, []);
+
+  const loadCustomFields = async () => {
+    try {
+      const fields = await base44.entities.CustomField.filter({ entity_type: 'Client', is_active: true });
+      setCustomFields(fields);
+    } catch (error) {
+      console.error('שגיאה בטעינת שדות מותאמים:', error);
+    }
+  };
 
   const systemFields = [
-    { value: 'full_name', label: 'שם מלא' },
-    { value: 'phone', label: 'טלפון' },
-    { value: 'email', label: 'אימייל' },
-    { value: 'service_type', label: 'סוג שירות' },
-    { value: 'initial_need', label: 'צורך ראשוני' },
-    { value: 'source', label: 'מקור' },
-    { value: 'notes', label: 'הערות' }
+    { value: 'full_name', label: 'שם מלא', group: 'system' },
+    { value: 'phone', label: 'טלפון', group: 'system' },
+    { value: 'email', label: 'אימייל', group: 'system' },
+    { value: 'service_type', label: 'סוג שירות', group: 'system' },
+    { value: 'initial_need', label: 'צורך ראשוני', group: 'system' },
+    { value: 'source', label: 'מקור', group: 'system' },
+    { value: 'notes', label: 'הערות', group: 'system' }
+  ];
+
+  const allFields = [
+    ...systemFields,
+    ...customFields.map(field => ({
+      value: `custom_${field.field_name}`,
+      label: `${field.field_label} (מותאם)`,
+      group: 'custom'
+    }))
   ];
 
   const addFieldMapping = () => {
@@ -71,11 +95,22 @@ export default function FieldMappingEditor({ initialMapping, onMappingChange }) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500">שדות מערכת</div>
                   {systemFields.map(field => (
                     <SelectItem key={field.value} value={field.value}>
                       {field.label}
                     </SelectItem>
                   ))}
+                  {customFields.length > 0 && (
+                    <>
+                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 border-t mt-1">שדות מותאמים אישית</div>
+                      {customFields.map(field => (
+                        <SelectItem key={`custom_${field.field_name}`} value={`custom_${field.field_name}`}>
+                          {field.field_label} (מותאם)
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>

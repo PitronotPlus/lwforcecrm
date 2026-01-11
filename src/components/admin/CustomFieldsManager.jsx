@@ -151,8 +151,8 @@ export default function CustomFieldsManager({ subAccountId = null }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold" style={{ fontFamily: 'Heebo' }}>שדות מותאמים אישית</h2>
-          <p className="text-sm text-gray-600">נהל שדות נוספים שיופיעו בכרטיסי לקוחות ובאינטגרציות</p>
+          <h2 className="text-xl font-bold" style={{ fontFamily: 'Heebo' }}>שדות מותאמים אישית ללקוחות</h2>
+          <p className="text-sm text-gray-600">שדות אלו יופיעו בכרטיסי לקוחות, ייצוא/ייבוא לקוחות, ומיפוי שדות באינטגרציות (Make, וכו')</p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
