@@ -33,9 +33,22 @@ export default function MenuEditor() {
     const loadAvailablePages = async () => {
         try {
             const { data } = await base44.functions.invoke('getAvailablePages');
+            let pages = [];
+            
             if (data.success) {
-                setAvailablePages(data.pages);
+                pages = data.pages;
             }
+            
+            // טען דפים מותאמים אישית מ-SystemObject
+            const customObjects = await base44.entities.SystemObject.filter({ is_active: true });
+            const customPages = customObjects.map(obj => ({
+                name: obj.object_name,
+                path: `/CustomObject?id=${obj.id}`,
+                isCustom: true,
+                objectId: obj.id
+            }));
+            
+            setAvailablePages([...pages, ...customPages]);
         } catch (error) {
             console.error('שגיאה בטעינת רשימת דפים:', error);
             // Fallback to basic pages if function fails
