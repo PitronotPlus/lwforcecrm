@@ -14,10 +14,12 @@ import { Textarea } from '@/components/ui/textarea';
 
 const TRIGGER_TYPES = [
   { value: 'lead_created', label: 'רשומה חדשה נוצרה', icon: Plus },
+  { value: 'lead_created_by_source', label: 'רשומה חדשה ממקור ספציפי', icon: Plus },
   { value: 'status_changed', label: 'סטטוס השתנה', icon: CheckCircle },
   { value: 'task_assigned', label: 'משימה הוגדרה', icon: CheckCircle },
   { value: 'case_created', label: 'תיק נוצר', icon: FileText },
   { value: 'appointment_scheduled', label: 'פגישה נקבעה', icon: Calendar },
+  { value: 'document_signed', label: 'מסמך נחתם', icon: FileText },
   { value: 'integration_webhook', label: 'אינטגרציה (Webhook)', icon: CheckCircle }
 ];
 
@@ -37,6 +39,8 @@ const STEP_TYPES = [
 export default function AutomationManager() {
   const [automations, setAutomations] = useState([]);
   const [integrations, setIntegrations] = useState([]);
+  const [clientSettings, setClientSettings] = useState(null);
+  const [documentTemplates, setDocumentTemplates] = useState([]);
   const [editingAutomation, setEditingAutomation] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,14 +63,25 @@ export default function AutomationManager() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [automationsData, integrationsData, logsData] = await Promise.all([
+      const [automationsData, integrationsData, logsData, clientSettingsData] = await Promise.all([
         base44.entities.Automation.list('-created_date'),
-        base44.entities.Integration.list(),
-        base44.entities.AutomationLog.list('-created_date', 50)
+        base44.entities.Integration.filter({ is_active: true }),
+        base44.entities.AutomationLog.list('-created_date', 50),
+        base44.entities.ClientSettings.list()
       ]);
       setAutomations(automationsData);
       setIntegrations(integrationsData);
       setLogs(logsData);
+      setClientSettings(clientSettingsData[0] || {});
+      
+      // טען תבניות חתימה דיגיטלית אם קיימות
+      try {
+        const templates = await base44.entities.SignedDocument.list();
+        const uniqueTemplates = [...new Set(templates.map(t => t.template_id))].filter(Boolean);
+        setDocumentTemplates(uniqueTemplates);
+      } catch (error) {
+        console.log('אין תבניות חתימה דיגיטלית');
+      }
     } catch (error) {
       console.error('שגיאה בטעינת נתונים:', error);
     } finally {
@@ -244,6 +259,7 @@ export default function AutomationManager() {
         );
 
       case 'change_status':
+        const statusOptions = clientSettings?.status_options || ['ליד', 'פולואפ', 'לקוח', 'לא נסגר'];
         return (
           <div>
             <Label>סטטוס חדש</Label>
@@ -255,10 +271,11 @@ export default function AutomationManager() {
                 <SelectValue placeholder="בחר סטטוס" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ליד">ליד</SelectItem>
-                <SelectItem value="פולואפ">פולואפ</SelectItem>
-                <SelectItem value="לקוח">לקוח</SelectItem>
-                <SelectItem value="לא נסגר">לא נסגר</SelectItem>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -515,6 +532,27 @@ export default function AutomationManager() {
 
   return (
     <div className="space-y-6">
+      {/* הסבר CRON Job */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900 mb-1">איך עובדות האוטומציות?</h3>
+              <p className="text-sm text-blue-800">
+                מערכת האוטומציות פועלת ברקע באמצעות Cron Jobs - משימות מתוזמנות שבודקות כל כמה דקות אם יש טריגרים שהופעלו (לקוח חדש, שינוי סטטוס וכו').
+                כאשר טריגר מתקיים, המערכת מבצעת את כל השלבים שהגדרת באוטומציה בזה אחר זה, כולל המתנות בין שלבים.
+              </p>
+              <ul className="text-sm text-blue-700 mt-2 list-disc list-inside space-y-1">
+                <li>הבדיקות מתבצעות אוטומטית כל 5 דקות</li>
+                <li>כל אוטומציה רצה בנפרד ולא משפיעה על אחרות</li>
+                <li>ניתן לעקוב אחר ביצוע בלשונית "היסטוריה"</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <div className="flex items-center justify-between mb-4">
           <TabsList>
