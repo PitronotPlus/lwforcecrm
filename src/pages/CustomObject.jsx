@@ -159,6 +159,7 @@ export default function CustomObject() {
                             record={record}
                             object={object}
                             fields={fields}
+                            sections={sections}
                             onRecordUpdated={loadObjectData}
                         >
                             <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
@@ -446,6 +447,7 @@ export default function CustomObject() {
                                                         record={record}
                                                         object={object}
                                                         fields={fields}
+                                                        sections={sections}
                                                         onRecordUpdated={loadObjectData}
                                                     >
                                                         <Button variant="ghost" size="sm" className="text-blue-500 hover:text-blue-700">
@@ -571,7 +573,7 @@ function FieldInput({ field, value, onChange }) {
     );
 }
 
-function EditRecordModal({ record, object, fields, onRecordUpdated, children }) {
+function EditRecordModal({ record, object, fields, sections, onRecordUpdated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({});
 
@@ -610,6 +612,17 @@ function EditRecordModal({ record, object, fields, onRecordUpdated, children }) 
         }));
     };
 
+    // זיהוי שדה הסינון ואפשרויות הקבוצות
+    const filterField = sections.length > 0 && sections[0].filter_field_name 
+        ? sections[0].filter_field_name 
+        : null;
+    const groupOptions = filterField 
+        ? sections.filter(s => s.filter_value).map(s => ({
+            label: s.section_name,
+            value: s.filter_value
+        }))
+        : [];
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -622,6 +635,29 @@ function EditRecordModal({ record, object, fields, onRecordUpdated, children }) 
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {filterField && groupOptions.length > 0 && (
+                        <div className="border-b pb-4">
+                            <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
+                                קבוצה
+                            </label>
+                            <Select 
+                                value={formData[filterField] || ''}
+                                onValueChange={(value) => updateField(filterField, value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="בחר קבוצה" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {groupOptions.map((option, idx) => (
+                                        <SelectItem key={idx} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {fields.map(field => (
                             <FieldInput 
@@ -694,6 +730,17 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
         }));
     };
 
+    // זיהוי שדה הסינון ואפשרויות הקבוצות
+    const filterField = sections.length > 0 && sections[0].filter_field_name 
+        ? sections[0].filter_field_name 
+        : null;
+    const groupOptions = filterField 
+        ? sections.filter(s => s.filter_value).map(s => ({
+            label: s.section_name,
+            value: s.filter_value
+        }))
+        : [];
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -706,6 +753,29 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {filterField && groupOptions.length > 0 && (
+                        <div className="border-b pb-4">
+                            <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
+                                קבוצה
+                            </label>
+                            <Select 
+                                value={formData[filterField] || ''}
+                                onValueChange={(value) => updateField(filterField, value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="בחר קבוצה" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {groupOptions.map((option, idx) => (
+                                        <SelectItem key={idx} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {fields.map(field => (
                             <FieldInput 
