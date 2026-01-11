@@ -612,15 +612,20 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
     };
 
     // זיהוי שדה הסינון ואפשרויות הקבוצות
-    const filterField = sections.length > 0 && sections[0].filter_field_name 
+    const filterField = sections.length > 0 && sections[0]?.filter_field_name 
         ? sections[0].filter_field_name 
         : null;
     const groupOptions = filterField 
-        ? sections.filter(s => s.filter_value).map(s => ({
+        ? sections.filter(s => s.filter_field_name && s.filter_value).map(s => ({
             label: s.section_name,
             value: s.filter_value
         }))
         : [];
+    
+    // הסר את שדה הסינון מרשימת השדות הרגילים כדי למנוע כפילות
+    const regularFields = filterField 
+        ? fields.filter(f => f.field_name !== filterField)
+        : fields;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -658,7 +663,7 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
                     )}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {fields.map(field => (
+                        {regularFields.map(field => (
                             <FieldInput 
                                 key={field.id} 
                                 field={field} 
