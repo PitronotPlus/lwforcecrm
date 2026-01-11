@@ -80,10 +80,8 @@ export default function CustomObject() {
 
         if (selectedFilter !== 'הכל') {
             const section = sections.find(s => s.section_name === selectedFilter);
-            if (section && section.filter_field_name && section.filter_value) {
-                filtered = filtered.filter(record => {
-                    return record.data?.[section.filter_field_name] === section.filter_value;
-                });
+            if (section) {
+                filtered = filtered.filter(record => record.section_id === section.id);
             }
         }
 
@@ -306,10 +304,7 @@ export default function CustomObject() {
                                 const section = sections.find(s => s.section_name === option);
                                 const count = option === 'הכל' 
                                     ? records.length 
-                                    : records.filter(r => {
-                                        if (!section?.filter_field_name || !section?.filter_value) return false;
-                                        return r.data?.[section.filter_field_name] === section.filter_value;
-                                    }).length;
+                                    : records.filter(r => section && r.section_id === section.id).length;
                                 
                                 return (
                                     <div key={option}>
@@ -375,9 +370,7 @@ export default function CustomObject() {
                             <div className="hidden md:grid grid-cols-4 gap-4">
                                 {sections.length > 0 ? (
                                     sections.map(section => {
-                                        const sectionRecords = section.filter_field_name && section.filter_value
-                                            ? filteredRecords.filter(r => r.data?.[section.filter_field_name] === section.filter_value)
-                                            : [];
+                                        const sectionRecords = filteredRecords.filter(r => r.section_id === section.id);
                                         
                                         return (
                                             <div key={section.id} className="bg-gray-50/50 rounded-lg p-3 min-h-[200px]">
@@ -575,10 +568,14 @@ function FieldInput({ field, value, onChange }) {
 function EditRecordModal({ record, object, fields, sections, onRecordUpdated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({});
+    const [selectedSection, setSelectedSection] = useState('');
 
     useEffect(() => {
         if (record?.data) {
             setFormData(record.data);
+        }
+        if (record?.section_id) {
+            setSelectedSection(record.section_id);
         }
     }, [record]);
 
@@ -591,8 +588,14 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
             return;
         }
 
+        if (!selectedSection && sections.length > 0) {
+            alert('יש לבחור מקטע');
+            return;
+        }
+
         try {
             await base44.entities.CustomRecord.update(record.id, {
+                section_id: selectedSection,
                 data: formData
             });
             
@@ -610,22 +613,6 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
             [fieldName]: value
         }));
     };
-
-    // זיהוי שדה הסינון ואפשרויות הקבוצות
-    const filterField = sections.length > 0 && sections[0]?.filter_field_name 
-        ? sections[0].filter_field_name 
-        : null;
-    const groupOptions = filterField 
-        ? sections.filter(s => s.filter_field_name && s.filter_value).map(s => ({
-            label: s.section_name,
-            value: s.filter_value
-        }))
-        : [];
-    
-    // הסר את שדה הסינון מרשימת השדות הרגילים כדי למנוע כפילות
-    const regularFields = filterField 
-        ? fields.filter(f => f.field_name !== filterField)
-        : fields;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -690,6 +677,7 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
 function CreateRecordModal({ object, sections, fields, onRecordCreated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({});
+    const [selectedSection, setSelectedSection] = useState('');
 
     useEffect(() => {
         const initialData = {};
@@ -710,10 +698,16 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
             return;
         }
 
+        if (!selectedSection && sections.length > 0) {
+            alert('יש לבחור מקטע');
+            return;
+        }
+
         try {
             const user = await base44.auth.me();
             await base44.entities.CustomRecord.create({
                 object_id: object.id,
+                section_id: selectedSection,
                 data: formData,
                 sub_account_id: user?.sub_account_id
             });
@@ -721,6 +715,7 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
             onRecordCreated();
             setIsOpen(false);
             setFormData({});
+            setSelectedSection('');
         } catch (error) {
             console.error('שגיאה ביצירת רשומה:', error);
             alert('שגיאה ביצירת הרשומה');
@@ -733,22 +728,6 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
             [fieldName]: value
         }));
     };
-
-    // זיהוי שדה הסינון ואפשרויות הקבוצות
-    const filterField = sections.length > 0 && sections[0]?.filter_field_name 
-        ? sections[0].filter_field_name 
-        : null;
-    const groupOptions = filterField 
-        ? sections.filter(s => s.filter_field_name && s.filter_value).map(s => ({
-            label: s.section_name,
-            value: s.filter_value
-        }))
-        : [];
-    
-    // הסר את שדה הסינון מרשימת השדות הרגילים כדי למנוע כפילות
-    const regularFields = filterField 
-        ? fields.filter(f => f.field_name !== filterField)
-        : fields;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

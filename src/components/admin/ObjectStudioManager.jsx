@@ -497,11 +497,7 @@ function ObjectEditorCard({ object, onClose }) {
                                             />
                                             <div>
                                                 <p className="font-medium">{section.section_name}</p>
-                                                <p className="text-sm text-gray-500">
-                                                    {section.filter_field_name && section.filter_value ? 
-                                                        `סינון: ${section.filter_field_name} = ${section.filter_value}` 
-                                                        : 'ללא סינון'}
-                                                </p>
+                                                <p className="text-sm text-gray-500">סדר: {section.order_index || 0}</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
@@ -538,8 +534,6 @@ function CreateSectionModal({ objectId, fields, onSectionCreated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         section_name: '',
-        filter_field_name: '',
-        filter_value: '',
         order_index: 0,
         color: '#3568AE'
     });
@@ -553,7 +547,7 @@ function CreateSectionModal({ objectId, fields, onSectionCreated, children }) {
             });
             onSectionCreated();
             setIsOpen(false);
-            setFormData({ section_name: '', filter_field_name: '', filter_value: '', order_index: 0, color: '#3568AE' });
+            setFormData({ section_name: '', order_index: 0, color: '#3568AE' });
         } catch (error) {
             console.error('שגיאה ביצירת מקטע:', error);
             alert('שגיאה ביצירת המקטע');
@@ -579,33 +573,8 @@ function CreateSectionModal({ objectId, fields, onSectionCreated, children }) {
                             placeholder="לדוגמה: ליד, פולואפ"
                             className="text-right"
                         />
+                        <p className="text-xs text-gray-500 mt-1">המשתמשים יבחרו את המקטע בעת יצירה או עריכה של רשומה</p>
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">שדה לסינון</label>
-                        <select
-                            value={formData.filter_field_name}
-                            onChange={(e) => setFormData({...formData, filter_field_name: e.target.value})}
-                            className="w-full p-2 border rounded-md text-right"
-                        >
-                            <option value="">ללא סינון</option>
-                            {fields.map(f => (
-                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {formData.filter_field_name && (
-                        <div>
-                            <label className="block text-sm font-medium mb-1">ערך לסינון</label>
-                            <Input
-                                value={formData.filter_value}
-                                onChange={(e) => setFormData({...formData, filter_value: e.target.value})}
-                                placeholder="לדוגמה: ליד"
-                                className="text-right"
-                            />
-                        </div>
-                    )}
 
                     <div>
                         <label className="block text-sm font-medium mb-1">צבע</label>
@@ -644,8 +613,6 @@ function EditSectionModal({ section, fields, onSectionUpdated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         section_name: section?.section_name || '',
-        filter_field_name: section?.filter_field_name || '',
-        filter_value: section?.filter_value || '',
         order_index: section?.order_index || 0,
         color: section?.color || '#3568AE'
     });
@@ -654,8 +621,6 @@ function EditSectionModal({ section, fields, onSectionUpdated, children }) {
         if (section) {
             setFormData({
                 section_name: section.section_name,
-                filter_field_name: section.filter_field_name || '',
-                filter_value: section.filter_value || '',
                 order_index: section.order_index || 0,
                 color: section.color || '#3568AE'
             });
@@ -692,32 +657,8 @@ function EditSectionModal({ section, fields, onSectionUpdated, children }) {
                             onChange={(e) => setFormData({...formData, section_name: e.target.value})}
                             className="text-right"
                         />
+                        <p className="text-xs text-gray-500 mt-1">המשתמשים יבחרו את המקטע בעת יצירה או עריכה של רשומה</p>
                     </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">שדה לסינון</label>
-                        <select
-                            value={formData.filter_field_name}
-                            onChange={(e) => setFormData({...formData, filter_field_name: e.target.value})}
-                            className="w-full p-2 border rounded-md text-right"
-                        >
-                            <option value="">ללא סינון</option>
-                            {fields.map(f => (
-                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {formData.filter_field_name && (
-                        <div>
-                            <label className="block text-sm font-medium mb-1">ערך לסינון</label>
-                            <Input
-                                value={formData.filter_value}
-                                onChange={(e) => setFormData({...formData, filter_value: e.target.value})}
-                                className="text-right"
-                            />
-                        </div>
-                    )}
 
                     <div>
                         <label className="block text-sm font-medium mb-1">צבע</label>
