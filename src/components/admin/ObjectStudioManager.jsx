@@ -111,16 +111,11 @@ function ObjectCard({ object, onEdit, onDelete, onObjectUpdated }) {
         <Card className="hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ background: object.color || '#3568AE' }}>
-                            <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg" style={{ fontFamily: 'Heebo' }}>
-                                {object.object_name}
-                            </h3>
-                            <p className="text-sm text-gray-500">{object.system_name}</p>
-                        </div>
+                    <div>
+                        <h3 className="font-bold text-lg mb-1" style={{ fontFamily: 'Heebo' }}>
+                            {object.object_name}
+                        </h3>
+                        <p className="text-sm text-gray-500">{object.system_name}</p>
                     </div>
                     <Badge className={object.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                         {object.is_active ? 'פעיל' : 'לא פעיל'}
@@ -243,25 +238,7 @@ function CreateObjectModal({ children, onObjectCreated }) {
                         />
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium mb-1">צבע</label>
-                            <Input
-                                type="color"
-                                value={formData.color}
-                                onChange={(e) => setFormData({...formData, color: e.target.value})}
-                            />
-                        </div>
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium mb-1">אייקון</label>
-                            <Input
-                                value={formData.icon}
-                                onChange={(e) => setFormData({...formData, icon: e.target.value})}
-                                placeholder="FileText"
-                                className="text-right"
-                            />
-                        </div>
-                    </div>
+
 
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
