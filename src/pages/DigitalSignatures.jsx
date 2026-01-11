@@ -9,7 +9,7 @@ import { createPageUrl } from '@/utils';
 export default function DigitalSignatures() {
   const [templates, setTemplates] = useState([]);
   const [signedDocuments, setSignedDocuments] = useState([]);
-  const [leads, setLeads] = useState([]);
+  const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -25,15 +25,15 @@ export default function DigitalSignatures() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [templatesData, documentsData, leadsData] = await Promise.all([
+      const [templatesData, documentsData, clientsData] = await Promise.all([
         base44.entities.DigitalSignatureTemplate.list('-created_date'),
         base44.entities.SignedDocument.list('-created_date'),
-        base44.entities.Lead.list()
+        base44.entities.Client.list()
       ]);
       
       setTemplates(templatesData);
       setSignedDocuments(documentsData);
-      setLeads(leadsData);
+      setClients(clientsData);
     } catch (error) {
       console.error('שגיאה בטעינת הנתונים:', error);
     }
@@ -320,7 +320,7 @@ export default function DigitalSignatures() {
                     return (
                       <tr key={doc.id} className="border-b last:border-b-0 hover:bg-gray-50/50 transition-colors">
                         <td className="p-3 sm:p-4 text-sm sm:text-base">{template?.name || 'לא ידוע'}</td>
-                        <td className="p-3 sm:p-4 text-sm sm:text-base">{lead ? `${lead.first_name} ${lead.last_name}` : 'לא ידוע'}</td>
+                        <td className="p-3 sm:p-4 text-sm sm:text-base">{client?.full_name || 'לא ידוע'}</td>
                         <td className="p-3 sm:p-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                             doc.status === 'signed' ? 'bg-green-100 text-green-800' :
@@ -436,7 +436,14 @@ export default function DigitalSignatures() {
       {showSendModal && (
         <SendModal
           template={selectedTemplate}
-          leads={leadsFormatted}
+          leads={clients.map(client => ({
+            id: client.id,
+            first_name: client.full_name?.split(' ')[0] || client.full_name || '',
+            last_name: client.full_name?.split(' ').slice(1).join(' ') || '',
+            email: client.email,
+            phone: client.phone,
+            full_name: client.full_name
+          }))}
           onSend={handleSendRequest}
           onCreateLink={handleCreateLink}
           onCancel={() => setShowSendModal(false)}
