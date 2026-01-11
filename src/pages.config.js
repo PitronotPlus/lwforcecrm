@@ -5,6 +5,7 @@ import Cases from './pages/Cases';
 import ClientDetails from './pages/ClientDetails';
 import Clients from './pages/Clients';
 import Credits from './pages/Credits';
+import CustomObject from './pages/CustomObject';
 import Dashboard from './pages/Dashboard';
 import DigitalSignatures from './pages/DigitalSignatures';
 import Finances from './pages/Finances';
@@ -23,7 +24,6 @@ import Support from './pages/Support';
 import Tasks from './pages/Tasks';
 import TeamManagement from './pages/TeamManagement';
 import TestSignature from './pages/TestSignature';
-import CustomObject from './pages/CustomObject';
 import __Layout from './Layout.jsx';
 
 
@@ -35,6 +35,7 @@ export const PAGES = {
     "ClientDetails": ClientDetails,
     "Clients": Clients,
     "Credits": Credits,
+    "CustomObject": CustomObject,
     "Dashboard": Dashboard,
     "DigitalSignatures": DigitalSignatures,
     "Finances": Finances,
@@ -53,7 +54,6 @@ export const PAGES = {
     "Tasks": Tasks,
     "TeamManagement": TeamManagement,
     "TestSignature": TestSignature,
-    "CustomObject": CustomObject,
 }
 
 export const pagesConfig = {

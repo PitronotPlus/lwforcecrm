@@ -44,19 +44,21 @@ export default function CustomObject() {
 
     const loadObjectData = async () => {
         try {
-            const [objectData, sectionsData, fieldsData] = await Promise.all([
+            const [objectData, sectionsData, fieldsData, columnsData] = await Promise.all([
                 base44.entities.SystemObject.get(objectId),
                 base44.entities.ObjectSection.filter({ object_id: objectId }),
-                base44.entities.ObjectField.filter({ object_id: objectId })
+                base44.entities.ObjectField.filter({ object_id: objectId }),
+                base44.entities.ObjectColumn.filter({ object_id: objectId })
             ]);
             
             setObject(objectData);
             setSections(sectionsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
             setFields(fieldsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
             
-            // TODO: טען רשומות בפועל כשיהיה ישות דינאמית
-            setRecords([]);
-            setFilteredRecords([]);
+            // טען רשומות
+            const recordsData = await base44.entities.CustomRecord.filter({ object_id: objectId });
+            setRecords(recordsData);
+            setFilteredRecords(recordsData);
         } catch (error) {
             console.error('שגיאה בטעינת נתוני הדף:', error);
         } finally {
@@ -71,14 +73,20 @@ export default function CustomObject() {
             // חיפוש בכל השדות
             filtered = filtered.filter(record => {
                 return fields.some(field => {
-                    const value = record[field.field_name];
+                    const value = record.data?.[field.field_name];
                     return value && String(value).toLowerCase().includes(searchQuery.toLowerCase());
                 });
             });
         }
 
         if (selectedFilter !== 'הכל') {
-            // כאן אפשר להוסיף סינונים נוספים בעתיד
+            // סינון לפי מקטע
+            const section = sections.find(s => s.section_name === selectedFilter);
+            if (section && section.filter_field_name && section.filter_value) {
+                filtered = filtered.filter(record => {
+                    return record.data?.[section.filter_field_name] === section.filter_value;
+                });
+            }
         }
 
         setFilteredRecords(filtered);
@@ -86,24 +94,22 @@ export default function CustomObject() {
 
     const handleDeleteRecord = async (recordId) => {
         if (window.confirm('האם אתה בטוח שברצונך למחוק רשומה זו?')) {
-            // TODO: מחיקת רשומה בפועל
-            alert('פיצ׳ר מחיקה בפיתוח');
+            try {
+                await base44.entities.CustomRecord.delete(recordId);
+                loadObjectData();
+            } catch (error) {
+                console.error('שגיאה במחיקת רשומה:', error);
+                alert('שגיאה במחיקת הרשומה');
+            }
         }
     };
 
-    // סינון דינאמי לפי שדות select
+    // סינון דינאמי לפי מקטעי הסיידבר
     const getFilterOptions = () => {
-        const selectFields = fields.filter(f => f.field_type === 'select' && f.select_options?.length > 0);
         const options = ['הכל'];
-        
-        selectFields.forEach(field => {
-            field.select_options.forEach(opt => {
-                if (!options.includes(opt)) {
-                    options.push(opt);
-                }
-            });
+        sections.forEach(section => {
+            options.push(section.section_name);
         });
-        
         return options;
     };
 
@@ -160,7 +166,7 @@ export default function CustomObject() {
                         <div key={field.id}>
                             <div className="text-sm text-gray-500">{field.field_label}</div>
                             <div className="text-base font-medium" style={{ fontFamily: 'Heebo' }}>
-                                {record[field.field_name] || '-'}
+                                {record.data?.[field.field_name] || '-'}
                             </div>
                         </div>
                     ))}
@@ -279,25 +285,35 @@ export default function CustomObject() {
                         </div>
 
                         <div className="space-y-4">
-                            {filterOptions.map((option, index) => (
-                                <div key={option}>
-                                    <div 
-                                        className={`text-[16px] leading-[24px] text-right cursor-pointer py-3 px-2 rounded-lg transition-colors ${
-                                            selectedFilter === option ? 'bg-blue-50 text-[#3568AE] font-medium' : 'text-[#484848] hover:bg-gray-50'
-                                        }`}
-                                        style={{ fontFamily: 'Heebo' }}
-                                        onClick={() => setSelectedFilter(option)}
-                                    >
-                                        {option}
-                                        <span className="text-sm text-gray-500 mr-2">
-                                            ({option === 'הכל' ? records.length : 0})
-                                        </span>
+                            {filterOptions.map((option, index) => {
+                                const section = sections.find(s => s.section_name === option);
+                                const count = option === 'הכל' 
+                                    ? records.length 
+                                    : records.filter(r => {
+                                        if (!section?.filter_field_name || !section?.filter_value) return false;
+                                        return r.data?.[section.filter_field_name] === section.filter_value;
+                                    }).length;
+                                
+                                return (
+                                    <div key={option}>
+                                        <div 
+                                            className={`text-[16px] leading-[24px] text-right cursor-pointer py-3 px-2 rounded-lg transition-colors ${
+                                                selectedFilter === option ? 'bg-blue-50 text-[#3568AE] font-medium' : 'text-[#484848] hover:bg-gray-50'
+                                            }`}
+                                            style={{ fontFamily: 'Heebo' }}
+                                            onClick={() => setSelectedFilter(option)}
+                                        >
+                                            {option}
+                                            <span className="text-sm text-gray-500 mr-2">
+                                                ({count})
+                                            </span>
+                                        </div>
+                                        {index < filterOptions.length - 1 && (
+                                            <hr style={{ border: '1px solid #D9D9D9' }} />
+                                        )}
                                     </div>
-                                    {index < filterOptions.length - 1 && (
-                                        <hr style={{ border: '1px solid #D9D9D9' }} />
-                                    )}
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -361,7 +377,7 @@ export default function CustomObject() {
                                         <div className="hidden md:grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length + 1, 6)}, 1fr)` }}>
                                             {fields.slice(0, 5).map(field => (
                                                 <div key={field.id} className="text-right">
-                                                    {record[field.field_name] || '-'}
+                                                    {record.data?.[field.field_name] || '-'}
                                                 </div>
                                             ))}
                                             <div className="text-right">
@@ -423,10 +439,10 @@ export default function CustomObject() {
     );
 }
 
-function FieldPreview({ field }) {
+function FieldInput({ field, value, onChange }) {
     return (
         <div className="space-y-1">
-            <label className="text-sm font-medium flex items-center gap-2">
+            <label className="text-sm font-medium flex items-center gap-2" style={{ fontFamily: 'Heebo' }}>
                 {field.field_label}
                 {field.is_required && <span className="text-red-500">*</span>}
                 {field.is_read_only && <span className="text-xs text-gray-500">(לקריאה בלבד)</span>}
@@ -436,12 +452,18 @@ function FieldPreview({ field }) {
                 <Textarea 
                     placeholder={`הזן ${field.field_label}`}
                     disabled={field.is_read_only}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
                     className="text-right"
                 />
             )}
             
             {field.field_type === 'select' && (
-                <Select disabled={field.is_read_only}>
+                <Select 
+                    disabled={field.is_read_only}
+                    value={value}
+                    onValueChange={onChange}
+                >
                     <SelectTrigger>
                         <SelectValue placeholder={`בחר ${field.field_label}`} />
                     </SelectTrigger>
@@ -460,9 +482,10 @@ function FieldPreview({ field }) {
                     <input 
                         type="checkbox" 
                         disabled={field.is_read_only}
+                        checked={value === true}
+                        onChange={(e) => onChange(e.target.checked)}
                         className="w-4 h-4"
                     />
-                    <span className="text-sm text-gray-600">{field.field_label}</span>
                 </div>
             )}
             
@@ -471,13 +494,10 @@ function FieldPreview({ field }) {
                     type={field.field_type}
                     placeholder={`הזן ${field.field_label}`}
                     disabled={field.is_read_only}
-                    defaultValue={field.default_value || ''}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
                     className="text-right"
                 />
-            )}
-            
-            {field.is_tracked && (
-                <p className="text-xs text-gray-400">השדה מעוקב לשינויים</p>
             )}
         </div>
     );
@@ -487,11 +507,49 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({});
 
+    useEffect(() => {
+        // אתחל את הטופס עם ערכי ברירת מחדל
+        const initialData = {};
+        fields.forEach(field => {
+            if (field.default_value) {
+                initialData[field.field_name] = field.default_value;
+            }
+        });
+        setFormData(initialData);
+    }, [fields]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // כאן תתווסף הלוגיקה לשמירת הרשומה במסד הנתונים
-        alert('פיצ׳ר זה בפיתוח - יאפשר שמירת רשומות חדשות');
-        setIsOpen(false);
+        
+        // בדיקת שדות חובה
+        const missingFields = fields.filter(f => f.is_required && !formData[f.field_name]);
+        if (missingFields.length > 0) {
+            alert(`יש למלא את השדות הבאים: ${missingFields.map(f => f.field_label).join(', ')}`);
+            return;
+        }
+
+        try {
+            const user = await base44.auth.me();
+            await base44.entities.CustomRecord.create({
+                object_id: object.id,
+                data: formData,
+                sub_account_id: user?.sub_account_id
+            });
+            
+            onRecordCreated();
+            setIsOpen(false);
+            setFormData({});
+        } catch (error) {
+            console.error('שגיאה ביצירת רשומה:', error);
+            alert('שגיאה ביצירת הרשומה');
+        }
+    };
+
+    const updateField = (fieldName, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [fieldName]: value
+        }));
     };
 
     return (
@@ -506,22 +564,16 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {sections.map(section => {
-                        const sectionFields = fields.filter(f => f.section_id === section.id);
-                        
-                        return (
-                            <div key={section.id} className="border rounded-lg p-4">
-                                <h3 className="font-semibold mb-4" style={{ fontFamily: 'Heebo' }}>
-                                    {section.section_name}
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {sectionFields.map(field => (
-                                        <FieldPreview key={field.id} field={field} />
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {fields.map(field => (
+                            <FieldInput 
+                                key={field.id} 
+                                field={field} 
+                                value={formData[field.field_name] || ''}
+                                onChange={(value) => updateField(field.field_name, value)}
+                            />
+                        ))}
+                    </div>
                     
                     <div className="flex justify-end gap-3 pt-4 border-t">
                         <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
