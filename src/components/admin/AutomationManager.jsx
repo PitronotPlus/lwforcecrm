@@ -599,22 +599,42 @@ export default function AutomationManager() {
 
   return (
     <div className="space-y-6">
-      {/* הסבר CRON Job */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold text-blue-900 mb-1">איך עובדות האוטומציות?</h3>
-              <p className="text-sm text-blue-800">
-                מערכת האוטומציות פועלת ברקע באמצעות Cron Jobs - משימות מתוזמנות שבודקות כל כמה דקות אם יש טריגרים שהופעלו (לקוח חדש, שינוי סטטוס וכו').
-                כאשר טריגר מתקיים, המערכת מבצעת את כל השלבים שהגדרת באוטומציה בזה אחר זה, כולל המתנות בין שלבים.
-              </p>
-              <ul className="text-sm text-blue-700 mt-2 list-disc list-inside space-y-1">
-                <li>הבדיקות מתבצעות אוטומטית כל 5 דקות</li>
-                <li>כל אוטומציה רצה בנפרד ולא משפיעה על אחרות</li>
-                <li>ניתן לעקוב אחר ביצוע בלשונית "היסטוריה"</li>
-              </ul>
+      {/* הסבר והגדרת CRON Job */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Clock className="w-6 h-6 text-blue-600 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-bold text-blue-900 mb-2 text-lg">🔄 הגדרת Cron Job - חובה להפעלת אוטומציות!</h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  <strong>חשוב:</strong> כדי שהאוטומציות יעבדו ברקע גם כשלא מחוברים למערכת, יש צורך בשירות חיצוני שיפעיל את הקוד כל כמה דקות.
+                </p>
+                
+                <div className="bg-white rounded-lg p-4 space-y-3 border border-blue-200">
+                  <h4 className="font-semibold text-blue-900">📋 הוראות הגדרה ב-cron-job.org:</h4>
+                  <ol className="text-sm text-gray-800 space-y-2 list-decimal list-inside">
+                    <li>היכנס לאתר <a href="https://cron-job.org" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold">cron-job.org</a> והירשם (חינם)</li>
+                    <li>לחץ על "Create cronjob"</li>
+                    <li>העתק את ה-URL הבא והדבק בשדה URL:</li>
+                  </ol>
+                  
+                  <div className="bg-gray-100 p-3 rounded border border-gray-300 font-mono text-sm break-all" dir="ltr">
+                    {window.location.origin}/api/functions/runAutomations
+                  </div>
+                  
+                  <ol start="4" className="text-sm text-gray-800 space-y-2 list-decimal list-inside">
+                    <li>הגדר את התדירות: <strong>כל 5 דקות</strong> (*/5 * * * *)</li>
+                    <li>שמור והפעל את ה-Cron Job</li>
+                  </ol>
+                  
+                  <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mt-3">
+                    <p className="text-sm text-yellow-800">
+                      ⚠️ <strong>ללא הגדרה זו האוטומציות לא יפעלו!</strong> המערכת זקוקה לקריאה חיצונית כל 5 דקות.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
