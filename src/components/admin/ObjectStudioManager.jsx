@@ -534,12 +534,14 @@ function ObjectEditorCard({ object, onClose }) {
     );
 }
 
-function CreateSectionModal({ objectId, onSectionCreated, children }) {
+function CreateSectionModal({ objectId, fields, onSectionCreated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         section_name: '',
+        filter_field_name: '',
+        filter_value: '',
         order_index: 0,
-        is_collapsed_by_default: false
+        color: '#3568AE'
     });
 
     const handleSubmit = async (e) => {
@@ -551,7 +553,7 @@ function CreateSectionModal({ objectId, onSectionCreated, children }) {
             });
             onSectionCreated();
             setIsOpen(false);
-            setFormData({ section_name: '', order_index: 0, is_collapsed_by_default: false });
+            setFormData({ section_name: '', filter_field_name: '', filter_value: '', order_index: 0, color: '#3568AE' });
         } catch (error) {
             console.error('שגיאה ביצירת מקטע:', error);
             alert('שגיאה ביצירת המקטע');
@@ -565,7 +567,7 @@ function CreateSectionModal({ objectId, onSectionCreated, children }) {
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle style={{ fontFamily: 'Heebo' }}>יצירת מקטע חדש</DialogTitle>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>יצירת מקטע סיידבר</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -574,8 +576,43 @@ function CreateSectionModal({ objectId, onSectionCreated, children }) {
                             required
                             value={formData.section_name}
                             onChange={(e) => setFormData({...formData, section_name: e.target.value})}
-                            placeholder="לדוגמה: פרטי מתעניין"
+                            placeholder="לדוגמה: ליד, פולואפ"
                             className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שדה לסינון</label>
+                        <select
+                            value={formData.filter_field_name}
+                            onChange={(e) => setFormData({...formData, filter_field_name: e.target.value})}
+                            className="w-full p-2 border rounded-md text-right"
+                        >
+                            <option value="">ללא סינון</option>
+                            {fields.map(f => (
+                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {formData.filter_field_name && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">ערך לסינון</label>
+                            <Input
+                                value={formData.filter_value}
+                                onChange={(e) => setFormData({...formData, filter_value: e.target.value})}
+                                placeholder="לדוגמה: ליד"
+                                className="text-right"
+                            />
+                        </div>
+                    )}
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">צבע</label>
+                        <Input
+                            type="color"
+                            value={formData.color}
+                            onChange={(e) => setFormData({...formData, color: e.target.value})}
                         />
                     </div>
 
@@ -603,20 +640,24 @@ function CreateSectionModal({ objectId, onSectionCreated, children }) {
     );
 }
 
-function EditSectionModal({ section, onSectionUpdated, children }) {
+function EditSectionModal({ section, fields, onSectionUpdated, children }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         section_name: section?.section_name || '',
+        filter_field_name: section?.filter_field_name || '',
+        filter_value: section?.filter_value || '',
         order_index: section?.order_index || 0,
-        is_collapsed_by_default: section?.is_collapsed_by_default || false
+        color: section?.color || '#3568AE'
     });
 
     useEffect(() => {
         if (section) {
             setFormData({
                 section_name: section.section_name,
+                filter_field_name: section.filter_field_name || '',
+                filter_value: section.filter_value || '',
                 order_index: section.order_index || 0,
-                is_collapsed_by_default: section.is_collapsed_by_default || false
+                color: section.color || '#3568AE'
             });
         }
     }, [section]);
@@ -640,7 +681,7 @@ function EditSectionModal({ section, onSectionUpdated, children }) {
             </DialogTrigger>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle style={{ fontFamily: 'Heebo' }}>עריכת מקטע</DialogTitle>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>עריכת מקטע סיידבר</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -650,6 +691,40 @@ function EditSectionModal({ section, onSectionUpdated, children }) {
                             value={formData.section_name}
                             onChange={(e) => setFormData({...formData, section_name: e.target.value})}
                             className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שדה לסינון</label>
+                        <select
+                            value={formData.filter_field_name}
+                            onChange={(e) => setFormData({...formData, filter_field_name: e.target.value})}
+                            className="w-full p-2 border rounded-md text-right"
+                        >
+                            <option value="">ללא סינון</option>
+                            {fields.map(f => (
+                                <option key={f.id} value={f.field_name}>{f.field_label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {formData.filter_field_name && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">ערך לסינון</label>
+                            <Input
+                                value={formData.filter_value}
+                                onChange={(e) => setFormData({...formData, filter_value: e.target.value})}
+                                className="text-right"
+                            />
+                        </div>
+                    )}
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">צבע</label>
+                        <Input
+                            type="color"
+                            value={formData.color}
+                            onChange={(e) => setFormData({...formData, color: e.target.value})}
                         />
                     </div>
 
