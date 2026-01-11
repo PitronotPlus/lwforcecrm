@@ -465,7 +465,7 @@ export default function AutomationManager() {
                 ) : (
                   integrations.map((int) => (
                     <SelectItem key={int.id} value={int.id}>
-                      {int.integration_name}
+                      {int.name}
                     </SelectItem>
                   ))
                 )}
