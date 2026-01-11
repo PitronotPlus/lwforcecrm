@@ -122,7 +122,8 @@ export const PERMISSION_LABELS = {
     
     // סטודיו דפים
     manage_custom_objects: 'ניהול דפים מותאמים אישית',
-    create_custom_pages: 'יצירת דפים חדשים'
+    create_custom_pages: 'יצירת דפים חדשים',
+    add_custom_records: 'הוספת רשומות בדפים מותאמים'
 };
 
 // קטגוריות הרשאות

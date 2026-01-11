@@ -308,6 +308,12 @@ export default function PermissionsManager() {
                     <div className="flex items-center gap-3">
                         <Badge className={currentRole?.color}>{currentRole?.label}</Badge>
                         <span className="text-gray-500">- הרשאות מפורטות</span>
+                        {selectedRole === 'admin' && (
+                            <Badge className="bg-yellow-100 text-yellow-800">
+                                <Info className="w-3 h-3 ml-1" />
+                                כל ההרשאות פעילות קבוע
+                            </Badge>
+                        )}
                     </div>
                 </CardHeader>
                 <CardContent>
