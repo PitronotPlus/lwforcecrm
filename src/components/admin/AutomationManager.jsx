@@ -443,64 +443,38 @@ export default function AutomationManager() {
 
     switch (triggerType) {
       case 'integration_webhook':
-        const popularIntegrations = [
-          { id: 'make', name: 'Make (Integromat)' },
-          { id: 'zapier', name: 'Zapier' },
-          { id: 'n8n', name: 'n8n' },
-          { id: 'pabbly', name: 'Pabbly Connect' },
-          { id: 'webhook_general', name: 'Webhook כללי' }
-        ];
-        
         return (
-          <div className="space-y-3">
-            <div>
-              <Label>בחר אינטגרציה</Label>
-              <Select
-                value={formData.trigger_config.integration_source || formData.trigger_config.integration_id || ''}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    trigger_config: { 
-                      ...formData.trigger_config, 
-                      integration_source: value,
-                      integration_id: value 
-                    }
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר מקור אינטגרציה" />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500">🔌 אינטגרציות פופולריות</div>
-                  {popularIntegrations.map((int) => (
+          <div>
+            <Label>אינטגרציה פעילה</Label>
+            <Select
+              value={formData.trigger_config.integration_id || ''}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  trigger_config: { ...formData.trigger_config, integration_id: value }
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="בחר אינטגרציה" />
+              </SelectTrigger>
+              <SelectContent>
+                {integrations.length === 0 ? (
+                  <SelectItem value={null} disabled>אין אינטגרציות פעילות - הגדר אותן בניהול מערכת</SelectItem>
+                ) : (
+                  integrations.map((int) => (
                     <SelectItem key={int.id} value={int.id}>
-                      {int.name}
+                      {int.integration_name}
                     </SelectItem>
-                  ))}
-                  
-                  {integrations.length > 0 && (
-                    <>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 border-t mt-1 pt-2">
-                        ⚙️ אינטגרציות מוגדרות במערכת
-                      </div>
-                      {integrations.map((int) => (
-                        <SelectItem key={int.id} value={int.id}>
-                          {int.integration_name}
-                        </SelectItem>
-                      ))}
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="bg-blue-50 border border-blue-200 rounded p-3">
-              <p className="text-xs text-blue-800">
-                💡 <strong>טיפ:</strong> אם אתה משתמש ב-Make, Zapier או כל אינטגרציה אחרת שלא מוגדרת במערכת, 
-                בחר את האפשרות המתאימה מהרשימה. האוטומציה תופעל כאשר הם ישלחו ליד חדש למערכת.
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {integrations.length === 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                💡 הוסף אינטגרציות דרך ניהול מערכת → אינטגרציות זמינות
               </p>
-            </div>
+            )}
           </div>
         );
 
