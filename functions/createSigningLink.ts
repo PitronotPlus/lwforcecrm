@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
         const signedDocument = await base44.entities.SignedDocument.create({
             template_id: templateId,
-            lead_id: clientId,
+            lead_id: clientId || client.id,
             status: 'created',
             signing_token: signingToken
         });
