@@ -240,6 +240,19 @@ export default function Layout({ children, currentPageName }) {
         );
     }
 
+    // בדוק אם זה דף חתימה - אם כן, הצג רק את התוכן ללא Layout
+    const isSigningPage = currentPageName === 'SignDocument';
+    if (isSigningPage) {
+        return (
+            <div className="min-h-screen" style={{ 
+                fontFamily: 'Heebo, -apple-system, BlinkMacSystemFont, sans-serif',
+                direction: 'rtl'
+            }}>
+                {children}
+            </div>
+        );
+    }
+
     const handleLogout = async () => {
         try {
             const { base44 } = await import("@/api/base44Client");
