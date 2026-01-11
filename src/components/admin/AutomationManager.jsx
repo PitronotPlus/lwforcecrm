@@ -438,6 +438,8 @@ export default function AutomationManager() {
 
   const renderTriggerConfig = () => {
     const triggerType = formData.trigger_type;
+    const statusOptions = clientSettings?.status_options || ['ליד', 'פולואפ', 'לקוח', 'לא נסגר'];
+    const sourceOptions = clientSettings?.source_options || [];
 
     switch (triggerType) {
       case 'integration_webhook':
@@ -457,13 +459,75 @@ export default function AutomationManager() {
                 <SelectValue placeholder="בחר אינטגרציה" />
               </SelectTrigger>
               <SelectContent>
-                {integrations.map((int) => (
-                  <SelectItem key={int.id} value={int.id}>
-                    {int.integration_name}
+                {integrations.length === 0 ? (
+                  <SelectItem value={null} disabled>אין אינטגרציות פעילות</SelectItem>
+                ) : (
+                  integrations.map((int) => (
+                    <SelectItem key={int.id} value={int.id}>
+                      {int.integration_name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        );
+
+      case 'lead_created_by_source':
+        return (
+          <div>
+            <Label>מקור הגעה</Label>
+            <Select
+              value={formData.trigger_config.source || ''}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  trigger_config: { ...formData.trigger_config, source: value }
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="בחר מקור הגעה" />
+              </SelectTrigger>
+              <SelectContent>
+                {sourceOptions.map((source) => (
+                  <SelectItem key={source} value={source}>
+                    {source}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        );
+
+      case 'document_signed':
+        return (
+          <div>
+            <Label>תבנית מסמך (אופציונלי)</Label>
+            <Select
+              value={formData.trigger_config.template_id || ''}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  trigger_config: { ...formData.trigger_config, template_id: value }
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="כל התבניות" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>כל התבניות</SelectItem>
+                {documentTemplates.map((templateId) => (
+                  <SelectItem key={templateId} value={templateId}>
+                    {templateId}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              אם לא תבחר תבנית ספציפית, האוטומציה תרוץ על כל מסמך שנחתם
+            </p>
           </div>
         );
 
@@ -486,9 +550,11 @@ export default function AutomationManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={null}>כל סטטוס</SelectItem>
-                  <SelectItem value="ליד">ליד</SelectItem>
-                  <SelectItem value="פולואפ">פולואפ</SelectItem>
-                  <SelectItem value="לקוח">לקוח</SelectItem>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -507,10 +573,11 @@ export default function AutomationManager() {
                   <SelectValue placeholder="בחר סטטוס יעד" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ליד">ליד</SelectItem>
-                  <SelectItem value="פולואפ">פולואפ</SelectItem>
-                  <SelectItem value="לקוח">לקוח</SelectItem>
-                  <SelectItem value="לא נסגר">לא נסגר</SelectItem>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
