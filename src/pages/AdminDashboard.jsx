@@ -17,6 +17,7 @@ import MenuEditor from "../components/admin/MenuEditor";
 import CustomFieldsManager from "../components/admin/CustomFieldsManager";
 import InviteUserModal from "../components/admin/InviteUserModal";
 import ObjectStudioManager from "../components/admin/ObjectStudioManager";
+import AutomationManager from "../components/admin/AutomationManager";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -112,6 +113,8 @@ export default function AdminDashboard() {
                 return <CustomFieldsManager />;
             case 'objectStudio':
                 return <ObjectStudioManager />;
+            case 'automations':
+                return <AutomationManager />;
             case 'settings':
                 return <SystemSettings />;
             default:
@@ -288,6 +291,19 @@ export default function AdminDashboard() {
                         >
                             <Layers className="w-5 h-5" />
                             סטודיו דפים
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('automations')}
+                            className={`flex items-center gap-3 px-6 py-3 rounded-[15px] transition-all ${
+                                activeTab === 'automations' 
+                                    ? 'bg-[#3568AE] text-white' 
+                                    : 'text-[#484848] hover:bg-gray-100'
+                            }`}
+                            style={{ fontFamily: 'Heebo' }}
+                        >
+                            <Bot className="w-5 h-5" />
+                            אוטומציות
                         </button>
                         
                         <button
