@@ -257,7 +257,7 @@ function CreateObjectModal({ children, onObjectCreated }) {
 function ObjectEditorCard({ object, onClose }) {
     const [sections, setSections] = useState([]);
     const [fields, setFields] = useState([]);
-    const [expandedSections, setExpandedSections] = useState({});
+    const [activeTab, setActiveTab] = useState('fields');
 
     useEffect(() => {
         loadSectionsAndFields();
@@ -271,31 +271,15 @@ function ObjectEditorCard({ object, onClose }) {
             ]);
             setSections(sectionsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
             setFields(fieldsData.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
-            
-            // פתח את כל המקטעים כברירת מחדל
-            const expanded = {};
-            sectionsData.forEach(s => expanded[s.id] = true);
-            setExpandedSections(expanded);
         } catch (error) {
             console.error('שגיאה בטעינת מקטעים ושדות:', error);
         }
     };
 
-    const toggleSection = (sectionId) => {
-        setExpandedSections(prev => ({
-            ...prev,
-            [sectionId]: !prev[sectionId]
-        }));
-    };
-
     const handleDeleteSection = async (sectionId) => {
-        if (!confirm('האם למחוק את המקטע? כל השדות בתוכו יימחקו.')) return;
+        if (!confirm('האם למחוק את המקטע? זה לא ימחק את השדות, רק את המקטע לתצוגה.')) return;
         
         try {
-            const sectionFields = fields.filter(f => f.section_id === sectionId);
-            for (const field of sectionFields) {
-                await base44.entities.ObjectField.delete(field.id);
-            }
             await base44.entities.ObjectSection.delete(sectionId);
             loadSectionsAndFields();
         } catch (error) {
@@ -326,102 +310,141 @@ function ObjectEditorCard({ object, onClose }) {
             </CardHeader>
             <CardContent className="space-y-6">
                 
-                {/* ניהול מקטעים */}
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>מקטעים</h3>
-                        <CreateSectionModal objectId={object.id} onSectionCreated={loadSectionsAndFields}>
-                            <Button size="sm" variant="outline">
-                                <Plus className="w-4 h-4 ml-2" />
-                                הוסף מקטע
-                            </Button>
-                        </CreateSectionModal>
-                    </div>
+                {/* Tabs */}
+                <div className="flex gap-2 border-b pb-2">
+                    <Button
+                        variant={activeTab === 'fields' ? 'default' : 'ghost'}
+                        onClick={() => setActiveTab('fields')}
+                        className={activeTab === 'fields' ? 'bg-[#3568AE] text-white' : ''}
+                    >
+                        שדות הרשומה
+                    </Button>
+                    <Button
+                        variant={activeTab === 'sections' ? 'default' : 'ghost'}
+                        onClick={() => setActiveTab('sections')}
+                        className={activeTab === 'sections' ? 'bg-[#3568AE] text-white' : ''}
+                    >
+                        מקטעים בתצוגה
+                    </Button>
+                </div>
 
-                    {sections.length === 0 ? (
-                        <p className="text-center py-8 text-gray-500">אין מקטעים עדיין. צור מקטע ראשון.</p>
-                    ) : (
-                        <div className="space-y-3">
-                            {sections.map(section => {
-                                const sectionFields = fields.filter(f => f.section_id === section.id);
-                                const isExpanded = expandedSections[section.id];
-                                
-                                return (
-                                    <div key={section.id} className="border rounded-lg p-4 bg-gray-50">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                                <button onClick={() => toggleSection(section.id)}>
-                                                    {isExpanded ? (
-                                                        <ChevronUp className="w-5 h-5 text-gray-600" />
-                                                    ) : (
-                                                        <ChevronDown className="w-5 h-5 text-gray-600" />
-                                                    )}
-                                                </button>
-                                                <h4 className="font-semibold" style={{ fontFamily: 'Heebo' }}>
-                                                    {section.section_name}
-                                                </h4>
-                                                <Badge variant="outline">{sectionFields.length} שדות</Badge>
+                {/* שדות הרשומה */}
+                {activeTab === 'fields' && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>שדות הרשומה</h3>
+                                <p className="text-sm text-gray-500">הגדר את כל השדות שיהיו ברשומות של הדף</p>
+                            </div>
+                            <CreateFieldModal 
+                                objectId={object.id}
+                                onFieldCreated={loadSectionsAndFields}
+                            >
+                                <Button size="sm" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                    <Plus className="w-4 h-4 ml-2" />
+                                    הוסף שדה
+                                </Button>
+                            </CreateFieldModal>
+                        </div>
+
+                        {fields.length === 0 ? (
+                            <p className="text-center py-8 text-gray-500">אין שדות עדיין. צור שדה ראשון.</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {fields.map(field => (
+                                    <div key={field.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:border-gray-300 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div>
+                                                <p className="font-medium">{field.field_label}</p>
+                                                <p className="text-sm text-gray-500">{field.field_name} • {field.field_type}</p>
                                             </div>
                                             <div className="flex gap-2">
-                                                <CreateFieldModal 
-                                                    objectId={object.id} 
-                                                    sectionId={section.id}
-                                                    onFieldCreated={loadSectionsAndFields}
-                                                >
-                                                    <Button size="sm" variant="ghost">
-                                                        <Plus className="w-4 h-4 ml-1" />
-                                                        שדה
-                                                    </Button>
-                                                </CreateFieldModal>
-                                                <Button 
-                                                    size="sm" 
-                                                    variant="ghost"
-                                                    onClick={() => handleDeleteSection(section.id)}
-                                                    className="text-red-600"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        {isExpanded && (
-                                            <div className="mt-4 space-y-2 pr-7">
-                                                {sectionFields.length === 0 ? (
-                                                    <p className="text-sm text-gray-500 text-center py-4">אין שדות במקטע זה</p>
-                                                ) : (
-                                                    sectionFields.map(field => (
-                                                        <div key={field.id} className="flex items-center justify-between p-3 bg-white rounded border">
-                                                            <div className="flex items-center gap-3">
-                                                                <div>
-                                                                    <p className="font-medium text-sm">{field.field_label}</p>
-                                                                    <p className="text-xs text-gray-500">{field.field_name} • {field.field_type}</p>
-                                                                </div>
-                                                                {field.is_required && (
-                                                                    <Badge variant="outline" className="text-xs">חובה</Badge>
-                                                                )}
-                                                                {field.is_read_only && (
-                                                                    <Badge variant="outline" className="text-xs">קריאה בלבד</Badge>
-                                                                )}
-                                                            </div>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={() => handleDeleteField(field.id)}
-                                                                className="text-red-600"
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    ))
+                                                {field.is_required && (
+                                                    <Badge variant="outline" className="text-xs">חובה</Badge>
+                                                )}
+                                                {field.is_read_only && (
+                                                    <Badge variant="outline" className="text-xs">קריאה בלבד</Badge>
+                                                )}
+                                                {field.is_tracked && (
+                                                    <Badge variant="outline" className="text-xs">מעוקב</Badge>
                                                 )}
                                             </div>
-                                        )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <EditFieldModal 
+                                                field={field}
+                                                onFieldUpdated={loadSectionsAndFields}
+                                            >
+                                                <Button size="sm" variant="ghost">
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                            </EditFieldModal>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDeleteField(field.id)}
+                                                className="text-red-600"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* מקטעים בתצוגה */}
+                {activeTab === 'sections' && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 className="text-lg font-semibold" style={{ fontFamily: 'Heebo' }}>מקטעים בתצוגה</h3>
+                                <p className="text-sm text-gray-500">הגדר איך לארגן את השדות בתצוגת הרשומה</p>
+                            </div>
+                            <CreateSectionModal objectId={object.id} onSectionCreated={loadSectionsAndFields}>
+                                <Button size="sm" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                    <Plus className="w-4 h-4 ml-2" />
+                                    הוסף מקטע
+                                </Button>
+                            </CreateSectionModal>
                         </div>
-                    )}
-                </div>
+
+                        {sections.length === 0 ? (
+                            <p className="text-center py-8 text-gray-500">אין מקטעים עדיין. צור מקטע ראשון.</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {sections.map(section => (
+                                    <div key={section.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:border-gray-300 transition-colors">
+                                        <div>
+                                            <p className="font-medium">{section.section_name}</p>
+                                            <p className="text-sm text-gray-500">סדר: {section.order_index || 0}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <EditSectionModal 
+                                                section={section}
+                                                onSectionUpdated={loadSectionsAndFields}
+                                            >
+                                                <Button size="sm" variant="ghost">
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                            </EditSectionModal>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => handleDeleteSection(section.id)}
+                                                className="text-red-600"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
@@ -488,6 +511,266 @@ function CreateSectionModal({ objectId, onSectionCreated, children }) {
                         </Button>
                         <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
                             צור מקטע
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function EditSectionModal({ section, onSectionUpdated, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        section_name: section?.section_name || '',
+        order_index: section?.order_index || 0,
+        is_collapsed_by_default: section?.is_collapsed_by_default || false
+    });
+
+    useEffect(() => {
+        if (section) {
+            setFormData({
+                section_name: section.section_name,
+                order_index: section.order_index || 0,
+                is_collapsed_by_default: section.is_collapsed_by_default || false
+            });
+        }
+    }, [section]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await base44.entities.ObjectSection.update(section.id, formData);
+            onSectionUpdated();
+            setIsOpen(false);
+        } catch (error) {
+            console.error('שגיאה בעדכון מקטע:', error);
+            alert('שגיאה בעדכון המקטע');
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>עריכת מקטע</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שם המקטע *</label>
+                        <Input
+                            required
+                            value={formData.section_name}
+                            onChange={(e) => setFormData({...formData, section_name: e.target.value})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סדר תצוגה</label>
+                        <Input
+                            type="number"
+                            value={formData.order_index}
+                            onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            ביטול
+                        </Button>
+                        <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            עדכן מקטע
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function EditFieldModal({ field, onFieldUpdated, children }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        field_label: field?.field_label || '',
+        field_name: field?.field_name || '',
+        field_type: field?.field_type || 'text',
+        is_required: field?.is_required || false,
+        is_read_only: field?.is_read_only || false,
+        is_tracked: field?.is_tracked || false,
+        default_value: field?.default_value || '',
+        select_options: field?.select_options || [],
+        order_index: field?.order_index || 0,
+        column_index: field?.column_index || 0
+    });
+
+    const [optionsText, setOptionsText] = useState('');
+
+    useEffect(() => {
+        if (field) {
+            setFormData({
+                field_label: field.field_label,
+                field_name: field.field_name,
+                field_type: field.field_type,
+                is_required: field.is_required || false,
+                is_read_only: field.is_read_only || false,
+                is_tracked: field.is_tracked || false,
+                default_value: field.default_value || '',
+                select_options: field.select_options || [],
+                order_index: field.order_index || 0,
+                column_index: field.column_index || 0
+            });
+            setOptionsText((field.select_options || []).join('\n'));
+        }
+    }, [field]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const fieldData = { ...formData };
+
+            if (formData.field_type === 'select' && optionsText) {
+                fieldData.select_options = optionsText.split('\n').filter(o => o.trim());
+            }
+
+            await base44.entities.ObjectField.update(field.id, fieldData);
+            onFieldUpdated();
+            setIsOpen(false);
+        } catch (error) {
+            console.error('שגיאה בעדכון שדה:', error);
+            alert('שגיאה בעדכון השדה');
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {children}
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle style={{ fontFamily: 'Heebo' }}>עריכת שדה</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שם השדה (תצוגה) *</label>
+                        <Input
+                            required
+                            value={formData.field_label}
+                            onChange={(e) => setFormData({...formData, field_label: e.target.value})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">שם השדה במערכת (באנגלית) *</label>
+                        <Input
+                            required
+                            value={formData.field_name}
+                            onChange={(e) => setFormData({...formData, field_name: e.target.value})}
+                            className="text-right"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">סוג שדה *</label>
+                        <select
+                            required
+                            value={formData.field_type}
+                            onChange={(e) => setFormData({...formData, field_type: e.target.value})}
+                            className="w-full p-2 border rounded-md text-right"
+                        >
+                            <option value="text">טקסט</option>
+                            <option value="textarea">תיבת טקסט</option>
+                            <option value="number">מספר</option>
+                            <option value="date">תאריך</option>
+                            <option value="datetime">תאריך ושעה</option>
+                            <option value="select">בחירה מרשימה</option>
+                            <option value="checkbox">תיבת סימון</option>
+                            <option value="email">דואר אלקטרוני</option>
+                            <option value="phone">טלפון</option>
+                            <option value="url">כתובת אינטרנט</option>
+                        </select>
+                    </div>
+
+                    {formData.field_type === 'select' && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">אפשרויות (שורה אחת לכל אפשרות)</label>
+                            <Textarea
+                                value={optionsText}
+                                onChange={(e) => setOptionsText(e.target.value)}
+                                placeholder="אופציה 1&#10;אופציה 2&#10;אופציה 3"
+                                className="text-right"
+                                rows={4}
+                            />
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">עמודה</label>
+                            <select
+                                value={formData.column_index}
+                                onChange={(e) => setFormData({...formData, column_index: parseInt(e.target.value)})}
+                                className="w-full p-2 border rounded-md text-right"
+                            >
+                                <option value={0}>עמודה ימין</option>
+                                <option value={1}>עמודה שמאל</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">סדר</label>
+                            <Input
+                                type="number"
+                                value={formData.order_index}
+                                onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value) || 0})}
+                                className="text-right"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.is_required}
+                                onChange={(e) => setFormData({...formData, is_required: e.target.checked})}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">שדה חובה</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.is_read_only}
+                                onChange={(e) => setFormData({...formData, is_read_only: e.target.checked})}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">שדה לקריאה בלבד (נעול)</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.is_tracked}
+                                onChange={(e) => setFormData({...formData, is_tracked: e.target.checked})}
+                                className="w-4 h-4"
+                            />
+                            <span className="text-sm">עקוב אחר שינויים בשדה זה</span>
+                        </label>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                        <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                            ביטול
+                        </Button>
+                        <Button type="submit" className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                            עדכן שדה
                         </Button>
                     </div>
                 </form>
