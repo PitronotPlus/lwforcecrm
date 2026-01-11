@@ -455,7 +455,8 @@ export default function CustomObject() {
                             <div className="space-y-2">
                                 {/* Table Header - Desktop Only */}
                                 <div className="hidden md:block bg-white rounded-[15px] p-6 mb-2">
-                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
+                                    <div className="grid gap-4 items-center text-[16px] font-bold text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `200px repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
+                                        <div className="text-right">משרד מקושר</div>
                                         {fields.slice(0, 5).map(field => (
                                             <div key={field.id} className="text-right">{field.field_label}</div>
                                         ))}
@@ -470,21 +471,20 @@ export default function CustomObject() {
                                 {paginatedRecords.map((record) => (
                                     <div key={record.id} className="bg-white rounded-[15px] p-3 md:p-6 hover:shadow-md transition-shadow">
                                         {/* Desktop Table Row */}
-                                                <div className="hidden md:block">
-                                                    {subAccounts.find(s => s.id === record.sub_account_id) && (
-                                                        <div className="mb-3 pb-2 border-b border-gray-200">
-                                                            <span className="text-xs font-medium text-gray-600">משרד מקושר: </span>
-                                                            <span className="text-sm font-bold text-[#3568AE]">
-                                                                {subAccounts.find(s => s.id === record.sub_account_id)?.name}
-                                                            </span>
+                                        <div className="hidden md:block">
+                                            <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `200px repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
+                                                <div className="text-right">
+                                                    {subAccounts.find(s => s.id === record.sub_account_id) ? (
+                                                        <div className="text-sm font-bold text-[#3568AE]" style={{ fontFamily: 'Heebo' }}>
+                                                            {subAccounts.find(s => s.id === record.sub_account_id)?.name}
                                                         </div>
-                                                    )}
-                                                    <div className="grid gap-4 items-center text-[16px] text-[#484848]" style={{ fontFamily: 'Heebo', gridTemplateColumns: `repeat(${Math.min(fields.length, 5)}, 1fr) auto` }}>
-                                                        {fields.slice(0, 5).map(field => (
-                                                            <div key={field.id} className="text-right">
-                                                                {record.data?.[field.field_name] || '-'}
-                                                            </div>
-                                                        ))}
+                                                    ) : '-'}
+                                                </div>
+                                                {fields.slice(0, 5).map(field => (
+                                                    <div key={field.id} className="text-right">
+                                                        {record.data?.[field.field_name] || '-'}
+                                                    </div>
+                                                ))}
                                                         <div className="text-right">
                                                             <div className="flex gap-2 justify-end">
                                                                 <ViewRecordModal
