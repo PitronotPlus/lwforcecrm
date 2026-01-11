@@ -70,8 +70,8 @@ export default function AutomationManager() {
         base44.entities.ClientSettings.list()
       ]);
       setAutomations(automationsData);
-      // סנן רק אינטגרציות פעילות
-      setIntegrations(integrationsData.filter(int => int.is_active === true));
+      // סנן רק אינטגרציות פעילות (status = active או connected)
+      setIntegrations(integrationsData.filter(int => ['active', 'connected'].includes(int.status)));
       setLogs(logsData);
       setClientSettings(clientSettingsData[0] || {});
       
