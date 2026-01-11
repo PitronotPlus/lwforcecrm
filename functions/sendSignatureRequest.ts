@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
             template_id: templateId,
             lead_id: leadId,
             status: 'sent',
-            signing_token: signingToken
+            signing_token: signingToken,
+            sub_account_id: user.sub_account_id
         });
 
         if (method === 'email') {
