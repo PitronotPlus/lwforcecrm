@@ -124,10 +124,10 @@ export default function DigitalSignatures() {
   const handleResendDocument = async (method) => {
     const doc = selectedDocumentForResend;
     const template = templates.find(t => t.id === doc.template_id);
-    const lead = leads.find(l => l.id === doc.lead_id);
+    const client = clients.find(c => c.id === doc.lead_id);
     
-    if (!template || !lead) {
-      alert('לא ניתן למצוא את פרטי התבנית או הליד');
+    if (!template || !client) {
+      alert('לא ניתן למצוא את פרטי התבנית או הלקוח');
       return;
     }
 
@@ -314,7 +314,7 @@ export default function DigitalSignatures() {
                 ) : (
                   signedDocuments.map(doc => {
                     const template = templates.find(t => t.id === doc.template_id);
-                    const lead = leads.find(l => l.id === doc.lead_id);
+                    const client = clients.find(c => c.id === doc.lead_id);
                     const canResend = doc.status !== 'signed' && doc.status !== 'voided';
                     
                     return (
@@ -436,7 +436,7 @@ export default function DigitalSignatures() {
       {showSendModal && (
         <SendModal
           template={selectedTemplate}
-          leads={leads}
+          leads={leadsFormatted}
           onSend={handleSendRequest}
           onCreateLink={handleCreateLink}
           onCancel={() => setShowSendModal(false)}
@@ -456,8 +456,8 @@ export default function DigitalSignatures() {
                   <h4 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">פרטי המסמך:</h4>
                   <div className="text-xs sm:text-sm text-blue-800 space-y-1">
                     <p><strong>תבנית:</strong> {templates.find(t => t.id === selectedDocumentForResend.template_id)?.name}</p>
-                    <p><strong>נמען:</strong> {leads.find(l => l.id === selectedDocumentForResend.lead_id)?.first_name} {leads.find(l => l.id === selectedDocumentForResend.lead_id)?.last_name}</p>
-                    <p className="break-all"><strong>אימייל:</strong> {leads.find(l => l.id === selectedDocumentForResend.lead_id)?.email}</p>
+                    <p><strong>נמען:</strong> {clients.find(c => c.id === selectedDocumentForResend.lead_id)?.full_name}</p>
+                    <p className="break-all"><strong>אימייל:</strong> {clients.find(c => c.id === selectedDocumentForResend.lead_id)?.email}</p>
                   </div>
                 </div>
                 <p className="text-sm sm:text-base text-gray-700 mb-4">איך תרצה לשלוח שוב את המסמך?</p>

@@ -31,13 +31,12 @@ Deno.serve(async (req) => {
 
         const template = await base44.entities.DigitalSignatureTemplate.get(document.template_id);
         
-        await base44.entities.LeadActivityLog.create({
-            lead_id: document.lead_id,
-            activity_type: 'interaction_added',
-            description: `בקשת חתימה בוטלה: "${template?.name || 'מסמך'}"`,
-            source: 'user',
-            performed_by: user.email,
-            timestamp: new Date().toISOString(),
+        await base44.entities.CommunicationLog.create({
+            client_id: document.lead_id,
+            type: 'note',
+            direction: 'outgoing',
+            content: `בקשת חתימה בוטלה: "${template?.name || 'מסמך'}"`,
+            status: 'logged'
         });
 
         return new Response(JSON.stringify({ success: true }), { status: 200 });

@@ -66,13 +66,10 @@ Deno.serve(async (req) => {
                 </div>
             `;
             
-            await base44.functions.invoke('sendEmail', {
+            await base44.integrations.Core.SendEmail({
                 to: lead.email,
-                name: `${lead.first_name || ''} ${lead.last_name || ''}`.trim(),
                 subject: `תזכורת: ${template.email_subject || template.name}`,
-                html: emailHtml,
-                userIdForCredits: user.id,
-                includeFooter: false
+                body: emailHtml
             });
 
             await base44.entities.LeadActivityLog.create({

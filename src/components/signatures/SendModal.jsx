@@ -74,7 +74,7 @@ export default function SendModal({ template, leads, onSend, onCreateLink, onCan
                             <SelectContent>
                                 {leads.map(lead => (
                                     <SelectItem key={lead.id} value={lead.id}>
-                                        {lead.first_name} {lead.last_name} ({lead.email || 'אין מייל'})
+                                        {lead.full_name || `${lead.first_name} ${lead.last_name}`} ({lead.email || 'אין מייל'})
                                     </SelectItem>
                                 ))}
                             </SelectContent>
