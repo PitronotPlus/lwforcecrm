@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { 
     Shield, Users, CheckSquare, UserCheck, Briefcase, 
-    DollarSign, BarChart3, Settings, Info, Save
+    DollarSign, BarChart3, Settings, Info, Save, Layers
 } from 'lucide-react';
 import { PERMISSION_LABELS } from '@/components/permissions/PermissionsContext';
 
@@ -59,6 +59,13 @@ const PERMISSION_GROUPS = {
             permissions: [
                 'view_reports', 'edit_system_settings', 'manage_permissions',
                 'manage_custom_fields'
+            ]
+        },
+        studio: {
+            label: 'סטודיו דפים',
+            icon: Layers,
+            permissions: [
+                'manage_custom_objects', 'create_custom_pages'
             ]
         }
     },
@@ -182,7 +189,7 @@ const DEFAULT_PERMISSIONS = {
         view_all_cases: true, edit_all_cases: true,
         view_all_finances: true, edit_finances: true,
         view_reports: true, edit_system_settings: true, manage_permissions: true,
-        manage_custom_fields: true
+        manage_custom_fields: true, manage_custom_objects: true, create_custom_pages: true
     },
     owner: {
         view_sub_account_users: true, edit_sub_account_users: true,
