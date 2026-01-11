@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Loader2, AlertTriangle, PartyPopper, RotateCw, Lock } from 'lucide-react';
+import { Loader2, AlertTriangle, PartyPopper, RotateCw, Lock, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -238,6 +238,46 @@ export default function SignDocument() {
   }
 
   const { template, lead } = data || {};
+  const [selectedFieldId, setSelectedFieldId] = useState(null);
+
+  const isFieldFilled = (field) => {
+    const value = fieldValues[field.id];
+    if (field.type === 'checkbox') return value === true;
+    return value && value.toString().trim() !== '';
+  };
+
+  const renderFieldOverlay = (field) => {
+    if (!field.x || !field.y || !field.width || !field.height) return null;
+    
+    const isFilled = isFieldFilled(field);
+    const isRequired = field.required;
+    
+    return (
+      <div
+        key={field.id}
+        className="absolute cursor-pointer transition-all border-2 flex items-start justify-start p-1"
+        style={{
+          left: `${field.x}%`,
+          top: `${field.y}%`,
+          width: `${field.width}%`,
+          height: `${field.height}%`,
+          borderColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af'),
+          backgroundColor: isFilled ? 'rgba(34, 197, 94, 0.1)' : (isRequired ? 'rgba(220, 38, 38, 0.1)' : 'rgba(156, 163, 175, 0.1)'),
+        }}
+        onClick={() => setSelectedFieldId(field.id)}
+      >
+        <div className="rounded-full p-0.5" style={{
+          backgroundColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af')
+        }}>
+          {isFilled ? (
+            <Check className="w-3 h-3 text-white" />
+          ) : (
+            <span className="text-white text-xs font-bold">*</span>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   if (isSuccess) {
     return (
@@ -297,10 +337,19 @@ export default function SignDocument() {
       {/* Main Content */}
       <main className="flex-1 overflow-hidden flex gap-4 p-4">
         {/* Document */}
-        <div className="flex-1 overflow-y-auto bg-white rounded-lg shadow-md p-4">
-          {template?.page_image_urls?.map((url, index) => (
-            <img key={index} src={url} alt={`עמוד ${index + 1}`} className="w-full mb-4 last:mb-0 shadow" />
-          ))}
+        <div className="flex-1 overflow-y-auto bg-gray-200 rounded-lg shadow-md p-4">
+          <div className="max-w-4xl mx-auto">
+            {template?.page_image_urls?.map((pageIndex, imgIndex) => (
+              <div key={imgIndex} className="relative bg-white shadow-lg mb-4 last:mb-0">
+                <img src={pageIndex} alt={`עמוד ${imgIndex + 1}`} className="w-full" />
+                {/* Field Overlays */}
+                {template?.fields?.map(field => {
+                  if (field.page !== (imgIndex + 1)) return null;
+                  return renderFieldOverlay(field);
+                })}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Sidebar - Fields */}
@@ -316,24 +365,36 @@ export default function SignDocument() {
             )}
 
             {template?.fields?.map(field => {
+              const isSelected = field.id === selectedFieldId;
+              const isFilled = isFieldFilled(field);
+
               if (field.type === 'text' || field.type === 'date') {
                 return (
-                  <div key={field.id} className="space-y-1">
-                    <Label htmlFor={field.id} className="text-xs font-semibold text-gray-700">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                  <div 
+                    key={field.id} 
+                    className={`space-y-1 p-2 rounded cursor-pointer transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    onClick={() => setSelectedFieldId(field.id)}
+                  >
+                    <Label htmlFor={field.id} className="text-xs font-semibold text-gray-700 flex items-center justify-between">
+                      <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+                      {isFilled && <Check className="w-3 h-3 text-green-600" />}
                     </Label>
                     <Input
                       id={field.id}
                       type={field.type === 'date' ? 'date' : 'text'}
                       value={fieldValues[field.id] || ''}
                       onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
-                      className="h-8 text-sm bg-gray-50 border-gray-300"
+                      className="h-8 text-sm bg-white border-gray-300"
                     />
                   </div>
                 );
               } else if (field.type === 'checkbox') {
                 return (
-                  <div key={field.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <div 
+                    key={field.id} 
+                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    onClick={() => setSelectedFieldId(field.id)}
+                  >
                     <Checkbox
                       id={field.id}
                       checked={fieldValues[field.id] === true}
@@ -346,9 +407,14 @@ export default function SignDocument() {
                 );
               } else if (field.type === 'signature') {
                 return (
-                  <div key={field.id} className="space-y-1">
-                    <Label className="text-xs font-semibold text-gray-700">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                  <div 
+                    key={field.id} 
+                    className={`space-y-1 p-2 rounded transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    onClick={() => setSelectedFieldId(field.id)}
+                  >
+                    <Label className="text-xs font-semibold text-gray-700 flex items-center justify-between">
+                      <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+                      {isFilled && <Check className="w-3 h-3 text-green-600" />}
                     </Label>
                     <InlineSignaturePad onSignatureChange={setSignatureData} />
                   </div>
