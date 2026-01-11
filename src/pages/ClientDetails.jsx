@@ -276,10 +276,6 @@ export default function ClientDetails() {
                                             <ExternalLink className="w-4 h-4 ml-2" />
                                             <span className="text-sm">שיווק</span>
                                         </TabsTrigger>
-                                        <TabsTrigger value="automation" className="justify-start h-auto py-3 px-4 rounded-lg border border-gray-300 hover:border-gray-700 data-[state=active]:bg-gray-700 data-[state=active]:text-white data-[state=active]:border-gray-700 data-[state=active]:shadow-md transition-all">
-                                            <Settings className="w-4 h-4 ml-2" />
-                                            <span className="text-sm">אוטומציות</span>
-                                        </TabsTrigger>
                                     </TabsList>
                                 </div>
                             </CardContent>
@@ -659,119 +655,7 @@ export default function ClientDetails() {
                             </div>
                         </TabsContent>
 
-                        {/* אוטומציות */}
-                        <TabsContent value="automation">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle style={{ fontFamily: 'Heebo' }}>הגדרות הודעות אוטומטיות</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                                        <label htmlFor="welcome-msg-toggle" className="text-sm font-medium" style={{ fontFamily: 'Heebo' }}>שליחת הודעת פתיחה אוטומטית לליד חדש</label>
-                                        <input
-                                            id="welcome-msg-toggle"
-                                            type="checkbox"
-                                            className="toggle-switch"
-                                            disabled={!isEditing}
-                                            checked={editForm.automation_settings?.send_welcome_message || false}
-                                            onChange={(e) => setEditForm({
-                                                ...editForm,
-                                                automation_settings: {
-                                                    ...editForm.automation_settings,
-                                                    send_welcome_message: e.target.checked
-                                                }
-                                            })}
-                                        />
-                                    </div>
 
-                                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                                        <label htmlFor="status-change-toggle" className="text-sm font-medium" style={{ fontFamily: 'Heebo' }}>שליחת הודעה אוטומטית בשינוי סטטוס</label>
-                                         <input
-                                            id="status-change-toggle"
-                                            type="checkbox"
-                                            className="toggle-switch"
-                                            disabled={!isEditing}
-                                            checked={editForm.automation_settings?.auto_send_on_status_change || false}
-                                            onChange={(e) => setEditForm({
-                                                ...editForm,
-                                                automation_settings: {
-                                                    ...editForm.automation_settings,
-                                                    auto_send_on_status_change: e.target.checked
-                                                }
-                                            })}
-                                        />
-                                    </div>
-                                    
-                                    {isEditing && editForm.automation_settings?.auto_send_on_status_change && (
-                                        <div className="pl-4">
-                                            <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
-                                                בחר תבנית הודעה לשליחה
-                                            </label>
-                                            <Select
-                                                value={editForm.automation_settings?.status_change_template_id || ''}
-                                                onValueChange={(value) => setEditForm({
-                                                    ...editForm,
-                                                    automation_settings: {
-                                                        ...editForm.automation_settings,
-                                                        status_change_template_id: value
-                                                    }
-                                                })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="בחר תבנית" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {(clientSettings?.message_templates || []).map((template) => (
-                                                        <SelectItem key={template.id} value={template.id}>
-                                                            {template.title}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                                        <label htmlFor="auto-followup-toggle" className="text-sm font-medium" style={{ fontFamily: 'Heebo' }}>יצירת משימת פולואפ אוטומטית</label>
-                                        <input
-                                            id="auto-followup-toggle"
-                                            type="checkbox"
-                                            className="toggle-switch"
-                                            disabled={!isEditing}
-                                            checked={editForm.automation_settings?.auto_followup || false}
-                                            onChange={(e) => setEditForm({
-                                                ...editForm,
-                                                automation_settings: {
-                                                    ...editForm.automation_settings,
-                                                    auto_followup: e.target.checked
-                                                }
-                                            })}
-                                        />
-                                    </div>
-
-                                    {isEditing && editForm.automation_settings?.auto_followup && (
-                                        <div className="pl-4">
-                                            <label className="block text-sm font-medium mb-2" style={{ fontFamily: 'Heebo' }}>
-                                                מספר ימים למשימת פולואפ
-                                            </label>
-                                            <Input
-                                                type="number"
-                                                min="1"
-                                                value={editForm.automation_settings?.followup_days || 1}
-                                                onChange={(e) => setEditForm({
-                                                    ...editForm,
-                                                    automation_settings: {
-                                                        ...editForm.automation_settings,
-                                                        followup_days: parseInt(e.target.value) || 1
-                                                    }
-                                                })}
-                                                className="w-32"
-                                            />
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
                     </Tabs>
                 </div>
             </div>
