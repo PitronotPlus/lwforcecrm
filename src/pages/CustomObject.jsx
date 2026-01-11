@@ -26,12 +26,28 @@ export default function CustomObject() {
     const [itemsPerPage, setItemsPerPage] = useState(8);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedFilter, setSelectedFilter] = useState('הכל');
+    const [currentUser, setCurrentUser] = useState(null);
+    const [canAddRecords, setCanAddRecords] = useState(false);
 
     useEffect(() => {
         if (objectId) {
             loadObjectData();
+            checkUserPermissions();
         }
     }, [objectId]);
+
+    const checkUserPermissions = async () => {
+        try {
+            const user = await base44.auth.me();
+            setCurrentUser(user);
+            const userRole = user.user_role || user.role;
+            // רק מנהלי מערכת, בעלי משרד וראשי מחלקות יכולים להוסיף רשומות
+            setCanAddRecords(userRole === 'admin' || userRole === 'owner' || userRole === 'department_head');
+        } catch (error) {
+            console.error('שגיאה בבדיקת הרשאות:', error);
+            setCanAddRecords(false);
+        }
+    };
 
     useEffect(() => {
         filterRecords();
@@ -187,17 +203,19 @@ export default function CustomObject() {
                 {/* Desktop Top Controls */}
                 <div className="hidden md:flex items-center justify-between mb-8">
                     <div className="flex items-center gap-4">
-                        <CreateRecordModal 
-                            object={object}
-                            sections={sections}
-                            fields={fields}
-                            onRecordCreated={loadObjectData}
-                        >
-                            <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white py-2 h-12 px-6 rounded-[15px] text-[18px] font-bold">
-                                <Plus className="w-5 h-5 ml-2" />
-                                הוסף {object.object_name_singular}
-                            </Button>
-                        </CreateRecordModal>
+                        {canAddRecords && (
+                            <CreateRecordModal 
+                                object={object}
+                                sections={sections}
+                                fields={fields}
+                                onRecordCreated={loadObjectData}
+                            >
+                                <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white py-2 h-12 px-6 rounded-[15px] text-[18px] font-bold">
+                                    <Plus className="w-5 h-5 ml-2" />
+                                    הוסף {object.object_name_singular}
+                                </Button>
+                            </CreateRecordModal>
+                        )}
                     </div>
 
                     <div className="flex-1 max-w-[470px] mx-8">
@@ -249,17 +267,19 @@ export default function CustomObject() {
 
                 {/* Mobile Top Controls */}
                 <div className="md:hidden space-y-3 mb-4">
-                    <CreateRecordModal 
-                        object={object}
-                        sections={sections}
-                        fields={fields}
-                        onRecordCreated={loadObjectData}
-                    >
-                        <Button className="w-full bg-[#67BF91] hover:bg-[#5AA880] text-white">
-                            <Plus className="w-5 h-5 ml-2" />
-                            הוסף {object.object_name_singular}
-                        </Button>
-                    </CreateRecordModal>
+                    {canAddRecords && (
+                        <CreateRecordModal 
+                            object={object}
+                            sections={sections}
+                            fields={fields}
+                            onRecordCreated={loadObjectData}
+                        >
+                            <Button className="w-full bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                <Plus className="w-5 h-5 ml-2" />
+                                הוסף {object.object_name_singular}
+                            </Button>
+                        </CreateRecordModal>
+                    )}
                     
                     <div className="relative">
                         <Input
@@ -481,17 +501,19 @@ export default function CustomObject() {
                                         ? 'לא נמצאו רשומות התואמות לחיפוש'
                                         : `אין ${object.object_name} במערכת`}
                                 </p>
-                                <CreateRecordModal 
-                                    object={object}
-                                    sections={sections}
-                                    fields={fields}
-                                    onRecordCreated={loadObjectData}
-                                >
-                                    <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
-                                        <Plus className="w-5 h-5 ml-2" />
-                                        צור {object.object_name_singular} ראשון
-                                    </Button>
-                                </CreateRecordModal>
+                                {canAddRecords && (
+                                    <CreateRecordModal 
+                                        object={object}
+                                        sections={sections}
+                                        fields={fields}
+                                        onRecordCreated={loadObjectData}
+                                    >
+                                        <Button className="bg-[#67BF91] hover:bg-[#5AA880] text-white">
+                                            <Plus className="w-5 h-5 ml-2" />
+                                            צור {object.object_name_singular} ראשון
+                                        </Button>
+                                    </CreateRecordModal>
+                                )}
                             </div>
                         )}
                     </div>
@@ -705,6 +727,14 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
 
         try {
             const user = await base44.auth.me();
+            
+            // בדיקה שהמשתמש מורשה להוסיף רשומות
+            const userRole = user.user_role || user.role;
+            if (userRole === 'lawyer') {
+                alert('אין לך הרשאה להוסיף רשומות');
+                return;
+            }
+            
             await base44.entities.CustomRecord.create({
                 object_id: object.id,
                 section_id: selectedSection,
