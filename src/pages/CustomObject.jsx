@@ -626,22 +626,22 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {sections.length > 0 && sections.some(s => s.filter_field_name && s.filter_value) && (
+                    {sections.length > 0 && (
                         <div className="border-b pb-4">
                             <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
-                                קבוצה
+                                בחר מקטע *
                             </label>
                             <Select 
-                                value={formData[filterField] || ''}
-                                onValueChange={(value) => updateField(filterField, value)}
+                                value={selectedSection}
+                                onValueChange={setSelectedSection}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="בחר קבוצה" />
+                                    <SelectValue placeholder="בחר מקטע" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {groupOptions.map((option, idx) => (
-                                        <SelectItem key={idx} value={option.value}>
-                                            {option.label}
+                                    {sections.map(section => (
+                                        <SelectItem key={section.id} value={section.id}>
+                                            {section.section_name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -650,7 +650,7 @@ function EditRecordModal({ record, object, fields, sections, onRecordUpdated, ch
                     )}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {regularFields.map(field => (
+                        {fields.map(field => (
                             <FieldInput 
                                 key={field.id} 
                                 field={field} 
@@ -741,22 +741,22 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {sections.length > 0 && sections.some(s => s.filter_field_name && s.filter_value) && (
+                    {sections.length > 0 && (
                         <div className="border-b pb-4">
                             <label className="text-sm font-medium mb-2 block" style={{ fontFamily: 'Heebo' }}>
-                                קבוצה
+                                בחר מקטע *
                             </label>
                             <Select 
-                                value={formData[filterField] || ''}
-                                onValueChange={(value) => updateField(filterField, value)}
+                                value={selectedSection}
+                                onValueChange={setSelectedSection}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="בחר קבוצה" />
+                                    <SelectValue placeholder="בחר מקטע" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {groupOptions.map((option, idx) => (
-                                        <SelectItem key={idx} value={option.value}>
-                                            {option.label}
+                                    {sections.map(section => (
+                                        <SelectItem key={section.id} value={section.id}>
+                                            {section.section_name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -765,7 +765,7 @@ function CreateRecordModal({ object, sections, fields, onRecordCreated, children
                     )}
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {regularFields.map(field => (
+                        {fields.map(field => (
                             <FieldInput 
                                 key={field.id} 
                                 field={field} 
