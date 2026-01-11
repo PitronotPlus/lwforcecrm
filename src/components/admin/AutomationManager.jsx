@@ -65,12 +65,13 @@ export default function AutomationManager() {
       setLoading(true);
       const [automationsData, integrationsData, logsData, clientSettingsData] = await Promise.all([
         base44.entities.Automation.list('-created_date'),
-        base44.entities.Integration.filter({ is_active: true }),
+        base44.entities.Integration.list(),
         base44.entities.AutomationLog.list('-created_date', 50),
         base44.entities.ClientSettings.list()
       ]);
       setAutomations(automationsData);
-      setIntegrations(integrationsData);
+      // סנן רק אינטגרציות פעילות
+      setIntegrations(integrationsData.filter(int => int.is_active === true));
       setLogs(logsData);
       setClientSettings(clientSettingsData[0] || {});
       
