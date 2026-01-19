@@ -921,7 +921,1399 @@ Deno.serve(async (req) => {
 
           </TabsContent>
 
-          {/* Continue in next message due to length... */}
+          {/* Automations & System Tab */}
+          <TabsContent value="automations" className="space-y-6">
+            
+            {/* Automations */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="w-6 h-6 text-orange-500" />
+                  אוטומציות (Automations)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-orange-50 border-r-4 border-orange-500 p-4 rounded">
+                  <h4 className="font-semibold text-orange-900 mb-2">מערכת אוטומציות</h4>
+                  <p className="text-sm text-orange-800">
+                    האוטומציות מאפשרות להפעיל פעולות אוטומטיות בתגובה לאירועים במערכת או בזמן מתוכנן.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">סוגי Triggers (טריגרים)</h4>
+                  <div className="space-y-2">
+                    <Badge variant="outline">lead_created</Badge> - לקוח חדש נוצר
+                    <br />
+                    <Badge variant="outline">lead_created_by_source</Badge> - לקוח חדש ממקור מסוים
+                    <br />
+                    <Badge variant="outline">status_changed</Badge> - סטטוס השתנה
+                    <br />
+                    <Badge variant="outline">task_assigned</Badge> - משימה הוקצתה
+                    <br />
+                    <Badge variant="outline">case_created</Badge> - תיק חדש נוצר
+                    <br />
+                    <Badge variant="outline">appointment_scheduled</Badge> - פגישה נקבעה
+                    <br />
+                    <Badge variant="outline">document_signed</Badge> - מסמך נחתם
+                    <br />
+                    <Badge variant="outline">integration_webhook</Badge> - Webhook מאינטגרציה חיצונית
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">סוגי Steps (פעולות)</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm mr-4">
+                    <li><strong>send_email:</strong> שלח מייל ללקוח</li>
+                    <li><strong>send_sms:</strong> שלח SMS</li>
+                    <li><strong>change_status:</strong> שנה סטטוס לקוח</li>
+                    <li><strong>create_task:</strong> צור משימה חדשה</li>
+                    <li><strong>create_case:</strong> צור תיק חדש</li>
+                    <li><strong>add_note:</strong> הוסף הערה</li>
+                    <li><strong>send_document:</strong> שלח מסמך לחתימה</li>
+                    <li><strong>wait:</strong> המתן זמן מסוים</li>
+                    <li><strong>update_field:</strong> עדכן שדה</li>
+                    <li><strong>delete_record:</strong> מחק רשומה</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת אוטומציה דרך הממשק</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm mr-4">
+                    <li>עבור ל-<strong>ניהול מערכת → אוטומציות</strong></li>
+                    <li>לחץ על "הוסף אוטומציה"</li>
+                    <li>בחר טריגר (אירוע מפעיל)</li>
+                    <li>הגדר תנאים (אופציונלי)</li>
+                    <li>הוסף שלבי פעולה</li>
+                    <li>הפעל את האוטומציה</li>
+                  </ol>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">דוגמה: אוטומציה למעקב אחר לקוח חדש</h4>
+                  <CodeBlock
+                    code={`{
+  "name": "מעקב לקוח חדש",
+  "trigger_type": "lead_created",
+  "trigger_config": {
+    "source": "פייסבוק"
+  },
+  "steps": [
+    {
+      "step_type": "send_email",
+      "order": 1,
+      "step_config": {
+        "to": "{{client.email}}",
+        "subject": "ברוכים הבאים למשרד",
+        "body": "שלום {{client.full_name}}, תודה שפנית אלינו..."
+      }
+    },
+    {
+      "step_type": "create_task",
+      "order": 2,
+      "step_config": {
+        "title": "התקשר ללקוח {{client.full_name}}",
+        "assigned_to": "auto",
+        "due_days": 1,
+        "priority": "גבוהה"
+      }
+    },
+    {
+      "step_type": "wait",
+      "order": 3,
+      "step_config": {
+        "duration": 24,
+        "unit": "hours"
+      }
+    },
+    {
+      "step_type": "send_email",
+      "order": 4,
+      "step_config": {
+        "to": "{{client.email}}",
+        "subject": "האם קיבלת את המידע?",
+        "body": "שלום שוב, רצינו לבדוק אם קיבלת את המידע..."
+      }
+    }
+  ],
+  "is_active": true
+}`}
+                    copyId="automation-example"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">הרצת אוטומציה באופן ידני (Backend Function)</h4>
+                  <CodeBlock
+                    code={`// functions/runAutomations.js
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+
+Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
+  const user = await base44.auth.me();
+  
+  if (!user || user.role !== 'admin') {
+    return Response.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  const { automation_id, entity_id, entity_type } = await req.json();
+  
+  // טען את האוטומציה
+  const automation = await base44.entities.Automation.get(automation_id);
+  
+  if (!automation.is_active) {
+    return Response.json({ error: 'Automation is not active' }, { status: 400 });
+  }
+  
+  // טען את הישות
+  const entity = await base44.entities[entity_type].get(entity_id);
+  
+  // רשום לוג
+  const log = await base44.entities.AutomationLog.create({
+    automation_id,
+    automation_name: automation.name,
+    trigger_type: automation.trigger_type,
+    entity_id,
+    entity_type,
+    status: 'running',
+    current_step: 0,
+    total_steps: automation.steps.length
+  });
+  
+  // בצע כל שלב
+  for (const step of automation.steps) {
+    try {
+      await executeStep(step, entity, base44);
+      
+      // עדכן לוג
+      await base44.entities.AutomationLog.update(log.id, {
+        steps_completed: step.order,
+        current_step: step.order + 1
+      });
+      
+    } catch (error) {
+      // רשום שגיאה
+      await base44.entities.AutomationLog.update(log.id, {
+        status: 'failed',
+        error_message: error.message
+      });
+      throw error;
+    }
+  }
+  
+  // סיום מוצלח
+  await base44.entities.AutomationLog.update(log.id, {
+    status: 'completed'
+  });
+  
+  return Response.json({ success: true, log_id: log.id });
+});
+
+async function executeStep(step, entity, base44) {
+  const config = step.step_config;
+  
+  switch (step.step_type) {
+    case 'send_email':
+      await base44.integrations.Core.SendEmail({
+        to: replaceVariables(config.to, entity),
+        subject: replaceVariables(config.subject, entity),
+        body: replaceVariables(config.body, entity)
+      });
+      break;
+      
+    case 'create_task':
+      await base44.entities.Task.create({
+        title: replaceVariables(config.title, entity),
+        client_id: entity.id,
+        assigned_to: config.assigned_to,
+        due_date: addDays(new Date(), config.due_days || 0),
+        priority: config.priority
+      });
+      break;
+      
+    case 'change_status':
+      await base44.entities.Client.update(entity.id, {
+        status: config.new_status
+      });
+      break;
+      
+    case 'wait':
+      // המתן (בפועל, צריך לתזמן את השלב הבא)
+      await new Promise(resolve => 
+        setTimeout(resolve, config.duration * 3600000)
+      );
+      break;
+  }
+}
+
+function replaceVariables(text, entity) {
+  return text.replace(/{{(.*?)}}/g, (match, path) => {
+    const keys = path.split('.');
+    let value = entity;
+    for (const key of keys) {
+      value = value?.[key.trim()];
+    }
+    return value || '';
+  });
+}
+
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result.toISOString().split('T')[0];
+}`}
+                    copyId="automation-run"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* System Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-6 h-6 text-gray-500" />
+                  הגדרות מערכת (System Settings)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-gray-50 border-r-4 border-gray-500 p-4 rounded">
+                  <h4 className="font-semibold text-gray-900 mb-2">ניהול הגדרות כלליות</h4>
+                  <p className="text-sm text-gray-800">
+                    הגדרות מערכת מאפשרות להתאים את המערכת לצרכים הספציפיים של המשרד.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">אפשרויות סטטוס לקוח</h4>
+                  <p className="text-sm text-gray-600 mb-2">ניתן להגדיר סטטוסים מותאמים אישית במערכת:</p>
+                  <CodeBlock
+                    code={`// הגדרת סטטוסים חדשים
+const updateClientStatuses = async () => {
+  await base44.entities.ClientSettings.update('settings_id', {
+    status_options: [
+      'ליד חדש',
+      'בטיפול',
+      'ממתין למסמכים',
+      'לקוח פעיל',
+      'סגור - הצליח',
+      'סגור - לא רלוונטי'
+    ]
+  });
+};`}
+                    copyId="settings-status"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">תבניות הודעות</h4>
+                  <CodeBlock
+                    code={`const createMessageTemplate = async () => {
+  const settings = await base44.entities.ClientSettings.list();
+  const currentSettings = settings[0];
+  
+  const newTemplates = [
+    ...currentSettings.message_templates,
+    {
+      id: Date.now().toString(),
+      title: 'תזכורת לפגישה',
+      body: \`שלום {{full_name}},
+      
+זוהי תזכורת לפגישה שלנו מחר ב-{{appointment_time}}.
+המשרד נמצא ב{{office_address}}.
+
+נשמח לראותך!
+בברכה,
+{{lawyer_name}}\`
+    }
+  ];
+  
+  await base44.entities.ClientSettings.update(currentSettings.id, {
+    message_templates: newTemplates
+  });
+};`}
+                    copyId="settings-templates"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">הגדרות ברירת מחדל</h4>
+                  <CodeBlock
+                    code={`// הגדרת הודעת ברכה אוטומטית
+await base44.entities.ClientSettings.update('settings_id', {
+  default_welcome_message: \`שלום {{full_name}},
+  
+תודה שפנית למשרד שלנו בנושא {{service_type}}.
+נחזור אליך בהקדם האפשרי.
+
+בברכה,
+צוות המשרד\`,
+  
+  // הגדרות אוטומציה
+  automation_settings: {
+    send_welcome_message: true,
+    auto_followup: true,
+    followup_days: 2,
+    auto_create_task: true,
+    default_task_assignee: 'secretary@office.com'
+  }
+});`}
+                    copyId="settings-defaults"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Client Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-500" />
+                  הגדרות לקוח (Client Settings)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 border-r-4 border-blue-500 p-4 rounded">
+                  <h4 className="font-semibold text-blue-900 mb-2">התאמה אישית של שדות לקוח</h4>
+                  <p className="text-sm text-blue-800">
+                    ניתן להוסיף שדות מותאמים אישית לכל לקוח.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת שדה מותאם אישית</h4>
+                  <CodeBlock
+                    code={`const createCustomField = async () => {
+  await base44.entities.CustomField.create({
+    field_name: 'insurance_company',
+    field_label: 'חברת ביטוח',
+    field_type: 'select',
+    field_options: [
+      'כלל ביטוח',
+      'הפניקס',
+      'מנורה מבטחים',
+      'הראל',
+      'איי די איי',
+      'אחר'
+    ],
+    is_required: false,
+    entity_type: 'Client',
+    order: 10,
+    is_active: true
+  });
+};`}
+                    copyId="client-custom-field"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">שימוש בשדות מותאמים</h4>
+                  <CodeBlock
+                    code={`// יצירת לקוח עם שדות מותאמים
+const createClientWithCustomFields = async () => {
+  const client = await base44.entities.Client.create({
+    full_name: 'ישראל ישראלי',
+    phone: '050-1234567',
+    email: 'israel@example.com',
+    
+    // שדות בסיסיים
+    status: 'ליד',
+    source: 'פייסבוק',
+    
+    // שדות מותאמים (נשמרים כ-JSON)
+    custom_fields: {
+      insurance_company: 'כלל ביטוח',
+      policy_number: '12345678',
+      claim_date: '2024-01-15',
+      injury_type: 'תאונת דרכים'
+    }
+  });
+  
+  return client;
+};
+
+// קריאת שדות מותאמים
+const getClientCustomFields = async (clientId) => {
+  const client = await base44.entities.Client.get(clientId);
+  return client.custom_fields;
+};`}
+                    copyId="client-use-custom"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="w-6 h-6 text-purple-500" />
+                  הגדרות AI
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-purple-50 border-r-4 border-purple-500 p-4 rounded">
+                  <h4 className="font-semibold text-purple-900 mb-2">Prompts מותאמים אישית</h4>
+                  <p className="text-sm text-purple-800">
+                    ניתן להגדיר Prompts של AI לשימושים שונים במערכת.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת AI Prompt</h4>
+                  <CodeBlock
+                    code={`const createAiPrompt = async () => {
+  await base44.entities.AiPrompt.create({
+    name: 'סיכום פגישה',
+    description: 'מסכם פגישה עם לקוח ומחלץ נקודות מפתח',
+    prompt_template: \`אתה עוזר AI של משרד עורכי דין.
+סכם את הפגישה הבאה ותחלץ:
+1. נושאים שנדונו
+2. החלטות שהתקבלו  
+3. פעולות המשך נדרשות
+4. מועדים חשובים
+
+תוכן הפגישה:
+{{meeting_notes}}
+
+פורמט התשובה ב-JSON:\`,
+    response_schema: {
+      type: 'object',
+      properties: {
+        topics: { type: 'array', items: { type: 'string' } },
+        decisions: { type: 'array', items: { type: 'string' } },
+        action_items: { type: 'array', items: { type: 'string' } },
+        important_dates: { type: 'array', items: { type: 'string' } }
+      }
+    },
+    category: 'meetings',
+    is_active: true
+  });
+};`}
+                    copyId="ai-prompt-create"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">שימוש ב-AI Prompt</h4>
+                  <CodeBlock
+                    code={`const useMeetingSummary = async (meetingNotes) => {
+  // טען את ה-Prompt
+  const prompts = await base44.entities.AiPrompt.filter({
+    name: 'סיכום פגישה',
+    is_active: true
+  });
+  
+  const prompt = prompts[0];
+  
+  // החלף משתנים
+  const finalPrompt = prompt.prompt_template
+    .replace('{{meeting_notes}}', meetingNotes);
+  
+  // הרץ AI
+  const result = await base44.integrations.Core.InvokeLLM({
+    prompt: finalPrompt,
+    response_json_schema: prompt.response_schema
+  });
+  
+  return result;
+};
+
+// דוגמת שימוש
+const summary = await useMeetingSummary(\`
+פגישה עם הלקוח ישראל ישראלי.
+דובר על תביעת ביטוח בגין תאונת דרכים ב-15.1.2024.
+הלקוח סיפק מסמכים: דוח משטרה, אישורים רפואיים.
+הוחלט לפנות לחברת הביטוח תוך 7 ימים.
+הפגישה הבאה: 30.1.2024 בשעה 10:00.
+\`);
+
+console.log(summary);
+// {
+//   topics: ['תביעת ביטוח', 'תאונת דרכים'],
+//   decisions: ['פנייה לחברת ביטוח תוך 7 ימים'],
+//   action_items: ['איסוף מסמכים נוספים', 'שליחת מכתב לביטוח'],
+//   important_dates: ['30.1.2024 - פגישה המשך']
+// }`}
+                    copyId="ai-prompt-use"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">דוגמאות נוספות ל-Prompts</h4>
+                  <ul className="list-disc list-inside space-y-2 text-sm mr-4">
+                    <li><strong>ניתוח חוזה:</strong> מחלץ סעיפים חשובים, התחייבויות, מועדים</li>
+                    <li><strong>המלצות צעד הבא:</strong> מציע פעולות לפי סטטוס התיק</li>
+                    <li><strong>יצירת טיוטת מייל:</strong> כותב מייל ללקוח לפי הקשר</li>
+                    <li><strong>סיווג דחיפות:</strong> מסווג פניות לפי רמת דחיפות</li>
+                    <li><strong>תרגום משפטי:</strong> מתרגם מסמכים תוך שמירה על טרמינולוגיה</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+          </TabsContent>
+
+          {/* Permissions & Management Tab */}
+          <TabsContent value="permissions" className="space-y-6">
+            
+            {/* Permissions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-red-500" />
+                  ניהול הרשאות (Permissions)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-red-50 border-r-4 border-red-500 p-4 rounded">
+                  <h4 className="font-semibold text-red-900 mb-2">מערכת הרשאות מבוססת תפקידים</h4>
+                  <p className="text-sm text-red-800">
+                    המערכת תומכת ב-4 רמות הרשאה: בעלים (Owner), ראש מחלקה (Department Head), עורך דין (Lawyer), ומנהל מערכת (Admin).
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">תפקידים ורמות הרשאה</h4>
+                  <div className="space-y-3">
+                    <div className="border-r-4 border-blue-500 bg-blue-50 p-3 rounded">
+                      <h5 className="font-semibold text-blue-900">Admin (מנהל מערכת)</h5>
+                      <p className="text-sm text-blue-800">גישה מלאה לכל המערכת, כולל הגדרות מערכת, חשבונות, קרדיטים</p>
+                    </div>
+                    <div className="border-r-4 border-purple-500 bg-purple-50 p-3 rounded">
+                      <h5 className="font-semibold text-purple-900">Owner (בעל משרד)</h5>
+                      <p className="text-sm text-purple-800">גישה מלאה למשרד שלו, ניהול צוות, דוחות, כספים</p>
+                    </div>
+                    <div className="border-r-4 border-green-500 bg-green-50 p-3 rounded">
+                      <h5 className="font-semibold text-green-900">Department Head (ראש מחלקה)</h5>
+                      <p className="text-sm text-green-800">ניהול צוות במחלקה, גישה לדוחות, ניהול תיקים</p>
+                    </div>
+                    <div className="border-r-4 border-gray-500 bg-gray-50 p-3 rounded">
+                      <h5 className="font-semibold text-gray-900">Lawyer (עורך דין)</h5>
+                      <p className="text-sm text-gray-800">גישה לתיקים שלו בלבד, יצירת לקוחות ומשימות</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">בדיקת הרשאות בקוד</h4>
+                  <CodeBlock
+                    code={`import { base44 } from '@/api/base44Client';
+
+// בדוק אם המשתמש הוא בעלים
+const checkIfOwner = async () => {
+  const user = await base44.auth.me();
+  return user.user_role === 'owner' || user.role === 'owner';
+};
+
+// בדוק אם למשתמש יש הרשאה לראות דוחות
+const canViewReports = async () => {
+  const user = await base44.auth.me();
+  const allowedRoles = ['admin', 'owner', 'department_head'];
+  return allowedRoles.includes(user.user_role || user.role);
+};
+
+// Guard לדף מוגן
+const ProtectedPage = () => {
+  const [hasAccess, setHasAccess] = useState(false);
+  
+  useEffect(() => {
+    checkAccess();
+  }, []);
+  
+  const checkAccess = async () => {
+    const user = await base44.auth.me();
+    if (!user || user.user_role !== 'owner') {
+      navigate('/');
+      return;
+    }
+    setHasAccess(true);
+  };
+  
+  if (!hasAccess) return <div>בודק הרשאות...</div>;
+  
+  return <div>תוכן הדף המוגן</div>;
+};`}
+                    copyId="permissions-check"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">הגבלת גישה ב-Backend Functions</h4>
+                  <CodeBlock
+                    code={`// functions/adminOnly.js
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+
+Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
+  const user = await base44.auth.me();
+  
+  // בדוק אם המשתמש הוא Admin
+  if (user?.role !== 'admin') {
+    return Response.json(
+      { error: 'Forbidden: Admin access required' }, 
+      { status: 403 }
+    );
+  }
+  
+  // המשך עם הלוגיקה של האדמין...
+  const data = await performAdminOperation();
+  
+  return Response.json({ success: true, data });
+});`}
+                    copyId="permissions-backend"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">סינון נתונים לפי הרשאות</h4>
+                  <CodeBlock
+                    code={`// הצג רק תיקים שהמשתמש רשאי לראות
+const getAccessibleCases = async () => {
+  const user = await base44.auth.me();
+  
+  let query = {};
+  
+  // עורך דין רואה רק את התיקים שלו
+  if (user.user_role === 'lawyer') {
+    query = { assigned_to: user.email };
+  }
+  
+  // ראש מחלקה רואה את המחלקה שלו
+  else if (user.user_role === 'department_head') {
+    query = { department: user.department };
+  }
+  
+  // בעלים ואדמין רואים הכל (עם סינון לפי sub_account)
+  else if (user.user_role === 'owner' || user.role === 'admin') {
+    if (user.sub_account_id) {
+      query = { sub_account_id: user.sub_account_id };
+    }
+  }
+  
+  const cases = await base44.entities.Case.filter(query);
+  return cases;
+};`}
+                    copyId="permissions-filter"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Sub Accounts Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="w-6 h-6 text-indigo-500" />
+                  ניהול חשבונות משנה (Sub Accounts)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-indigo-50 border-r-4 border-indigo-500 p-4 rounded">
+                  <h4 className="font-semibold text-indigo-900 mb-2">מערכת רב-משרדית</h4>
+                  <p className="text-sm text-indigo-800">
+                    המערכת תומכת בניהול מספר משרדים נפרדים תחת אותה אפליקציה, כל אחד עם המשתמשים והנתונים שלו.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת משרד חדש</h4>
+                  <CodeBlock
+                    code={`const createSubAccount = async () => {
+  const subAccount = await base44.entities.SubAccount.create({
+    name: 'משרד כהן ושות',
+    owner_email: 'cohen@lawoffice.com',
+    phone: '03-1234567',
+    address: 'רחוב הרצל 123, תל אביב',
+    license_number: 'L-12345',
+    status: 'active',
+    subscription_type: 'premium',
+    subscription_end_date: '2025-12-31',
+    max_users: 10,
+    notes: 'משרד בוטיק המתמחה בדיני חברות'
+  });
+  
+  return subAccount;
+};`}
+                    copyId="subaccount-create"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">הקצאת משתמש למשרד</h4>
+                  <CodeBlock
+                    code={`const assignUserToSubAccount = async (userId, subAccountId) => {
+  await base44.entities.User.update(userId, {
+    sub_account_id: subAccountId,
+    user_role: 'lawyer'
+  });
+};
+
+// הזמנת משתמש חדש למשרד
+const inviteUserToSubAccount = async (email, role, subAccountId) => {
+  // שלח הזמנה
+  await base44.users.inviteUser(email, 'user');
+  
+  // שמור את הפרטים להקצאה לאחר ההרשמה
+  sessionStorage.setItem('invite_params', JSON.stringify({
+    sub_account_id: subAccountId,
+    assigned_role: role
+  }));
+};`}
+                    copyId="subaccount-assign"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">סינון נתונים לפי משרד</h4>
+                  <CodeBlock
+                    code={`// כל השאילתות צריכות להיות מסוננות לפי sub_account_id
+const getOfficeClients = async () => {
+  const user = await base44.auth.me();
+  
+  if (!user.sub_account_id) {
+    throw new Error('User not assigned to any office');
+  }
+  
+  const clients = await base44.entities.Client.filter({
+    sub_account_id: user.sub_account_id
+  });
+  
+  return clients;
+};
+
+// פונקציה כללית לסינון
+const filterByOffice = async (entityName, additionalFilters = {}) => {
+  const user = await base44.auth.me();
+  
+  const query = {
+    ...additionalFilters,
+    sub_account_id: user.sub_account_id
+  };
+  
+  return await base44.entities[entityName].filter(query);
+};
+
+// שימוש
+const activeCases = await filterByOffice('Case', { status: 'פעיל' });`}
+                    copyId="subaccount-filter"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">התחזות (Impersonation) - למנהלי מערכת</h4>
+                  <CodeBlock
+                    code={`// רק Admin יכול להתחזות
+const impersonateUser = async (targetUserId) => {
+  const currentUser = await base44.auth.me();
+  
+  if (currentUser.role !== 'admin') {
+    throw new Error('Only admins can impersonate');
+  }
+  
+  const targetUser = await base44.entities.User.get(targetUserId);
+  
+  // שמור את המשתמש המקורי
+  sessionStorage.setItem('original_user', JSON.stringify(currentUser));
+  sessionStorage.setItem('impersonating_user', JSON.stringify(targetUser));
+  
+  // רענן את הדף
+  window.location.reload();
+};
+
+// חזרה למשתמש מקורי
+const stopImpersonation = () => {
+  sessionStorage.removeItem('impersonating_user');
+  window.location.reload();
+};`}
+                    copyId="impersonation"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+          </TabsContent>
+
+          {/* Advanced Features Tab */}
+          <TabsContent value="advanced" className="space-y-6">
+            
+            {/* Custom Pages Studio */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layout className="w-6 h-6 text-teal-500" />
+                  סטודיו דפים מותאמים אישית (Object Studio)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-teal-50 border-r-4 border-teal-500 p-4 rounded">
+                  <h4 className="font-semibold text-teal-900 mb-2">יצירת ישויות ודפים מותאמים</h4>
+                  <p className="text-sm text-teal-800">
+                    Object Studio מאפשר ליצור ישויות ודפים חדשים ללא קוד, עם שדות מותאמים אישית.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת ישות חדשה</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm mr-4">
+                    <li>עבור ל-<strong>ניהול מערכת → Object Studio</strong></li>
+                    <li>לחץ על "צור ישות חדשה"</li>
+                    <li>הגדר:
+                      <ul className="list-disc list-inside mr-8 mt-1">
+                        <li>שם הישות (יחיד ורבים)</li>
+                        <li>שם מערכת (באנגלית, ייחודי)</li>
+                        <li>אייקון</li>
+                        <li>צבע</li>
+                      </ul>
+                    </li>
+                    <li>הוסף שדות לישות</li>
+                    <li>הגדר קטעים (Sections) לארגון השדות</li>
+                    <li>הגדר עמודות לתצוגת הרשימה</li>
+                  </ol>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">דוגמה: יצירת ישות "מתחרים"</h4>
+                  <CodeBlock
+                    code={`// יצירת הישות
+const competitorObject = await base44.entities.SystemObject.create({
+  object_name: 'מתחרים',
+  object_name_singular: 'מתחרה',
+  system_name: 'Competitor',
+  icon: 'Building',
+  color: '#FF6B6B',
+  description: 'ניהול מתחרים במשרד',
+  is_active: true
+});
+
+// הוספת שדות
+const fields = [
+  {
+    object_id: competitorObject.id,
+    field_name: 'company_name',
+    field_label: 'שם החברה',
+    field_type: 'text',
+    is_required: true,
+    order_index: 1
+  },
+  {
+    object_id: competitorObject.id,
+    field_name: 'website',
+    field_label: 'אתר אינטרנט',
+    field_type: 'url',
+    is_required: false,
+    order_index: 2
+  },
+  {
+    object_id: competitorObject.id,
+    field_name: 'market_share',
+    field_label: 'נתח שוק (%)',
+    field_type: 'number',
+    is_required: false,
+    order_index: 3
+  },
+  {
+    object_id: competitorObject.id,
+    field_name: 'notes',
+    field_label: 'הערות',
+    field_type: 'textarea',
+    is_required: false,
+    order_index: 4
+  }
+];
+
+for (const field of fields) {
+  await base44.entities.ObjectField.create(field);
+}
+
+// יצירת סקשן
+const section = await base44.entities.ObjectSection.create({
+  object_id: competitorObject.id,
+  section_name: 'פרטי מתחרה',
+  order_index: 0,
+  color: '#FF6B6B'
+});
+
+// הוספת עמודות לתצוגה
+const columns = [
+  {
+    object_id: competitorObject.id,
+    field_name: 'company_name',
+    column_label: 'שם',
+    order_index: 1,
+    width: '200px',
+    is_visible: true
+  },
+  {
+    object_id: competitorObject.id,
+    field_name: 'market_share',
+    column_label: 'נתח שוק',
+    order_index: 2,
+    width: '100px',
+    is_visible: true
+  }
+];
+
+for (const col of columns) {
+  await base44.entities.ObjectColumn.create(col);
+}`}
+                    copyId="object-create"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">שימוש בישות המותאמת</h4>
+                  <CodeBlock
+                    code={`// יצירת רשומה חדשה
+const createCompetitor = async () => {
+  await base44.entities.CustomRecord.create({
+    object_id: competitorObject.id,
+    section_id: section.id,
+    data: {
+      company_name: 'משרד כהן ושות',
+      website: 'https://cohen-law.co.il',
+      market_share: 15,
+      notes: 'מתמחים בדיני נדל"ן'
+    }
+  });
+};
+
+// קריאת כל הרשומות
+const getCompetitors = async () => {
+  const records = await base44.entities.CustomRecord.filter({
+    object_id: competitorObject.id
+  });
+  
+  return records.map(r => r.data);
+};
+
+// עדכון רשומה
+const updateCompetitor = async (recordId, updates) => {
+  const record = await base44.entities.CustomRecord.get(recordId);
+  
+  await base44.entities.CustomRecord.update(recordId, {
+    data: {
+      ...record.data,
+      ...updates
+    }
+  });
+};`}
+                    copyId="object-use"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Digital Signature */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileSignature className="w-6 h-6 text-green-500" />
+                  חתימה דיגיטלית (Digital Signature)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-green-50 border-r-4 border-green-500 p-4 rounded">
+                  <h4 className="font-semibold text-green-900 mb-2">מערכת חתימה דיגיטלית מובנית</h4>
+                  <p className="text-sm text-green-800">
+                    המערכת כוללת פתרון חתימה דיגיטלית מלא: העלאת מסמכים, הוספת שדות, שליחה ללקוח, ומעקב אחר סטטוס.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">תהליך החתימה</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm mr-4">
+                    <li><strong>יצירת תבנית:</strong> העלה PDF והוסף שדות (חתימה, טקסט, תאריך, checkbox)</li>
+                    <li><strong>שליחה ללקוח:</strong> שלח קישור חתימה במייל</li>
+                    <li><strong>חתימה:</strong> הלקוח פותח את הקישור, ממלא ומחתים</li>
+                    <li><strong>עיבוד:</strong> המערכת מייצרת PDF חתום אוטומטית</li>
+                    <li><strong>אחסון:</strong> המסמך החתום נשמר ונשלח למייל</li>
+                  </ol>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">יצירת תבנית חתימה</h4>
+                  <CodeBlock
+                    code={`const createSignatureTemplate = async (pdfUrl, pageImageUrls) => {
+  const template = await base44.entities.DigitalSignatureTemplate.create({
+    name: 'חוזה שירות משפטי',
+    original_pdf_url: pdfUrl,
+    page_image_urls: pageImageUrls,
+    fields: [
+      {
+        id: 'client_name',
+        type: 'text',
+        page: 1,
+        x: 10,
+        y: 20,
+        width: 30,
+        height: 5,
+        label: 'שם מלא',
+        required: true,
+        fontSize: 12
+      },
+      {
+        id: 'client_signature',
+        type: 'signature',
+        page: 1,
+        x: 10,
+        y: 80,
+        width: 40,
+        height: 10,
+        label: 'חתימה',
+        required: true
+      },
+      {
+        id: 'date',
+        type: 'date',
+        page: 1,
+        x: 60,
+        y: 80,
+        width: 20,
+        height: 5,
+        label: 'תאריך',
+        required: true
+      },
+      {
+        id: 'accept_terms',
+        type: 'checkbox',
+        page: 2,
+        x: 10,
+        y: 50,
+        width: 5,
+        height: 5,
+        label: 'אני מסכים לתנאי ההסכם',
+        required: true
+      }
+    ],
+    email_subject: 'בקשה לחתימה על חוזה שירות',
+    email_body: 'שלום, אנא חתום על המסמך המצורף.'
+  });
+  
+  return template;
+};`}
+                    copyId="signature-template"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">שליחת בקשה לחתימה</h4>
+                  <CodeBlock
+                    code={`const sendSignatureRequest = async (templateId, clientId) => {
+  // צור מסמך חתום
+  const { data } = await base44.functions.invoke('sendSignatureRequest', {
+    templateId,
+    leadId: clientId,
+    sendMethod: 'email'
+  });
+  
+  console.log('Signing URL:', data.signing_url);
+  return data;
+};
+
+// מעקב אחר סטטוס החתימה
+const checkSignatureStatus = async (documentId) => {
+  const doc = await base44.entities.SignedDocument.get(documentId);
+  
+  return {
+    status: doc.status, // 'sent', 'viewed', 'signed', 'voided'
+    signed_at: doc.signed_at,
+    signed_pdf_url: doc.signed_pdf_url
+  };
+};`}
+                    copyId="signature-send"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">טיפול בחתימה שהושלמה</h4>
+                  <CodeBlock
+                    code={`// אוטומציה שמופעלת כשמסמך נחתם
+const onDocumentSigned = async (signedDocId) => {
+  const signedDoc = await base44.entities.SignedDocument.get(signedDocId);
+  const client = await base44.entities.Client.get(signedDoc.lead_id);
+  
+  // שלח אישור ללקוח
+  await base44.integrations.Core.SendEmail({
+    to: client.email,
+    subject: 'המסמך נחתם בהצלחה',
+    body: \`
+      <html dir="rtl">
+        <body>
+          <h2>שלום \${client.full_name},</h2>
+          <p>המסמך נחתם בהצלחה ב-\${new Date(signedDoc.signed_at).toLocaleDateString('he-IL')}.</p>
+          <p>ניתן להוריד את המסמך החתום <a href="\${signedDoc.signed_pdf_url}">כאן</a>.</p>
+          <p>בברכה,<br>המשרד</p>
+        </body>
+      </html>
+    \`
+  });
+  
+  // צור משימה מעקב
+  await base44.entities.Task.create({
+    title: \`מעקב אחרי \${client.full_name} - חוזה נחתם\`,
+    client_id: client.id,
+    due_date: addDays(new Date(), 3),
+    priority: 'בינונית'
+  });
+  
+  // שנה סטטוס לקוח
+  await base44.entities.Client.update(client.id, {
+    status: 'לקוח'
+  });
+};`}
+                    copyId="signature-complete"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">ביטול בקשת חתימה</h4>
+                  <CodeBlock
+                    code={`const voidSignatureRequest = async (documentId, reason) => {
+  await base44.functions.invoke('voidSignatureRequest', {
+    documentId,
+    reason
+  });
+  
+  // שלח התראה ללקוח
+  const doc = await base44.entities.SignedDocument.get(documentId);
+  const client = await base44.entities.Client.get(doc.lead_id);
+  
+  await base44.integrations.Core.SendEmail({
+    to: client.email,
+    subject: 'בקשת החתימה בוטלה',
+    body: \`שלום, בקשת החתימה בוטלה. סיבה: \${reason}\`
+  });
+};`}
+                    copyId="signature-void"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Database & Queries */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="w-6 h-6 text-blue-500" />
+                  עבודה עם מסד הנתונים
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 border-r-4 border-blue-500 p-4 rounded">
+                  <h4 className="font-semibold text-blue-900 mb-2">שאילתות ופעולות מתקדמות</h4>
+                  <p className="text-sm text-blue-800">
+                    דוגמאות לשאילתות מורכבות ופעולות batch על הנתונים.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">שאילתות מתקדמות</h4>
+                  <CodeBlock
+                    code={`// סינון עם מספר תנאים
+const getHighValueClients = async () => {
+  const clients = await base44.entities.Client.filter({
+    status: 'לקוח',
+    // ניתן להוסיף סינונים נוספים לפי צורך
+  });
+  
+  // סינון בצד לקוח
+  return clients.filter(c => {
+    const totalRevenue = calculateClientRevenue(c.id);
+    return totalRevenue > 50000;
+  });
+};
+
+// מיון מתקדם
+const getRecentClients = async (limit = 10) => {
+  const clients = await base44.entities.Client.list('-created_date', limit);
+  return clients;
+};
+
+// חיפוש טקסט
+const searchClients = async (searchTerm) => {
+  const allClients = await base44.entities.Client.list();
+  
+  return allClients.filter(client => 
+    client.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.phone?.includes(searchTerm)
+  );
+};`}
+                    copyId="db-queries"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">פעולות Bulk</h4>
+                  <CodeBlock
+                    code={`// יצירה מרובה
+const bulkCreateClients = async (clientsData) => {
+  const results = [];
+  
+  for (const clientData of clientsData) {
+    const client = await base44.entities.Client.create(clientData);
+    results.push(client);
+    
+    // המתן קצר בין יצירות
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  return results;
+};
+
+// עדכון מרובה
+const bulkUpdateStatus = async (clientIds, newStatus) => {
+  for (const id of clientIds) {
+    await base44.entities.Client.update(id, { status: newStatus });
+  }
+};
+
+// מחיקה מרובה
+const bulkDeleteOldClients = async (beforeDate) => {
+  const oldClients = await base44.entities.Client.filter({
+    // סינון לפי תאריך
+  });
+  
+  const clientsToDelete = oldClients.filter(c => 
+    new Date(c.created_date) < new Date(beforeDate)
+  );
+  
+  for (const client of clientsToDelete) {
+    await base44.entities.Client.delete(client.id);
+  }
+};`}
+                    copyId="db-bulk"
+                  />
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-2">Aggregations (צבירות)</h4>
+                  <CodeBlock
+                    code={`// סטטיסטיקות כלליות
+const getClientStats = async () => {
+  const clients = await base44.entities.Client.list();
+  
+  const stats = {
+    total: clients.length,
+    byStatus: {},
+    bySource: {},
+    recentWeek: 0,
+    recentMonth: 0
+  };
+  
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  clients.forEach(client => {
+    // ספירה לפי סטטוס
+    stats.byStatus[client.status] = (stats.byStatus[client.status] || 0) + 1;
+    
+    // ספירה לפי מקור
+    stats.bySource[client.source] = (stats.bySource[client.source] || 0) + 1;
+    
+    // ספירה לפי תאריך
+    const created = new Date(client.created_date);
+    if (created >= weekAgo) stats.recentWeek++;
+    if (created >= monthAgo) stats.recentMonth++;
+  });
+  
+  return stats;
+};
+
+// דוחות כספיים
+const getFinancialReport = async (startDate, endDate) => {
+  const transactions = await base44.entities.Financial.filter({
+    // סינון לפי תאריכים יעשה בצד לקוח
+  });
+  
+  const filtered = transactions.filter(t => {
+    const date = new Date(t.date);
+    return date >= new Date(startDate) && date <= new Date(endDate);
+  });
+  
+  const report = {
+    totalIncome: 0,
+    totalExpense: 0,
+    byCategory: {},
+    transactions: filtered.length
+  };
+  
+  filtered.forEach(t => {
+    if (t.type === 'הכנסה') {
+      report.totalIncome += t.amount;
+    } else {
+      report.totalExpense += t.amount;
+    }
+    
+    report.byCategory[t.category] = (report.byCategory[t.category] || 0) + t.amount;
+  });
+  
+  report.netProfit = report.totalIncome - report.totalExpense;
+  
+  return report;
+};`}
+                    copyId="db-aggregations"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Best Practices */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-6 h-6 text-green-500" />
+                  Best Practices
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="border-r-4 border-green-500 bg-green-50 p-3 rounded">
+                    <h5 className="font-semibold text-green-900">✓ אבטחה</h5>
+                    <ul className="text-sm text-green-800 list-disc list-inside mt-1 space-y-1">
+                      <li>תמיד בדוק הרשאות משתמש לפני גישה לנתונים רגישים</li>
+                      <li>אל תחשוף Secrets בקוד צד לקוח</li>
+                      <li>השתמש ב-HTTPS בלבד לכל הקריאות</li>
+                      <li>אמת חתימות Webhook לפני עיבוד נתונים</li>
+                    </ul>
+                  </div>
+
+                  <div className="border-r-4 border-blue-500 bg-blue-50 p-3 rounded">
+                    <h5 className="font-semibold text-blue-900">✓ ביצועים</h5>
+                    <ul className="text-sm text-blue-800 list-disc list-inside mt-1 space-y-1">
+                      <li>טען רק את הנתונים שאתה צריך (שימוש ב-filter במקום list)</li>
+                      <li>השתמש ב-caching כשאפשר</li>
+                      <li>בצע פעולות bulk בחבילות קטנות</li>
+                      <li>הימנע מ-loops מקוננים עם קריאות API</li>
+                    </ul>
+                  </div>
+
+                  <div className="border-r-4 border-yellow-500 bg-yellow-50 p-3 rounded">
+                    <h5 className="font-semibold text-yellow-900">✓ תחזוקה</h5>
+                    <ul className="text-sm text-yellow-800 list-disc list-inside mt-1 space-y-1">
+                      <li>תעד את הקוד שלך</li>
+                      <li>השתמש בשמות משתנים ברורים</li>
+                      <li>טפל בשגיאות בצורה נכונה</li>
+                      <li>בדוק את הקוד לפני deployment</li>
+                    </ul>
+                  </div>
+
+                  <div className="border-r-4 border-purple-500 bg-purple-50 p-3 rounded">
+                    <h5 className="font-semibold text-purple-900">✓ חוויית משתמש</h5>
+                    <ul className="text-sm text-purple-800 list-disc list-inside mt-1 space-y-1">
+                      <li>הצג loading states תמיד</li>
+                      <li>תן feedback למשתמש על פעולות</li>
+                      <li>טפל בשגיאות בצורה ידידותית</li>
+                      <li>הפוך את הממשק לנגיש ורספונסיבי</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+          </TabsContent>
           
         </Tabs>
       </div>
