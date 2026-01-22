@@ -780,13 +780,16 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                             onMouseDown={(e) => startDrag(e, field)}
                             onTouchStart={(e) => startDrag(e, field)}
                           >
-                            <div 
-                              className="bg-white/90 rounded px-1 py-0.5 flex items-center gap-1 text-xs font-medium pointer-events-none"
-                            >
-                              {fieldType && <fieldType.icon className="w-3 h-3" />}
-                              {field.label}
-                              {field.required && <span className="text-red-500">*</span>}
-                            </div>
+                            {/* Show label badge only for signature fields */}
+                            {field.type === 'signature' && (
+                              <div 
+                                className="bg-white/90 rounded px-1 py-0.5 flex items-center gap-1 text-xs font-medium pointer-events-none"
+                              >
+                                {fieldType && <fieldType.icon className="w-3 h-3" />}
+                                {field.label}
+                                {field.required && <span className="text-red-500">*</span>}
+                              </div>
+                            )}
 
                             {/* Live Preview of Field Content */}
                             {imageContainerRef.current && (
@@ -799,6 +802,15 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                   padding: field.type === 'checkbox' ? '0' : '4px',
                                 }}
                               >
+                                {field.type === 'signature' && (
+                                  <div 
+                                    className="bg-white/90 rounded px-1 py-0.5 flex items-center gap-1 text-xs font-medium"
+                                  >
+                                    {fieldType && <fieldType.icon className="w-3 h-3" />}
+                                    {field.label}
+                                    {field.required && <span className="text-red-500">*</span>}
+                                  </div>
+                                )}
                                 {field.type === 'checkbox' && (
                                   <span 
                                     className="text-green-600 font-bold" 
