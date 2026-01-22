@@ -813,7 +813,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                   <span 
                                     className="text-black/50 font-medium truncate"
                                     style={{ 
-                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.6}px`,
+                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.75}px`,
                                       lineHeight: '1.2'
                                     }}
                                   >
@@ -824,7 +824,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                   <span 
                                     className="text-black/50 font-medium truncate"
                                     style={{ 
-                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.6}px`,
+                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.75}px`,
                                       lineHeight: '1.2'
                                     }}
                                   >
