@@ -789,41 +789,50 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                             </div>
 
                             {/* Live Preview of Field Content */}
-                            <div 
-                              className="absolute inset-0 pointer-events-none"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: field.type === 'checkbox' ? 'center' : 'flex-start',
-                                padding: field.type === 'checkbox' ? '0' : '2px 4px',
-                              }}
-                            >
-                              {field.type === 'checkbox' && (
-                                <span className="text-green-600 font-bold" style={{ fontSize: `${Math.min(field.width, field.height) * 0.8}%` }}>✓</span>
-                              )}
-                              {field.type === 'text' && (
-                                <span 
-                                  className="text-black/50 font-medium truncate"
-                                  style={{ 
-                                    fontSize: `${field.height * 0.5}%`,
-                                    lineHeight: '1.2'
-                                  }}
-                                >
-                                  {field.label}
-                                </span>
-                              )}
-                              {field.type === 'date' && (
-                                <span 
-                                  className="text-black/50 font-medium truncate"
-                                  style={{ 
-                                    fontSize: `${field.height * 0.5}%`,
-                                    lineHeight: '1.2'
-                                  }}
-                                >
-                                  21/01/2026
-                                </span>
-                              )}
-                            </div>
+                            {imageContainerRef.current && (
+                              <div 
+                                className="absolute inset-0 pointer-events-none"
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: field.type === 'checkbox' ? 'center' : 'flex-start',
+                                  padding: field.type === 'checkbox' ? '0' : '4px',
+                                }}
+                              >
+                                {field.type === 'checkbox' && (
+                                  <span 
+                                    className="text-green-600 font-bold" 
+                                    style={{ 
+                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.7}px` 
+                                    }}
+                                  >
+                                    ✓
+                                  </span>
+                                )}
+                                {field.type === 'text' && (
+                                  <span 
+                                    className="text-black/50 font-medium truncate"
+                                    style={{ 
+                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.6}px`,
+                                      lineHeight: '1.2'
+                                    }}
+                                  >
+                                    {field.label}
+                                  </span>
+                                )}
+                                {field.type === 'date' && (
+                                  <span 
+                                    className="text-black/50 font-medium truncate"
+                                    style={{ 
+                                      fontSize: `${(field.height / 100) * imageContainerRef.current.offsetHeight * 0.6}px`,
+                                      lineHeight: '1.2'
+                                    }}
+                                  >
+                                    21/01/2026
+                                  </span>
+                                )}
+                              </div>
+                            )}
 
                             {isSelected && (
                               <>
