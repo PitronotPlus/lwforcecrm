@@ -167,6 +167,9 @@ export default function SignDocument() {
     if (!template?.fields) return 0;
     return template.fields.filter(f => {
       if (!f.required) return false;
+      if (f.type === 'signature') {
+        return signatureData !== null && signatureData !== undefined;
+      }
       const value = fieldValues[f.id];
       if (f.type === 'checkbox') return value === true;
       return value && value.toString().trim() !== '';
