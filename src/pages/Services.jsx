@@ -71,6 +71,9 @@ export default function Services() {
             const user = await base44.auth.me();
             const serviceData = {
                 ...formData,
+                price: formData.price ? parseFloat(formData.price) : null,
+                amount_paid: formData.amount_paid ? parseFloat(formData.amount_paid) : null,
+                balance: formData.balance ? parseFloat(formData.balance) : null,
                 sub_account_id: user?.sub_account_id || null
             };
 
