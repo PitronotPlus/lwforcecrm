@@ -49,25 +49,32 @@ async function fillSignatureFields(pdfDoc, template, field_values, hebrewFont) {
                     const pngImage = await pdfDoc.embedPng(pngImageBytes);
                     page.drawImage(pngImage, { ...fieldRect });
                 } else if (field.type === 'checkbox') {
-                    // Draw checkmark (✓) if checked
+                    // Draw checkmark if checked
                     if (value === true || value === 'true' || value === 'checked') {
                         const centerX = fieldRect.x + fieldRect.width / 2;
                         const centerY = fieldRect.y + fieldRect.height / 2;
-                        const size = Math.min(fieldRect.width, fieldRect.height) * 0.7;
+                        const checkSize = Math.min(fieldRect.width, fieldRect.height) * 0.8;
                         
-                        // Draw green checkmark
+                        // Draw V checkmark using Standard font for better support
+                        const checkFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
                         page.drawText('✓', {
-                            x: centerX - size * 0.4,
-                            y: centerY - size * 0.45,
-                            size: size * 1.5,
+                            x: centerX - checkSize * 0.35,
+                            y: centerY - checkSize * 0.4,
+                            size: checkSize * 1.2,
                             color: rgb(0.13, 0.72, 0.51),
-                            font: hebrewFont
+                            font: checkFont
                         });
                     }
                 } else if (field.type === 'text' || field.type === 'date') {
                     const text = String(value);
-                    let fontSize = field.fontSize && field.fontSize > 0 ? field.fontSize : fieldRect.height * 0.7;
-                    fontSize = Math.max(10, Math.min(24, fontSize));
+                    let fontSize;
+                    if (field.fontSize && field.fontSize > 0) {
+                        // Use manually set fontSize but ensure it's within reasonable bounds
+                        fontSize = Math.max(8, Math.min(72, field.fontSize));
+                    } else {
+                        // Auto-calculate based on field height
+                        fontSize = Math.max(10, Math.min(24, fieldRect.height * 0.7));
+                    }
                     
                     page.drawText(text, {
                         x: fieldRect.x + 4,

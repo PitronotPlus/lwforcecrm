@@ -372,6 +372,47 @@ export default function SignDocument() {
                   if (field.page !== (imgIndex + 1)) return null;
                   return renderFieldOverlay(field);
                 })}
+                {/* Filled Content Preview */}
+                {template?.fields?.map(field => {
+                  if (field.page !== (imgIndex + 1)) return null;
+                  const value = field.type === 'signature' ? signatureData : fieldValues[field.id];
+                  if (!value) return null;
+
+                  return (
+                    <div
+                      key={`preview-${field.id}`}
+                      className="absolute pointer-events-none"
+                      style={{
+                        left: `${field.x}%`,
+                        top: `${field.y}%`,
+                        width: `${field.width}%`,
+                        height: `${field.height}%`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: field.type === 'checkbox' ? 'center' : 'flex-start',
+                        padding: field.type === 'checkbox' ? '0' : '2px 4px',
+                      }}
+                    >
+                      {field.type === 'signature' && typeof value === 'string' && value.startsWith('data:image') && (
+                        <img src={value} alt="חתימה" className="w-full h-full object-contain" />
+                      )}
+                      {field.type === 'checkbox' && (value === true || value === 'true') && (
+                        <span className="text-green-600 font-bold" style={{ fontSize: `${Math.min(field.width, field.height) * 0.8}px` }}>✓</span>
+                      )}
+                      {(field.type === 'text' || field.type === 'date') && (
+                        <span 
+                          className="text-black font-medium truncate"
+                          style={{ 
+                            fontSize: field.fontSize && field.fontSize > 0 ? `${field.fontSize * 0.75}px` : `${field.height * 0.5}px`,
+                            lineHeight: '1.2'
+                          }}
+                        >
+                          {value}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
