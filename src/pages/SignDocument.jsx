@@ -241,6 +241,9 @@ export default function SignDocument() {
   const { template, lead } = data || {};
 
   const isFieldFilled = (field) => {
+    if (field.type === 'signature') {
+      return signatureData !== null && signatureData !== undefined;
+    }
     const value = fieldValues[field.id];
     if (field.type === 'checkbox') return value === true;
     return value && value.toString().trim() !== '';
@@ -391,7 +394,7 @@ export default function SignDocument() {
                 return (
                   <div 
                     key={field.id} 
-                    className={`space-y-1 p-2 rounded cursor-pointer transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    className={`space-y-1 p-2 rounded cursor-pointer transition-all ${isSelected ? 'bg-blue-100 border-2 border-blue-500 shadow-md' : 'bg-gray-50 border-2 border-transparent'} ${isFilled ? 'bg-green-50' : ''}`}
                     onClick={() => setSelectedFieldId(field.id)}
                   >
                     <Label htmlFor={field.id} className="text-xs font-semibold text-gray-700 flex items-center justify-between">
@@ -412,7 +415,7 @@ export default function SignDocument() {
                 return (
                   <div 
                     key={field.id} 
-                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${isSelected ? 'bg-blue-100 border-2 border-blue-500 shadow-md' : 'bg-gray-50 border-2 border-transparent'} ${isFilled ? 'bg-green-50' : ''}`}
                     onClick={() => setSelectedFieldId(field.id)}
                   >
                     <Checkbox
@@ -429,12 +432,12 @@ export default function SignDocument() {
                 return (
                   <div 
                     key={field.id} 
-                    className={`space-y-1 p-2 rounded transition-colors ${isSelected ? 'bg-blue-100 border border-blue-300' : 'bg-gray-50'} ${isFilled ? 'bg-green-50' : ''}`}
+                    className={`space-y-1 p-2 rounded transition-all ${isSelected ? 'bg-blue-100 border-2 border-blue-500 shadow-md' : 'bg-gray-50 border-2 border-transparent'} ${isFilled ? 'bg-green-50' : ''}`}
                     onClick={() => setSelectedFieldId(field.id)}
                   >
                     <Label className="text-xs font-semibold text-gray-700 flex items-center justify-between">
                       <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
-                      {isFilled && <Check className="w-3 h-3 text-green-600" />}
+                      {signatureData && <Check className="w-3 h-3 text-green-600" />}
                     </Label>
                     <InlineSignaturePad onSignatureChange={setSignatureData} />
                   </div>
