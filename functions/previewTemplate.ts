@@ -75,14 +75,8 @@ async function fillSignatureFields(pdfDoc, template, fieldValues, hebrewFont) {
                 });
             }
         } else if (field.type === 'text' || field.type === 'date') {
-            // Calculate fontSize to match submitSignature logic
-            let fontSize;
-            if (field.fontSize && field.fontSize > 0) {
-                fontSize = Math.min(field.fontSize, fieldHeight * 0.7);
-                fontSize = Math.max(fontSize, fieldHeight * 0.4);
-            } else {
-                fontSize = fieldHeight * 0.6;
-            }
+            // Calculate fontSize as 60% of field height (same as submitSignature)
+            const fontSize = fieldHeight * 0.6;
             
             // Calculate proper vertical centering
             const textY = fieldY - (fieldHeight / 2) - (fontSize / 3);

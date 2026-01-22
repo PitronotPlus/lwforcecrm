@@ -55,8 +55,6 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
   const [isDraggingField, setIsDraggingField] = useState(false);
   const [dragStartInfo, setDragStartInfo] = useState({ x: 0, y: 0, fieldX: 0, fieldY: 0, fieldId: null });
 
-  const [fontSizeInput, setFontSizeInput] = useState('');
-
   const [showPreview, setShowPreview] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -327,8 +325,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
       width: isSignature ? 15 : isCheckbox ? 2 : 10,
       height: isSignature ? 6 : isCheckbox ? 2 : 4,
       label: `${FIELD_TYPES.find(f => f.id === selectedFieldType)?.label} ${templateData.fields.filter(f => f.type === selectedFieldType).length + 1}`,
-      required: isSignature,
-      fontSize: isSignature || isCheckbox ? undefined : 16
+      required: isSignature
     };
 
     setTemplateData(prev => ({
@@ -450,30 +447,6 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
       }
     }
   };
-
-  const handleFontSizeChange = (e) => {
-    const value = e.target.value;
-    setFontSizeInput(value);
-  };
-
-  const applyFontSize = () => {
-    if (!selectedField) return;
-    
-    let val = parseInt(fontSizeInput);
-    if (isNaN(val) || val < 8) val = 8;
-    if (val > 48) val = 48;
-    
-    updateField(selectedField.id, { fontSize: val });
-    setFontSizeInput(val.toString());
-  };
-
-  useEffect(() => {
-    if (selectedField && (selectedField.type === 'text' || selectedField.type === 'date')) {
-      setFontSizeInput((selectedField.fontSize || 16).toString());
-    } else {
-      setFontSizeInput('');
-    }
-  }, [selectedField]);
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4">
@@ -643,31 +616,6 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                         />
                       </div>
                     </div>
-
-                    {(selectedField.type === 'text' || selectedField.type === 'date') && (
-                      <div>
-                        <Label className="flex items-center gap-2">
-                          <span>גודל פונט (pt)</span>
-                          <span className="text-xs text-gray-500">טווח: 8-48</span>
-                        </Label>
-                        <Input
-                          type="text"
-                          value={fontSizeInput}
-                          onChange={handleFontSizeChange}
-                          onBlur={applyFontSize}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              applyFontSize();
-                              e.currentTarget.blur();
-                            }
-                          }}
-                          placeholder="16"
-                        />
-                        <p className="text-xs text-emerald-600 mt-1 font-medium">
-                          💡 הקלד את הגודל הרצוי ולחץ Enter
-                        </p>
-                      </div>
-                    )}
 
                     <div className="flex items-center gap-2">
                       <input
@@ -857,7 +805,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                 <span 
                                   className="text-black/50 font-medium truncate"
                                   style={{ 
-                                    fontSize: field.fontSize && field.fontSize > 0 ? `${field.fontSize * 0.75}px` : `${field.height * 0.5}%`,
+                                    fontSize: `${field.height * 0.5}%`,
                                     lineHeight: '1.2'
                                   }}
                                 >
@@ -868,7 +816,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                 <span 
                                   className="text-black/50 font-medium truncate"
                                   style={{ 
-                                    fontSize: field.fontSize && field.fontSize > 0 ? `${field.fontSize * 0.75}px` : `${field.height * 0.5}%`,
+                                    fontSize: `${field.height * 0.5}%`,
                                     lineHeight: '1.2'
                                   }}
                                 >
