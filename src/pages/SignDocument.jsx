@@ -400,7 +400,8 @@ export default function SignDocument() {
                     </Label>
                     <Input
                       id={field.id}
-                      type={field.type === 'date' ? 'date' : 'text'}
+                      type="text"
+                      placeholder={field.type === 'date' ? 'יום/חודש/שנה (DD/MM/YYYY)' : ''}
                       value={fieldValues[field.id] || ''}
                       onChange={(e) => setFieldValues(prev => ({...prev, [field.id]: e.target.value}))}
                       className="h-8 text-sm bg-white border-gray-300"
