@@ -376,7 +376,6 @@ export default function SignDocument() {
                 {template?.fields?.map(field => {
                   if (field.page !== (imgIndex + 1)) return null;
                   const value = field.type === 'signature' ? signatureData : fieldValues[field.id];
-                  if (!value) return null;
 
                   return (
                     <div
@@ -393,7 +392,7 @@ export default function SignDocument() {
                         padding: field.type === 'checkbox' ? '0' : '2px 4px',
                       }}
                     >
-                      {field.type === 'signature' && typeof value === 'string' && value.startsWith('data:image') && (
+                      {field.type === 'signature' && value && typeof value === 'string' && value.startsWith('data:image') && (
                         <img src={value} alt="חתימה" className="w-full h-full object-contain" />
                       )}
                       {field.type === 'checkbox' && (value === true || value === 'true') && (
@@ -401,13 +400,13 @@ export default function SignDocument() {
                       )}
                       {(field.type === 'text' || field.type === 'date') && (
                         <span 
-                          className="text-black font-medium truncate"
+                          className={`font-medium truncate ${value ? 'text-black' : 'text-gray-400'}`}
                           style={{ 
                             fontSize: field.fontSize && field.fontSize > 0 ? `${field.fontSize * 0.75}px` : `${field.height * 0.5}px`,
                             lineHeight: '1.2'
                           }}
                         >
-                          {value}
+                          {value || field.label}
                         </span>
                       )}
                     </div>

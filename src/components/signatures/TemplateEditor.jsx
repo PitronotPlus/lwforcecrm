@@ -817,7 +817,7 @@ export default function TemplateEditor({ template, onSave, onCancel }) {
                                       lineHeight: '1.2'
                                     }}
                                   >
-                                    {field.label}
+                                    טקסט לדוגמא
                                   </span>
                                 )}
                                 {field.type === 'date' && (
