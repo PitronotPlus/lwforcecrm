@@ -75,15 +75,20 @@ async function fillSignatureFields(pdfDoc, template, fieldValues, hebrewFont) {
                 });
             }
         } else if (field.type === 'text' || field.type === 'date') {
-            const fontSize = field.fontSize && field.fontSize > 0 ? field.fontSize : 16;
-            const textY = fieldY - fieldHeight / 2 - fontSize / 3;
+            // CRITICAL: Use the EXACT fontSize specified in the field
+            const fontSize = field.fontSize && field.fontSize > 0 
+                ? field.fontSize 
+                : 16;
+            
+            // Calculate proper vertical centering to match final PDF
+            const textY = fieldY - (fieldHeight / 2) - (fontSize / 3);
 
             page.drawText(value.toString(), {
-                x: fieldX + 2,
+                x: fieldX + 4,
                 y: textY,
                 size: fontSize,
                 font: hebrewFont,
-                maxWidth: fieldWidth - 4,
+                maxWidth: fieldWidth - 8,
             });
         }
     }
