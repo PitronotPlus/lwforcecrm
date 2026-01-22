@@ -67,11 +67,18 @@ async function fillSignatureFields(pdfDoc, template, field_values, hebrewFont) {
                     }
                 } else if (field.type === 'text' || field.type === 'date') {
                     const text = String(value);
-                    // CRITICAL: Use the EXACT fontSize specified in the field
-                    // This ensures consistency with template editor preview
-                    const fontSize = field.fontSize && field.fontSize > 0 
-                        ? field.fontSize  // Use exact field font size
-                        : Math.max(12, fieldRect.height * 0.6);  // Fallback calculation
+                    // Calculate fontSize as proportion of field height
+                    // This ensures text scales correctly with any PDF size
+                    let fontSize;
+                    if (field.fontSize && field.fontSize > 0) {
+                        // Use minimum between specified size and 70% of field height
+                        fontSize = Math.min(field.fontSize, fieldRect.height * 0.7);
+                        // Ensure it's at least 40% of field height for readability
+                        fontSize = Math.max(fontSize, fieldRect.height * 0.4);
+                    } else {
+                        // Default to 60% of field height
+                        fontSize = fieldRect.height * 0.6;
+                    }
                     
                     // Calculate proper vertical centering
                     const textY = fieldRect.y + (fieldRect.height / 2) - (fontSize / 3);
