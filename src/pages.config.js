@@ -8,6 +8,7 @@ import Credits from './pages/Credits';
 import CustomObject from './pages/CustomObject';
 import Dashboard from './pages/Dashboard';
 import DigitalSignatures from './pages/DigitalSignatures';
+import Documentation from './pages/Documentation';
 import Finances from './pages/Finances';
 import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
@@ -24,7 +25,6 @@ import Support from './pages/Support';
 import Tasks from './pages/Tasks';
 import TeamManagement from './pages/TeamManagement';
 import TestSignature from './pages/TestSignature';
-import Documentation from './pages/Documentation';
 import __Layout from './Layout.jsx';
 
 
@@ -39,6 +39,7 @@ export const PAGES = {
     "CustomObject": CustomObject,
     "Dashboard": Dashboard,
     "DigitalSignatures": DigitalSignatures,
+    "Documentation": Documentation,
     "Finances": Finances,
     "Home": Home,
     "LandingPage": LandingPage,
@@ -55,7 +56,6 @@ export const PAGES = {
     "Tasks": Tasks,
     "TeamManagement": TeamManagement,
     "TestSignature": TestSignature,
-    "Documentation": Documentation,
 }
 
 export const pagesConfig = {

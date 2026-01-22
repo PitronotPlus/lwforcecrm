@@ -255,25 +255,44 @@ export default function SignDocument() {
     return (
       <div
         key={field.id}
-        className="absolute cursor-pointer transition-all border-2 flex items-start justify-start p-1"
+        className="absolute cursor-pointer transition-all border-2 flex flex-col items-center justify-center p-2 group hover:z-10"
         style={{
           left: `${field.x}%`,
           top: `${field.y}%`,
           width: `${field.width}%`,
           height: `${field.height}%`,
           borderColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af'),
-          backgroundColor: isFilled ? 'rgba(34, 197, 94, 0.1)' : (isRequired ? 'rgba(220, 38, 38, 0.1)' : 'rgba(156, 163, 175, 0.1)'),
+          backgroundColor: isFilled ? 'rgba(34, 197, 94, 0.15)' : (isRequired ? 'rgba(220, 38, 38, 0.15)' : 'rgba(156, 163, 175, 0.15)'),
         }}
         onClick={() => setSelectedFieldId(field.id)}
       >
-        <div className="rounded-full p-0.5" style={{
-          backgroundColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af')
-        }}>
-          {isFilled ? (
-            <Check className="w-3 h-3 text-white" />
-          ) : (
-            <span className="text-white text-xs font-bold">*</span>
-          )}
+        <div className="flex items-center gap-1">
+          <div className="rounded-full p-0.5" style={{
+            backgroundColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af')
+          }}>
+            {isFilled ? (
+              <Check className="w-3 h-3 text-white" />
+            ) : (
+              <span className="text-white text-xs font-bold">!</span>
+            )}
+          </div>
+          <div 
+            className="text-xs font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap"
+            style={{
+              backgroundColor: isFilled ? '#22c55e' : (isRequired ? '#dc2626' : '#9ca3af'),
+              color: 'white'
+            }}
+          >
+            {field.label}
+          </div>
+        </div>
+        
+        {/* Tooltip on hover */}
+        <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+          <div className="font-semibold">{field.label}</div>
+          {isRequired && <div className="text-red-300 text-xs">שדה חובה</div>}
+          {isFilled && <div className="text-green-300 text-xs">✓ מולא</div>}
+          <div className="text-gray-400 text-xs mt-1">לחץ כדי למלא</div>
         </div>
       </div>
     );
